@@ -67,10 +67,18 @@ This Project aims to port/build well known and commonly used data structures to 
 ### Contributing
 
 1. Fork it (<https://github.com/nsnikhil/go-datastructures>)
-2. Create your feature branch (`git checkout -b feature/fooBar`)
-3. Commit your changes (`git commit -am 'Add some fooBar'`)
-4. Push to the branch (`git push origin feature/fooBar`)
-5. Create a new Pull Request
+2. `make setup`
+3. Create your feature branch (`git checkout -b feature/fooBar`)
+4. Commit your changes (`git commit -am 'Add some fooBar'`)
+5. Push to the branch (`git push origin feature/fooBar`)
+6. Create a new Pull Request
+
+---
+
+### Known Issues
+
+1. Multiple implementation of sorting algorithm.
+2. Concurrent search dose not provide enough performance benefits and also the benchmark test for the same sometimes gets into infinite loop. 
 
 ---
 

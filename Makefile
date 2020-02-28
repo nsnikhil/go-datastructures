@@ -1,3 +1,5 @@
+ALL_PACKAGES=$(shell go list ./... | grep -v "vendor")
+
 test:
 	go clean -testcache
 	go test ./...
@@ -16,3 +18,14 @@ fmt:
 
 vet:
 	go vet ./...
+
+setup: download deps test
+
+download:
+	go get -u golang.org/x/lint/golint
+
+deps:
+	go mod vendor
+
+lint:
+	golint $(ALL_PACKAGES) | { grep -vwE "exported (var|function|method|type|const) \S+ should have comment" || true; }

@@ -86,7 +86,6 @@ func (al *ArrayList) Clear() {
 	al.data = nil
 }
 
-//TODO SHOULD IT THROW ERROR WHEN TYPE MISMATCH ?
 func (al *ArrayList) Contains(e interface{}) (bool, error) {
 	if !isValidType(e, al) {
 		return false, fmt.Errorf("type mismatch : expected %s got %s", al.typeURL, reflect.TypeOf(e).Name())
@@ -118,13 +117,12 @@ func (al *ArrayList) Get(i int) interface{} {
 	return al.data[i]
 }
 
-//TODO SHOULD IT THROW ERROR WHEN TYPE MISMATCH ?
 func (al *ArrayList) IndexOf(e interface{}) (int, error) {
 	if !isValidType(e, al) {
 		return invalidIndex, fmt.Errorf("type mismatch : expected %s got %s", al.typeURL, reflect.TypeOf(e).Name())
 	}
 
-	i := searchList(al, e)
+	i, _ := newFinder().search(al, e)
 	if i == invalidIndex {
 		return invalidIndex, fmt.Errorf("failed to find element %v in List", e)
 	}
@@ -140,7 +138,6 @@ func (al *ArrayList) Iterator() iterator.Iterator {
 	return newArrayListIterator(al)
 }
 
-//TODO SHOULD IT THROW ERROR WHEN TYPE MISMATCH ?
 func (al *ArrayList) LastIndexOf(e interface{}) (int, error) {
 	if !isValidType(e, al) {
 		return invalidIndex, fmt.Errorf("type mismatch : expected %s got %s", al.typeURL, reflect.TypeOf(e).Name())
@@ -157,7 +154,6 @@ func (al *ArrayList) LastIndexOf(e interface{}) (int, error) {
 	return invalidIndex, fmt.Errorf("element %v is not present in List", e)
 }
 
-//TODO SHOULD IT THROW ERROR WHEN TYPE MISMATCH ?
 func (al *ArrayList) Remove(e interface{}) (bool, error) {
 	if !isValidType(e, al) {
 		return false, fmt.Errorf("type mismatch : expected %s got %s", al.typeURL, reflect.TypeOf(e).Name())
@@ -222,7 +218,7 @@ func (al *ArrayList) Size() int {
 }
 
 func (al *ArrayList) Sort(c comparator.Comparator) {
-	sortList(al, c)
+	newSorter().sort(al, c)
 }
 
 func (al *ArrayList) SubList(s int, e int) (List, error) {
@@ -264,7 +260,7 @@ func (ali *arrayListIterator) Next() interface{} {
 	}
 
 	e := ali.al.Get(ali.currentIndex)
-	ali.currentIndex += 1
+	ali.currentIndex++
 
 	return e
 }
