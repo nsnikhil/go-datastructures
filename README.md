@@ -64,6 +64,12 @@ This Project aims to port/build well known and commonly used data structures to 
 
 ---
 
+### Usage
+
+1. `go get -u github.com/nsnikhil/go-datastructures`
+
+---
+
 ### Contributing
 
 1. Fork it (<https://github.com/nsnikhil/go-datastructures>)

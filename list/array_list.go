@@ -1,10 +1,10 @@
 package list
 
 import (
-	"datastructures/functions/comparator"
-	"datastructures/functions/iterator"
-	"datastructures/functions/operator"
 	"fmt"
+	"github.com/nsnikhil/go-datastructures/functions/comparator"
+	"github.com/nsnikhil/go-datastructures/functions/iterator"
+	"github.com/nsnikhil/go-datastructures/functions/operator"
 	"reflect"
 )
 

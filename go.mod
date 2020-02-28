@@ -1,4 +1,4 @@
-module datastructures
+module github.com/nsnikhil/go-datastructures
 
 go 1.13
 

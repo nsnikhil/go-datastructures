@@ -13,6 +13,8 @@ test-cover-html:
 clean:
 	rm -rf out/
 
+check: fmt vet lint
+
 fmt:
 	gofmt -l -s -w .
 

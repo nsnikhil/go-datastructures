@@ -1,7 +1,7 @@
 package list
 
 import (
-	"datastructures/functions/comparator"
+	"github.com/nsnikhil/go-datastructures/functions/comparator"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"testing"

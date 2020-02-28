@@ -1,6 +1,6 @@
 package list
 
-import "datastructures/functions/comparator"
+import "github.com/nsnikhil/go-datastructures/functions/comparator"
 
 type sorter interface {
 	sort(l List, c comparator.Comparator)
