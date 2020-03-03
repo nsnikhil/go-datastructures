@@ -13,7 +13,7 @@ This Project aims to port/build well known and commonly used data structures to 
 - [ ] LinkedList
 - [ ] Doubly LinkedList
 - [ ] Circular LinkedList
-- [ ] Skip List
+- [ ] Skip xList
 
 #### Map
 - [ ] Hash Map

@@ -25,16 +25,18 @@ func (lf linearFinder) search(l List, e interface{}) (int, error) {
 		return -1, fmt.Errorf("list is empty")
 	}
 
-	if reflect.TypeOf(l.Get(0)).Name() != reflect.TypeOf(e).Name() {
+	if getTypeName(l.Get(0)) != getTypeName(e) {
 		return -1, fmt.Errorf("type mismatch : expected %s got %s", reflect.TypeOf(l.Get(0)).Name(), reflect.TypeOf(e).Name())
 	}
 
-	res := make(chan int)
+	it := l.Iterator()
 
-	go searchUtil(l, e, 0, sz-1, res)
-
-	if idx := <-res; idx != -1 {
-		return idx, nil
+	count := 0
+	for it.HasNext() {
+		if it.Next() == e {
+			return count, nil
+		}
+		count++
 	}
 
 	return -1, fmt.Errorf("element %v not found in the list", e)
@@ -42,7 +44,6 @@ func (lf linearFinder) search(l List, e interface{}) (int, error) {
 }
 
 func searchUtil(l List, e interface{}, start, end int, res chan<- int) {
-	//fmt.Println(fmt.Sprintf("%d - %d", start, end))
 	for start <= end {
 		if l.Get(start) == e {
 			res <- start

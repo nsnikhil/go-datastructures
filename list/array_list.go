@@ -8,12 +8,6 @@ import (
 	"reflect"
 )
 
-const (
-	na                = "na"
-	typeMisMatchError = "every data in List should be of same type"
-	invalidIndex      = -1
-)
-
 type ArrayList struct {
 	typeURL string
 	data    []interface{}
@@ -30,7 +24,7 @@ func NewArrayList(data ...interface{}) (*ArrayList, error) {
 
 	for i := 1; i < len(data); i++ {
 		if reflect.TypeOf(data[i]).Name() != typeURL {
-			return nil, fmt.Errorf(typeMisMatchError)
+			return nil, fmt.Errorf("type mismatch : expected %s got %s", typeURL, reflect.TypeOf(data[i]).Name())
 		}
 	}
 
@@ -48,7 +42,7 @@ func (al *ArrayList) Add(e interface{}) error {
 		return nil
 	}
 
-	if !isValidType(e, al) {
+	if !al.isValidType(e) {
 		return fmt.Errorf("type mismatch : expected %s got %s", al.typeURL, reflect.TypeOf(e).Name())
 	}
 
@@ -57,11 +51,11 @@ func (al *ArrayList) Add(e interface{}) error {
 }
 
 func (al *ArrayList) AddAt(i int, e interface{}) error {
-	if !isValidType(e, al) {
+	if !al.isValidType(e) {
 		return fmt.Errorf("type mismatch : expected %s got %s", al.typeURL, reflect.TypeOf(e).Name())
 	}
 
-	if !isValidIndex(i, al) {
+	if !al.isValidIndex(i) {
 		return fmt.Errorf("invalid index %d", i)
 	}
 
@@ -72,8 +66,8 @@ func (al *ArrayList) AddAt(i int, e interface{}) error {
 
 func (al *ArrayList) AddAll(l ...interface{}) error {
 	for _, e := range l {
-		if !isValidType(e, al) {
-			return fmt.Errorf("failed to Add elements due to invalid type %s", reflect.TypeOf(e).Name())
+		if !al.isValidType(e) {
+			return fmt.Errorf("failed to add elements due to invalid type %s", reflect.TypeOf(e).Name())
 		}
 	}
 
@@ -87,17 +81,17 @@ func (al *ArrayList) Clear() {
 }
 
 func (al *ArrayList) Contains(e interface{}) (bool, error) {
-	if !isValidType(e, al) {
-		return false, fmt.Errorf("type mismatch : expected %s got %s", al.typeURL, reflect.TypeOf(e).Name())
+
+	id, err := newFinder().search(al, e)
+	if err != nil {
+		return false, err
 	}
 
-	for _, d := range al.data {
-		if d == e {
-			return true, nil
-		}
+	if id == invalidIndex {
+		return false, fmt.Errorf("element %v not found", e)
 	}
 
-	return false, fmt.Errorf("element %v not found", e)
+	return true, nil
 }
 
 func (al *ArrayList) ContainsAll(l ...interface{}) (bool, error) {
@@ -111,14 +105,18 @@ func (al *ArrayList) ContainsAll(l ...interface{}) (bool, error) {
 }
 
 func (al *ArrayList) Get(i int) interface{} {
-	if al.Size() == 0 || !isValidIndex(i, al) {
+	if al.Size() == 0 || !al.isValidIndex(i) {
 		return nil
 	}
 	return al.data[i]
 }
 
 func (al *ArrayList) IndexOf(e interface{}) (int, error) {
-	if !isValidType(e, al) {
+	if al.IsEmpty() {
+		return -1, fmt.Errorf("list is empty")
+	}
+
+	if !al.isValidType(e) {
 		return invalidIndex, fmt.Errorf("type mismatch : expected %s got %s", al.typeURL, reflect.TypeOf(e).Name())
 	}
 
@@ -139,7 +137,11 @@ func (al *ArrayList) Iterator() iterator.Iterator {
 }
 
 func (al *ArrayList) LastIndexOf(e interface{}) (int, error) {
-	if !isValidType(e, al) {
+	if al.IsEmpty() {
+		return -1, fmt.Errorf("list is empty")
+	}
+
+	if !al.isValidType(e) {
 		return invalidIndex, fmt.Errorf("type mismatch : expected %s got %s", al.typeURL, reflect.TypeOf(e).Name())
 	}
 
@@ -155,7 +157,11 @@ func (al *ArrayList) LastIndexOf(e interface{}) (int, error) {
 }
 
 func (al *ArrayList) Remove(e interface{}) (bool, error) {
-	if !isValidType(e, al) {
+	if al.IsEmpty() {
+		return false, fmt.Errorf("list is empty")
+	}
+
+	if !al.isValidType(e) {
 		return false, fmt.Errorf("type mismatch : expected %s got %s", al.typeURL, reflect.TypeOf(e).Name())
 	}
 
@@ -170,7 +176,7 @@ func (al *ArrayList) Remove(e interface{}) (bool, error) {
 }
 
 func (al *ArrayList) RemoveAt(i int) (interface{}, error) {
-	if !isValidIndex(i, al) {
+	if !al.isValidIndex(i) {
 		return nil, fmt.Errorf("invalid index %d", i)
 	}
 
@@ -188,7 +194,7 @@ func (al *ArrayList) ReplaceAll(uo operator.UnaryOperator) error {
 	sz := al.Size()
 	for i := 0; i < sz; i++ {
 		e := uo.Apply(al.Get(i))
-		if !isValidType(e, al) {
+		if !al.isValidType(e) {
 			return fmt.Errorf("type mismatch : expected %s got %s", al.typeURL, reflect.TypeOf(e).Name())
 		}
 
@@ -205,12 +211,12 @@ func (al *ArrayList) RetainAll(l ...interface{}) (bool, error) {
 }
 
 func (al *ArrayList) Set(i int, e interface{}) (interface{}, error) {
-	if !isValidIndex(i, al) {
+	if !al.isValidIndex(i) {
 		return nil, fmt.Errorf("failed to Set value %v due to invalid index %d", e, i)
 	}
 
 	al.data[i] = e
-	return e, nil
+	return al.data[i], nil
 }
 
 func (al *ArrayList) Size() int {
@@ -222,16 +228,20 @@ func (al *ArrayList) Sort(c comparator.Comparator) {
 }
 
 func (al *ArrayList) SubList(s int, e int) (List, error) {
-	if !isValidIndex(s, al) {
+	if e < s {
+		return nil, fmt.Errorf("end cannot be smaller than start")
+	}
+
+	if !al.isValidIndex(s) {
 		return nil, fmt.Errorf("invalid index %d", s)
 	}
 
-	if !isValidIndex(e, al) {
+	if !al.isValidIndex(e) {
 		return nil, fmt.Errorf("invalid index %d", e)
 	}
 
 	tempData := make([]interface{}, 0)
-	for i := s; i <= e; i++ {
+	for i := s; i < e; i++ {
 		tempData = append(tempData, al.Get(i))
 	}
 
@@ -265,17 +275,17 @@ func (ali *arrayListIterator) Next() interface{} {
 	return e
 }
 
-func isValidIndex(i int, al *ArrayList) bool {
+func (al *ArrayList) isValidIndex(i int) bool {
 	return i >= 0 && i < al.Size()
 }
 
-func isValidType(e interface{}, al *ArrayList) bool {
+func (al *ArrayList) isValidType(e interface{}) bool {
 	return reflect.TypeOf(e).Name() == al.typeURL
 }
 
 func filter(al *ArrayList, inverse bool, l ...interface{}) (bool, error) {
 	for _, e := range l {
-		if !isValidType(e, al) {
+		if !al.isValidType(e) {
 			return false, fmt.Errorf("type mismatch : expected %s got %s", al.typeURL, reflect.TypeOf(e).Name())
 		}
 	}

@@ -39,7 +39,7 @@ func TestCreateNewArrayList(t *testing.T) {
 				return NewArrayList(1, "2")
 			},
 			expectedResult: (*ArrayList)(nil),
-			expectedError:  errors.New("every data in List should be of same type"),
+			expectedError:  errors.New("type mismatch : expected int got string"),
 		},
 	}
 
@@ -228,7 +228,7 @@ func TestArrayListGet(t *testing.T) {
 			expectedResult: 3,
 		},
 		{
-			name: "test Get nil when index is greater than the Size of List",
+			name: "test get nil when index is greater than the Size of List",
 			actualResult: func() interface{} {
 				list, err := NewArrayList()
 				require.NoError(t, err)
@@ -594,7 +594,7 @@ func TestArrayListAddAll(t *testing.T) {
 				typeURL: "string",
 				data:    []interface{}{"a", "b"},
 			},
-			expectedError: errors.New("failed to Add elements due to invalid type int"),
+			expectedError: errors.New("failed to add elements due to invalid type int"),
 		},
 	}
 
@@ -613,7 +613,7 @@ func TestArrayListClear(t *testing.T) {
 		result func() int
 	}{
 		{
-			name: "test Clear integer List",
+			name: "test clear integer list",
 			result: func() int {
 				al, err := NewArrayList(1, 2)
 				require.NoError(t, err)
@@ -623,7 +623,7 @@ func TestArrayListClear(t *testing.T) {
 			},
 		},
 		{
-			name: "test Clear string List",
+			name: "test clear string list",
 			result: func() int {
 				al, err := NewArrayList("a", "b")
 				require.NoError(t, err)
@@ -668,10 +668,10 @@ func TestArrayListContains(t *testing.T) {
 				return al.Contains(0)
 			},
 			expectedResult: false,
-			expectedError:  errors.New("element 0 not found"),
+			expectedError:  errors.New("element 0 not found in the list"),
 		},
 		{
-			name: "test return false when element type mis match",
+			name: "test return false when element type mismatch",
 			actualResult: func() (bool, error) {
 				al, err := NewArrayList(1, 2)
 				require.NoError(t, err)
@@ -718,7 +718,7 @@ func TestArrayListContainsAll(t *testing.T) {
 				return al.ContainsAll(6, 1, 0)
 			},
 			expectedResult: false,
-			expectedError:  errors.New("element 0 not found"),
+			expectedError:  errors.New("element 0 not found in the list"),
 		},
 		{
 			name: "return false when a element type mismatch",
@@ -798,7 +798,7 @@ func TestArrayListEmpty(t *testing.T) {
 		expectedResult bool
 	}{
 		{
-			name: "return true when List is empty",
+			name: "return true when list is empty",
 			actualResult: func() bool {
 				al, err := NewArrayList()
 				require.NoError(t, err)
@@ -808,7 +808,7 @@ func TestArrayListEmpty(t *testing.T) {
 			expectedResult: true,
 		},
 		{
-			name: "return false when List is not empty",
+			name: "return false when list is not empty",
 			actualResult: func() bool {
 				al, err := NewArrayList(1)
 				require.NoError(t, err)
@@ -834,7 +834,7 @@ func TestArrayListLastIndexOf(t *testing.T) {
 		expectedError  error
 	}{
 		{
-			name: "Get last index of the element in List",
+			name: "get last index of the element in List",
 			actualResult: func() (int, error) {
 				al, err := NewArrayList(1, 2, 3, 1, 4)
 				require.NoError(t, err)
@@ -953,7 +953,7 @@ func TestArrayListRemoveAt(t *testing.T) {
 		expectedError  error
 	}{
 		{
-			name: "test Remove element at index 1",
+			name: "test remove element at index 1",
 			actualResult: func() (List, error) {
 				al, err := NewArrayList(1, 2, 3, 4)
 				require.NoError(t, err)
@@ -968,7 +968,7 @@ func TestArrayListRemoveAt(t *testing.T) {
 			},
 		},
 		{
-			name: "test failed to Remove element at invalid index",
+			name: "test failed to remove element at invalid index",
 			actualResult: func() (List, error) {
 				al, err := NewArrayList(1, 2, 3, 4)
 				require.NoError(t, err)
@@ -1143,6 +1143,39 @@ func TestArrayListRetainAll(t *testing.T) {
 				data:    []interface{}{2, 4},
 			},
 		},
+		{
+			name: "test retain all from string List",
+			actualResult: func() (List, error) {
+				al, err := NewArrayList("a", "b", "c", "d")
+				require.NoError(t, err)
+
+				ok, err := al.RetainAll("b", "d")
+				require.True(t, ok)
+
+				return al, err
+			},
+			expectedResult: &ArrayList{
+				typeURL: "string",
+				data:    []interface{}{"b", "d"},
+			},
+		},
+		{
+			name: "test retain all from string List",
+			actualResult: func() (List, error) {
+				al, err := NewArrayList(1, 2, 3, 4)
+				require.NoError(t, err)
+
+				ok, err := al.RetainAll(2, "c")
+				require.False(t, ok)
+
+				return al, err
+			},
+			expectedResult: &ArrayList{
+				typeURL: "int",
+				data:    []interface{}{1, 2, 3, 4},
+			},
+			expectedError: errors.New("type mismatch : expected int got string"),
+		},
 	}
 
 	for _, testCase := range testCases {
@@ -1171,7 +1204,20 @@ func TestArrayListSubList(t *testing.T) {
 			},
 			expectedResult: &ArrayList{
 				typeURL: "int",
-				data:    []interface{}{2, 3, 4, 5},
+				data:    []interface{}{2, 3, 4},
+			},
+		},
+		{
+			name: "test Get sublist from index 0 to 0",
+			actualResult: func() (List, error) {
+				al, err := NewArrayList(1, 2, 3, 4, 5, 6, 7)
+				require.NoError(t, err)
+
+				return al.SubList(0, 0)
+			},
+			expectedResult: &ArrayList{
+				typeURL: "na",
+				data:    []interface{}(nil),
 			},
 		},
 		{
@@ -1184,7 +1230,7 @@ func TestArrayListSubList(t *testing.T) {
 			},
 			expectedResult: &ArrayList{
 				typeURL: "int",
-				data:    []interface{}{1, 2, 3},
+				data:    []interface{}{1, 2},
 			},
 		},
 		{
@@ -1197,7 +1243,7 @@ func TestArrayListSubList(t *testing.T) {
 			},
 			expectedResult: &ArrayList{
 				typeURL: "int",
-				data:    []interface{}{5, 6, 7},
+				data:    []interface{}{5, 6},
 			},
 		},
 		{
@@ -1219,6 +1265,16 @@ func TestArrayListSubList(t *testing.T) {
 				return al.SubList(0, 10)
 			},
 			expectedError: errors.New("invalid index 10"),
+		},
+		{
+			name: "test get sublist return error when end is less than start",
+			actualResult: func() (List, error) {
+				ll, err := NewArrayList(1, 2, 3, 4, 5, 6, 7)
+				require.NoError(t, err)
+
+				return ll.SubList(4, 2)
+			},
+			expectedError: errors.New("end cannot be smaller than start"),
 		},
 	}
 
