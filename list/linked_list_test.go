@@ -343,6 +343,21 @@ func TestLinkedListAddAt(t *testing.T) {
 			},
 		},
 		{
+			name: "test add elements for empty linked list",
+			actualResult: func() (error, List) {
+				ll, err := newLinkedList()
+				require.NoError(t, err)
+
+				return ll.AddAt(0, 1), ll
+			},
+			expectedResult: func() List {
+				ll, err := newLinkedList(1)
+				require.NoError(t, err)
+
+				return ll
+			},
+		},
+		{
 			name: "test return error when adding element at invalid index",
 			actualResult: func() (error, List) {
 				ll, err := newLinkedList(1, 2, 3, 5)
@@ -451,6 +466,21 @@ func TestLinkedListAllAdd(t *testing.T) {
 				return ll
 			},
 			expectedError: errors.New("type mismatch : all elements must be of same type"),
+		},
+		{
+			name: "test add all return nil when arguments are empty",
+			actualResult: func() (error, List) {
+				ll, err := newLinkedList(1, 2)
+				require.NoError(t, err)
+
+				return ll.AddAll(), ll
+			},
+			expectedResult: func() List {
+				ll, err := newLinkedList(1, 2)
+				require.NoError(t, err)
+
+				return ll
+			},
 		},
 	}
 
@@ -680,7 +710,7 @@ func TestLinkedListIndexOf(t *testing.T) {
 				return ll.IndexOf(0)
 			},
 			expectedResult: -1,
-			expectedError:  errors.New("failed to find element 0 in List"),
+			expectedError:  errors.New("element 0 not found in the list"),
 		},
 		{
 			name: "return type mismatch error when searching for invalid type",
@@ -764,7 +794,7 @@ func TestLinkedListLastIndexOf(t *testing.T) {
 				return ll.LastIndexOf(0)
 			},
 			expectedResult: -1,
-			expectedError:  errors.New("element 0 is not present in List"),
+			expectedError:  errors.New("element 0 not found in the list"),
 		},
 		{
 			name: "return type mismatch error when searching for different type",
@@ -869,7 +899,7 @@ func TestLinkedListRemove(t *testing.T) {
 
 				return ll
 			},
-			expectedError: errors.New("failed to find element 0 in List"),
+			expectedError: errors.New("element 0 not found in the list"),
 		},
 		{
 			name: "test return false when trying to Remove element of different type",
@@ -977,6 +1007,25 @@ func TestLinkedListRemoveAt(t *testing.T) {
 				return ll
 			},
 			expectedError: errors.New("invalid index 4"),
+		},
+		{
+			name: "test failed to remove element for empty list",
+			actualResult: func() (List, error) {
+				ll, err := newLinkedList()
+				require.NoError(t, err)
+
+				e, err := ll.RemoveAt(0)
+				assert.Nil(t, e)
+
+				return ll, err
+			},
+			expectedResult: func() List {
+				ll, err := newLinkedList()
+				require.NoError(t, err)
+
+				return ll
+			},
+			expectedError: errors.New("list is empty"),
 		},
 	}
 
@@ -1274,7 +1323,7 @@ func TestLinkedListSet(t *testing.T) {
 			expectedResult: 4,
 		},
 		{
-			name: "test failed to Set value due to invalid index",
+			name: "test failed to set value due to invalid index",
 			actualResult: func() (interface{}, error) {
 				ll, err := newLinkedList(1, 2, 3, 4)
 				require.NoError(t, err)
@@ -1282,6 +1331,16 @@ func TestLinkedListSet(t *testing.T) {
 				return ll.Set(5, 3)
 			},
 			expectedError: errors.New("invalid index 5"),
+		},
+		{
+			name: "test failed to set value due to different element type",
+			actualResult: func() (interface{}, error) {
+				ll, err := newLinkedList(1, 2, 3, 4)
+				require.NoError(t, err)
+
+				return ll.Set(1, "a")
+			},
+			expectedError: errors.New("type mismatch : expected int got string"),
 		},
 	}
 
@@ -1411,4 +1470,277 @@ func TestLinkedListSubList(t *testing.T) {
 			assert.Equal(t, testCase.expectedResult(), res)
 		})
 	}
+}
+
+func TestAllLinkedListAPI(t *testing.T) {
+	ll, err := newLinkedList()
+	require.NoError(t, err)
+
+	err = ll.Add(2)
+	require.NoError(t, err)
+
+	err = ll.Add("a")
+	require.Error(t, err)
+	assert.Equal(t, "type mismatch : expected int got string", err.Error())
+
+	err = ll.AddAt(0, 1)
+	require.NoError(t, err)
+
+	err = ll.AddAt(2, 1)
+	require.Error(t, err)
+	assert.Equal(t, "invalid index 2", err.Error())
+
+	err = ll.AddAt(0, "a")
+	require.Error(t, err)
+	assert.Equal(t, "type mismatch : expected int got string", err.Error())
+
+	err = ll.AddAll(3, 4, 5)
+	require.NoError(t, err)
+
+	err = ll.AddAll(5, 6, "a")
+	require.Error(t, err)
+	assert.Equal(t, "type mismatch : all elements must be of same type", err.Error())
+
+	ok, err := ll.Contains(1)
+	require.NoError(t, err)
+	assert.True(t, ok)
+
+	ok, err = ll.Contains(8)
+	require.Error(t, err)
+	assert.Equal(t, "element 8 not found in the list", err.Error())
+	assert.False(t, ok)
+
+	ok, err = ll.Contains("a")
+	require.Error(t, err)
+	assert.Equal(t, "type mismatch : expected int got string", err.Error())
+	assert.False(t, ok)
+
+	ok, err = ll.ContainsAll(2, 4, 5)
+	require.NoError(t, err)
+	assert.True(t, ok)
+
+	ok, err = ll.ContainsAll(4, 7)
+	require.Error(t, err)
+	assert.Equal(t, "element 7 not found in the list", err.Error())
+	assert.False(t, ok)
+
+	ok, err = ll.ContainsAll(4, "a")
+	require.Error(t, err)
+	assert.Equal(t, "type mismatch : expected int got string", err.Error())
+	assert.False(t, ok)
+
+	ele := ll.Get(0)
+	assert.Equal(t, 1, ele)
+
+	ele = ll.Get(10)
+	assert.Nil(t, ele)
+
+	id, err := ll.IndexOf(2)
+	require.NoError(t, err)
+	assert.Equal(t, 1, id)
+
+	id, err = ll.IndexOf(10)
+	require.Error(t, err)
+	assert.Equal(t, "element 10 not found in the list", err.Error())
+	assert.Equal(t, -1, id)
+
+	id, err = ll.IndexOf("a")
+	require.Error(t, err)
+	assert.Equal(t, "type mismatch : expected int got string", err.Error())
+	assert.Equal(t, -1, id)
+
+	ok = ll.IsEmpty()
+	require.False(t, ok)
+
+	it := ll.Iterator()
+
+	count := 1
+	for it.HasNext() {
+		assert.Equal(t, count, it.Next())
+		count++
+	}
+
+	require.NoError(t, ll.Add(1))
+
+	id, err = ll.LastIndexOf(1)
+	require.NoError(t, err)
+	assert.Equal(t, 5, id)
+
+	id, err = ll.LastIndexOf(10)
+	require.Error(t, err)
+	assert.Equal(t, "element 10 not found in the list", err.Error())
+	assert.Equal(t, -1, id)
+
+	id, err = ll.LastIndexOf("a")
+	require.Error(t, err)
+	assert.Equal(t, "type mismatch : expected int got string", err.Error())
+	assert.Equal(t, -1, id)
+
+	ok, err = ll.Remove(1)
+	require.NoError(t, err)
+	assert.True(t, ok)
+
+	ok, err = ll.Remove(10)
+	require.Error(t, err)
+	assert.Equal(t, "element 10 not found in the list", err.Error())
+	assert.False(t, ok)
+
+	ok, err = ll.Remove("a")
+	require.Error(t, err)
+	assert.Equal(t, "type mismatch : expected int got string", err.Error())
+	assert.False(t, ok)
+
+	ele, err = ll.RemoveAt(0)
+	require.NoError(t, err)
+	assert.Equal(t, 2, ele)
+
+	ele, err = ll.RemoveAt(10)
+	require.Error(t, err)
+	assert.Equal(t, "invalid index 10", err.Error())
+	assert.Nil(t, ele)
+
+	require.NoError(t, ll.Add(3))
+
+	ok, err = ll.RemoveAll(3, 5)
+	require.NoError(t, err)
+	require.True(t, ok)
+
+	ok, err = ll.RemoveAll(3, "a")
+	require.Error(t, err)
+	assert.Equal(t, "type mismatch : expected int got string", err.Error())
+	require.False(t, ok)
+
+	err = ll.ReplaceAll(testIntIncOperator{})
+	require.NoError(t, err)
+
+	err = ll.ReplaceAll(testStringConcatOperator{})
+	require.Error(t, err)
+	assert.Equal(t, "type mismatch : interface conversion: interface {} is int, not string", err.Error())
+
+	require.NoError(t, ll.AddAll(4, 6, 3, 1))
+
+	ok, err = ll.RetainAll(6, 2, 4)
+	require.NoError(t, err)
+	require.True(t, ok)
+
+	ok, err = ll.RetainAll(1, 3, 5, "a")
+	require.Error(t, err)
+	assert.Equal(t, "type mismatch : expected int got string", err.Error())
+	require.False(t, ok)
+
+	ele, err = ll.Set(0, 7)
+	require.NoError(t, err)
+	assert.Equal(t, 7, ele)
+
+	ele, err = ll.Set(3, 8)
+	require.Error(t, err)
+	assert.Equal(t, "invalid index 3", err.Error())
+	assert.Nil(t, ele)
+
+	ele, err = ll.Set(1, "a")
+	require.Error(t, err)
+	assert.Equal(t, "type mismatch : expected int got string", err.Error())
+	assert.Nil(t, ele)
+
+	sz := ll.Size()
+	assert.Equal(t, 3, sz)
+
+	ll.Sort(comparator.NewIntegerComparator())
+
+	val := []int{4, 6, 7}
+	i := 0
+	it = ll.Iterator()
+	for it.HasNext() {
+		assert.Equal(t, val[i], it.Next())
+		i++
+	}
+
+	sl, err := ll.SubList(0, 0)
+	require.NoError(t, err)
+	assert.Equal(t, tempLinkedList(), sl)
+
+	sl, err = ll.SubList(1, 1)
+	require.NoError(t, err)
+	assert.Equal(t, tempLinkedList(), sl)
+
+	sl, err = ll.SubList(2, 2)
+	require.NoError(t, err)
+	assert.Equal(t, tempLinkedList(), sl)
+
+	sl, err = ll.SubList(0, 1)
+	require.NoError(t, err)
+	assert.Equal(t, tempLinkedList(4), sl)
+
+	sl, err = ll.SubList(0, 2)
+	require.NoError(t, err)
+	assert.Equal(t, tempLinkedList(4, 6), sl)
+
+	sl, err = ll.SubList(1, 2)
+	require.NoError(t, err)
+	assert.Equal(t, tempLinkedList(6), sl)
+
+	sl, err = ll.SubList(1, 3)
+	require.NoError(t, err)
+	assert.Equal(t, tempLinkedList(6, 7), sl)
+
+	sl, err = ll.SubList(2, 3)
+	require.NoError(t, err)
+	assert.Equal(t, tempLinkedList(7), sl)
+
+	ll.Clear()
+
+	assert.Equal(t, 0, ll.Size())
+
+	err = ll.Add("a")
+	require.Error(t, err)
+	assert.Equal(t, "type mismatch : expected int got string", err.Error())
+
+	err = ll.AddAll("a", "b")
+	require.Error(t, err)
+	assert.Equal(t, "type mismatch : expected int got string", err.Error())
+
+	err = ll.AddAll(1, "a", "b")
+	require.Error(t, err)
+	assert.Equal(t, "type mismatch : all elements must be of same type", err.Error())
+
+	id, err = ll.IndexOf(1)
+	require.Error(t, err)
+	assert.Equal(t, "list is empty", err.Error())
+	assert.Equal(t, -1, id)
+
+	id, err = ll.LastIndexOf(1)
+	require.Error(t, err)
+	assert.Equal(t, "list is empty", err.Error())
+	assert.Equal(t, -1, id)
+
+	ok, err = ll.Remove(1)
+	require.Error(t, err)
+	assert.Equal(t, "list is empty", err.Error())
+	require.False(t, ok)
+
+	ele, err = ll.RemoveAt(0)
+	require.Error(t, err)
+	assert.Equal(t, "list is empty", err.Error())
+	assert.Nil(t, ele)
+
+	ok, err = ll.RemoveAll(1, 2)
+	require.Error(t, err)
+	assert.Equal(t, "list is empty", err.Error())
+	require.False(t, ok)
+
+	ok, err = ll.RetainAll(1, 2)
+	require.Error(t, err)
+	assert.Equal(t, "list is empty", err.Error())
+	require.False(t, ok)
+
+	ele, err = ll.Set(0, 1)
+	require.Error(t, err)
+	assert.Equal(t, "list is empty", err.Error())
+	assert.Nil(t, ele)
+
+}
+
+func tempLinkedList(data ...interface{}) *linkedList {
+	ll, _ := newLinkedList(data...)
+	return ll
 }

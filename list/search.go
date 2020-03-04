@@ -2,7 +2,6 @@ package list
 
 import (
 	"fmt"
-	"reflect"
 )
 
 type finder interface {
@@ -26,7 +25,7 @@ func (lf linearFinder) search(l List, e interface{}) (int, error) {
 	}
 
 	if getTypeName(l.Get(0)) != getTypeName(e) {
-		return -1, fmt.Errorf("type mismatch : expected %s got %s", reflect.TypeOf(l.Get(0)).Name(), reflect.TypeOf(e).Name())
+		return -1, fmt.Errorf("type mismatch : expected %s got %s", getTypeName(l.Get(0)), getTypeName(e))
 	}
 
 	it := l.Iterator()
@@ -75,8 +74,8 @@ func (cf concurrentFinder) search(l List, e interface{}) (int, error) {
 		return -1, fmt.Errorf("list is empty")
 	}
 
-	if reflect.TypeOf(l.Get(0)).Name() != reflect.TypeOf(e).Name() {
-		return -1, fmt.Errorf("type mismatch : expected %s got %s", reflect.TypeOf(l.Get(0)).Name(), reflect.TypeOf(e).Name())
+	if getTypeName(l.Get(0)) != getTypeName(e) {
+		return -1, fmt.Errorf("type mismatch : expected %s got %s", getTypeName(l.Get(0)), getTypeName(e))
 	}
 
 	if sz < cf.searchFactor {

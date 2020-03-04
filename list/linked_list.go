@@ -80,14 +80,14 @@ func (ll *linkedList) Add(e interface{}) error {
 }
 
 func (ll *linkedList) AddAt(i int, e interface{}) error {
-	if !ll.isValidIndex(i) {
-		return fmt.Errorf("invalid index %d", i)
-	}
-
-	if ll.typeURL == na {
+	if ll.IsEmpty() && ll.typeURL == na {
 		ll.root = newNode(e)
 		ll.typeURL = getTypeName(e)
 		return nil
+	}
+
+	if !ll.isValidIndex(i) {
+		return fmt.Errorf("invalid index %d", i)
 	}
 
 	if !ll.isValidType(e) {
@@ -168,13 +168,9 @@ func (ll *linkedList) Clear() {
 }
 
 func (ll *linkedList) Contains(e interface{}) (bool, error) {
-	id, err := newFinder().search(ll, e)
+	_, err := newFinder().search(ll, e)
 	if err != nil {
 		return false, err
-	}
-
-	if id == invalidIndex {
-		return false, fmt.Errorf("element %v not found", e)
 	}
 
 	return true, nil
@@ -216,7 +212,7 @@ func (ll *linkedList) IndexOf(e interface{}) (int, error) {
 
 	i, _ := newFinder().search(ll, e)
 	if i == invalidIndex {
-		return invalidIndex, fmt.Errorf("failed to find element %v in List", e)
+		return invalidIndex, fmt.Errorf("element %v not found in the list", e)
 	}
 
 	return i, nil
@@ -253,7 +249,7 @@ func (ll *linkedList) LastIndexOf(e interface{}) (int, error) {
 	}
 
 	if i == invalidIndex {
-		return invalidIndex, fmt.Errorf("element %v is not present in List", e)
+		return invalidIndex, fmt.Errorf("element %v not found in the list", e)
 	}
 
 	return i, nil
@@ -291,7 +287,7 @@ func (ll *linkedList) Remove(e interface{}) (bool, error) {
 
 func (ll *linkedList) RemoveAt(i int) (interface{}, error) {
 	if ll.IsEmpty() {
-		return false, fmt.Errorf("list is empty")
+		return nil, fmt.Errorf("list is empty")
 	}
 
 	if !ll.isValidIndex(i) {
@@ -321,20 +317,27 @@ func (ll *linkedList) RemoveAll(l ...interface{}) (bool, error) {
 	return filterLinkedList(ll, false, l...)
 }
 
-func (ll *linkedList) ReplaceAll(uo operator.UnaryOperator) error {
+func (ll *linkedList) ReplaceAll(uo operator.UnaryOperator) (err error) {
+	defer func() {
+		if r := recover(); r != nil {
+			err = fmt.Errorf("type mismatch : %v", r)
+		}
+	}()
+
 	temp := ll.root
 
 	for temp != nil {
 		e := uo.Apply(temp.data)
 		if !ll.isValidType(e) {
-			return fmt.Errorf("type mismatch : expected %s got %s", ll.typeURL, getTypeName(e))
+			err = fmt.Errorf("type mismatch : expected %s got %s", ll.typeURL, getTypeName(e))
+			return
 		}
 
 		temp.data = e
 		temp = temp.next
 	}
 
-	return nil
+	return
 }
 
 func (ll *linkedList) RetainAll(l ...interface{}) (bool, error) {
@@ -351,7 +354,7 @@ func (ll *linkedList) Set(i int, e interface{}) (interface{}, error) {
 	}
 
 	if !ll.isValidType(e) {
-		return false, fmt.Errorf("type mismatch : expected %s got %s", ll.typeURL, getTypeName(e))
+		return nil, fmt.Errorf("type mismatch : expected %s got %s", ll.typeURL, getTypeName(e))
 	}
 
 	temp := ll.root
@@ -400,7 +403,7 @@ func (ll *linkedList) SubList(s int, e int) (List, error) {
 		return nil, fmt.Errorf("invalid index %d", s)
 	}
 
-	if !ll.isValidIndex(e) {
+	if e < 0 || e > ll.Size() {
 		return nil, fmt.Errorf("invalid index %d", e)
 	}
 
