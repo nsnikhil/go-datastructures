@@ -3,6 +3,7 @@ package list
 import (
 	"errors"
 	"github.com/nsnikhil/go-datastructures/functions/comparator"
+	"github.com/nsnikhil/go-datastructures/liberror"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"testing"
@@ -45,7 +46,7 @@ func TestCreateNewLinkedList(t *testing.T) {
 				return newLinkedList(1, "a")
 			},
 			expectedResult: (*linkedList)(nil),
-			expectedError:  errors.New("type mismatch : expected int got string"),
+			expectedError:  liberror.NewTypeMismatchError("int", "string"),
 		},
 	}
 
@@ -371,7 +372,7 @@ func TestLinkedListAddAt(t *testing.T) {
 
 				return ll
 			},
-			expectedError: errors.New("invalid index 4"),
+			expectedError: liberror.NewIndexOutOfBoundError(4),
 		},
 		{
 			name: "test return error when adding element of invalid type",
@@ -387,7 +388,7 @@ func TestLinkedListAddAt(t *testing.T) {
 
 				return ll
 			},
-			expectedError: errors.New("type mismatch : expected int got string"),
+			expectedError: liberror.NewTypeMismatchError("int", "string"),
 		},
 	}
 	for _, testCase := range testCases {
@@ -565,7 +566,7 @@ func TestLinkedListContains(t *testing.T) {
 				return ll.Contains("a")
 			},
 			expectedResult: false,
-			expectedError:  errors.New("type mismatch : expected int got string"),
+			expectedError:  liberror.NewTypeMismatchError("int", "string"),
 		},
 	}
 
@@ -671,7 +672,7 @@ func TestLinkedListContainsAll(t *testing.T) {
 				return ll.ContainsAll(6, 1, "a")
 			},
 			expectedResult: false,
-			expectedError:  errors.New("type mismatch : expected int got string"),
+			expectedError:  liberror.NewTypeMismatchError("int", "string"),
 		},
 	}
 
@@ -721,7 +722,7 @@ func TestLinkedListIndexOf(t *testing.T) {
 				return ll.IndexOf("a")
 			},
 			expectedResult: -1,
-			expectedError:  errors.New("type mismatch : expected int got string"),
+			expectedError:  liberror.NewTypeMismatchError("int", "string"),
 		},
 	}
 	for _, testCase := range testCases {
@@ -805,7 +806,7 @@ func TestLinkedListLastIndexOf(t *testing.T) {
 				return ll.LastIndexOf("a")
 			},
 			expectedResult: -1,
-			expectedError:  errors.New("type mismatch : expected int got string"),
+			expectedError:  liberror.NewTypeMismatchError("int", "string"),
 		},
 	}
 
@@ -918,7 +919,7 @@ func TestLinkedListRemove(t *testing.T) {
 
 				return ll
 			},
-			expectedError: errors.New("type mismatch : expected int got string"),
+			expectedError: liberror.NewTypeMismatchError("int", "string"),
 		},
 	}
 
@@ -1006,7 +1007,7 @@ func TestLinkedListRemoveAt(t *testing.T) {
 
 				return ll
 			},
-			expectedError: errors.New("invalid index 4"),
+			expectedError: liberror.NewIndexOutOfBoundError(4),
 		},
 		{
 			name: "test failed to remove element for empty list",
@@ -1052,6 +1053,24 @@ func TestLinkedListRemoveAll(t *testing.T) {
 				require.NoError(t, err)
 
 				ok, err := ll.RemoveAll(2, 4)
+				require.True(t, ok)
+
+				return ll, err
+			},
+			expectedResult: func() List {
+				ll, err := newLinkedList(1, 3)
+				require.NoError(t, err)
+
+				return ll
+			},
+		},
+		{
+			name: "test successfully remove only elements which are present",
+			actualResult: func() (List, error) {
+				ll, err := newLinkedList(1, 2, 3, 4)
+				require.NoError(t, err)
+
+				ok, err := ll.RemoveAll(2, 4, 5)
 				require.True(t, ok)
 
 				return ll, err
@@ -1133,7 +1152,7 @@ func TestLinkedListRemoveAll(t *testing.T) {
 
 				return ll
 			},
-			expectedError: errors.New("type mismatch : expected int got string"),
+			expectedError: liberror.NewTypeMismatchError("int", "string"),
 		},
 	}
 
@@ -1198,7 +1217,7 @@ func TestLinkedListReplaceAll(t *testing.T) {
 
 				return ll
 			},
-			expectedError: errors.New("type mismatch : expected int got string"),
+			expectedError: liberror.NewTypeMismatchError("int", "string"),
 		},
 	}
 
@@ -1226,6 +1245,24 @@ func TestLinkedListRetainAll(t *testing.T) {
 				require.NoError(t, err)
 
 				ok, err := ll.RetainAll(2, 4)
+				require.True(t, ok)
+
+				return ll, err
+			},
+			expectedResult: func() List {
+				ll, err := newLinkedList(2, 4)
+				require.NoError(t, err)
+
+				return ll
+			},
+		},
+		{
+			name: "test retain all from integer list with ignoring element which are not present",
+			actualResult: func() (List, error) {
+				ll, err := newLinkedList(1, 2, 3, 4)
+				require.NoError(t, err)
+
+				ok, err := ll.RetainAll(2, 4, 5)
 				require.True(t, ok)
 
 				return ll, err
@@ -1272,7 +1309,7 @@ func TestLinkedListRetainAll(t *testing.T) {
 
 				return ll
 			},
-			expectedError: errors.New("type mismatch : expected int got string"),
+			expectedError: liberror.NewTypeMismatchError("int", "string"),
 		},
 	}
 
@@ -1330,7 +1367,7 @@ func TestLinkedListSet(t *testing.T) {
 
 				return ll.Set(5, 3)
 			},
-			expectedError: errors.New("invalid index 5"),
+			expectedError: liberror.NewIndexOutOfBoundError(5),
 		},
 		{
 			name: "test failed to set value due to different element type",
@@ -1340,7 +1377,7 @@ func TestLinkedListSet(t *testing.T) {
 
 				return ll.Set(1, "a")
 			},
-			expectedError: errors.New("type mismatch : expected int got string"),
+			expectedError: liberror.NewTypeMismatchError("int", "string"),
 		},
 	}
 
@@ -1431,7 +1468,7 @@ func TestLinkedListSubList(t *testing.T) {
 			expectedResult: func() List {
 				return nil
 			},
-			expectedError: errors.New("invalid index -1"),
+			expectedError: liberror.NewIndexOutOfBoundError(-1),
 		},
 		{
 			name: "test get sublist return error for invalid end index",
@@ -1444,7 +1481,7 @@ func TestLinkedListSubList(t *testing.T) {
 			expectedResult: func() List {
 				return nil
 			},
-			expectedError: errors.New("invalid index 10"),
+			expectedError: liberror.NewIndexOutOfBoundError(10),
 		},
 		{
 			name: "test get sublist return error when end is less than start",
@@ -1464,9 +1501,7 @@ func TestLinkedListSubList(t *testing.T) {
 	for _, testCase := range testCases {
 		t.Run(testCase.name, func(t *testing.T) {
 			res, err := testCase.actualResult()
-
 			assert.Equal(t, testCase.expectedError, err)
-
 			assert.Equal(t, testCase.expectedResult(), res)
 		})
 	}
@@ -1481,18 +1516,18 @@ func TestAllLinkedListAPI(t *testing.T) {
 
 	err = ll.Add("a")
 	require.Error(t, err)
-	assert.Equal(t, "type mismatch : expected int got string", err.Error())
+	assert.Equal(t, liberror.NewTypeMismatchError("int", "string"), err)
 
 	err = ll.AddAt(0, 1)
 	require.NoError(t, err)
 
 	err = ll.AddAt(2, 1)
 	require.Error(t, err)
-	assert.Equal(t, "invalid index 2", err.Error())
+	assert.Equal(t, liberror.NewIndexOutOfBoundError(2), err)
 
 	err = ll.AddAt(0, "a")
 	require.Error(t, err)
-	assert.Equal(t, "type mismatch : expected int got string", err.Error())
+	assert.Equal(t, liberror.NewTypeMismatchError("int", "string"), err)
 
 	err = ll.AddAll(3, 4, 5)
 	require.NoError(t, err)
@@ -1512,7 +1547,7 @@ func TestAllLinkedListAPI(t *testing.T) {
 
 	ok, err = ll.Contains("a")
 	require.Error(t, err)
-	assert.Equal(t, "type mismatch : expected int got string", err.Error())
+	assert.Equal(t, liberror.NewTypeMismatchError("int", "string"), err)
 	assert.False(t, ok)
 
 	ok, err = ll.ContainsAll(2, 4, 5)
@@ -1526,7 +1561,7 @@ func TestAllLinkedListAPI(t *testing.T) {
 
 	ok, err = ll.ContainsAll(4, "a")
 	require.Error(t, err)
-	assert.Equal(t, "type mismatch : expected int got string", err.Error())
+	assert.Equal(t, liberror.NewTypeMismatchError("int", "string"), err)
 	assert.False(t, ok)
 
 	ele := ll.Get(0)
@@ -1546,7 +1581,7 @@ func TestAllLinkedListAPI(t *testing.T) {
 
 	id, err = ll.IndexOf("a")
 	require.Error(t, err)
-	assert.Equal(t, "type mismatch : expected int got string", err.Error())
+	assert.Equal(t, liberror.NewTypeMismatchError("int", "string"), err)
 	assert.Equal(t, -1, id)
 
 	ok = ll.IsEmpty()
@@ -1573,7 +1608,7 @@ func TestAllLinkedListAPI(t *testing.T) {
 
 	id, err = ll.LastIndexOf("a")
 	require.Error(t, err)
-	assert.Equal(t, "type mismatch : expected int got string", err.Error())
+	assert.Equal(t, liberror.NewTypeMismatchError("int", "string"), err)
 	assert.Equal(t, -1, id)
 
 	ok, err = ll.Remove(1)
@@ -1587,7 +1622,7 @@ func TestAllLinkedListAPI(t *testing.T) {
 
 	ok, err = ll.Remove("a")
 	require.Error(t, err)
-	assert.Equal(t, "type mismatch : expected int got string", err.Error())
+	assert.Equal(t, liberror.NewTypeMismatchError("int", "string"), err)
 	assert.False(t, ok)
 
 	ele, err = ll.RemoveAt(0)
@@ -1596,7 +1631,7 @@ func TestAllLinkedListAPI(t *testing.T) {
 
 	ele, err = ll.RemoveAt(10)
 	require.Error(t, err)
-	assert.Equal(t, "invalid index 10", err.Error())
+	assert.Equal(t, liberror.NewIndexOutOfBoundError(10), err)
 	assert.Nil(t, ele)
 
 	require.NoError(t, ll.Add(3))
@@ -1607,7 +1642,7 @@ func TestAllLinkedListAPI(t *testing.T) {
 
 	ok, err = ll.RemoveAll(3, "a")
 	require.Error(t, err)
-	assert.Equal(t, "type mismatch : expected int got string", err.Error())
+	assert.Equal(t, liberror.NewTypeMismatchError("int", "string"), err)
 	require.False(t, ok)
 
 	err = ll.ReplaceAll(testIntIncOperator{})
@@ -1625,7 +1660,7 @@ func TestAllLinkedListAPI(t *testing.T) {
 
 	ok, err = ll.RetainAll(1, 3, 5, "a")
 	require.Error(t, err)
-	assert.Equal(t, "type mismatch : expected int got string", err.Error())
+	assert.Equal(t, liberror.NewTypeMismatchError("int", "string"), err)
 	require.False(t, ok)
 
 	ele, err = ll.Set(0, 7)
@@ -1634,12 +1669,12 @@ func TestAllLinkedListAPI(t *testing.T) {
 
 	ele, err = ll.Set(3, 8)
 	require.Error(t, err)
-	assert.Equal(t, "invalid index 3", err.Error())
+	assert.Equal(t, liberror.NewIndexOutOfBoundError(3), err)
 	assert.Nil(t, ele)
 
 	ele, err = ll.Set(1, "a")
 	require.Error(t, err)
-	assert.Equal(t, "type mismatch : expected int got string", err.Error())
+	assert.Equal(t, liberror.NewTypeMismatchError("int", "string"), err)
 	assert.Nil(t, ele)
 
 	sz := ll.Size()
@@ -1693,11 +1728,11 @@ func TestAllLinkedListAPI(t *testing.T) {
 
 	err = ll.Add("a")
 	require.Error(t, err)
-	assert.Equal(t, "type mismatch : expected int got string", err.Error())
+	assert.Equal(t, liberror.NewTypeMismatchError("int", "string"), err)
 
 	err = ll.AddAll("a", "b")
 	require.Error(t, err)
-	assert.Equal(t, "type mismatch : expected int got string", err.Error())
+	assert.Equal(t, liberror.NewTypeMismatchError("int", "string"), err)
 
 	err = ll.AddAll(1, "a", "b")
 	require.Error(t, err)

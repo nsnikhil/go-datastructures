@@ -5,6 +5,7 @@ import (
 	"github.com/nsnikhil/go-datastructures/functions/comparator"
 	"github.com/nsnikhil/go-datastructures/functions/iterator"
 	"github.com/nsnikhil/go-datastructures/functions/operator"
+	"github.com/nsnikhil/go-datastructures/liberror"
 )
 
 type ArrayList struct {
@@ -23,7 +24,7 @@ func NewArrayList(data ...interface{}) (*ArrayList, error) {
 
 	for i := 1; i < len(data); i++ {
 		if getTypeName(data[i]) != typeURL {
-			return nil, fmt.Errorf("type mismatch : expected %s got %s", typeURL, getTypeName(data[i]))
+			return nil, liberror.NewTypeMismatchError(typeURL, getTypeName(data[i]))
 		}
 	}
 
@@ -41,8 +42,8 @@ func (al *ArrayList) Add(e interface{}) error {
 		return nil
 	}
 
-	if !al.isValidType(e) {
-		return fmt.Errorf("type mismatch : expected %s got %s", al.typeURL, getTypeName(e))
+	if err := al.isValidType(e); err != nil {
+		return err
 	}
 
 	al.data = append(al.data, e)
@@ -56,12 +57,12 @@ func (al *ArrayList) AddAt(i int, e interface{}) error {
 		return nil
 	}
 
-	if !al.isValidIndex(i) {
-		return fmt.Errorf("invalid index %d", i)
+	if err := al.isValidIndex(i); err != nil {
+		return err
 	}
 
-	if !al.isValidType(e) {
-		return fmt.Errorf("type mismatch : expected %s got %s", al.typeURL, getTypeName(e))
+	if err := al.isValidType(e); err != nil {
+		return err
 	}
 
 	al.data = append(al.data[:i], append([]interface{}{e}, al.data[i:]...)...)
@@ -88,8 +89,8 @@ func (al *ArrayList) AddAll(l ...interface{}) error {
 		idx++
 	} else {
 
-		if !al.isValidType(l[idx]) {
-			return fmt.Errorf("type mismatch : expected %s got %s", al.typeURL, getTypeName(l[idx]))
+		if err := al.isValidType(l[idx]); err != nil {
+			return err
 		}
 
 		if al.IsEmpty() {
@@ -129,7 +130,7 @@ func (al *ArrayList) ContainsAll(l ...interface{}) (bool, error) {
 }
 
 func (al *ArrayList) Get(i int) interface{} {
-	if al.Size() == 0 || !al.isValidIndex(i) {
+	if err := al.isValidIndex(i); al.IsEmpty() || err != nil {
 		return nil
 	}
 	return al.data[i]
@@ -140,8 +141,8 @@ func (al *ArrayList) IndexOf(e interface{}) (int, error) {
 		return -1, fmt.Errorf("list is empty")
 	}
 
-	if !al.isValidType(e) {
-		return invalidIndex, fmt.Errorf("type mismatch : expected %s got %s", al.typeURL, getTypeName(e))
+	if err := al.isValidType(e); err != nil {
+		return invalidIndex, err
 	}
 
 	i, _ := newFinder().search(al, e)
@@ -165,8 +166,8 @@ func (al *ArrayList) LastIndexOf(e interface{}) (int, error) {
 		return -1, fmt.Errorf("list is empty")
 	}
 
-	if !al.isValidType(e) {
-		return invalidIndex, fmt.Errorf("type mismatch : expected %s got %s", al.typeURL, getTypeName(e))
+	if err := al.isValidType(e); err != nil {
+		return invalidIndex, err
 	}
 
 	i := al.Size() - 1
@@ -185,8 +186,8 @@ func (al *ArrayList) Remove(e interface{}) (bool, error) {
 		return false, fmt.Errorf("list is empty")
 	}
 
-	if !al.isValidType(e) {
-		return false, fmt.Errorf("type mismatch : expected %s got %s", al.typeURL, getTypeName(e))
+	if err := al.isValidType(e); err != nil {
+		return false, err
 	}
 
 	i, err := al.IndexOf(e)
@@ -204,8 +205,8 @@ func (al *ArrayList) RemoveAt(i int) (interface{}, error) {
 		return nil, fmt.Errorf("list is empty")
 	}
 
-	if !al.isValidIndex(i) {
-		return nil, fmt.Errorf("invalid index %d", i)
+	if err := al.isValidIndex(i); err != nil {
+		return nil, err
 	}
 
 	e := al.Get(i)
@@ -228,8 +229,9 @@ func (al *ArrayList) ReplaceAll(uo operator.UnaryOperator) (err error) {
 	sz := al.Size()
 	for i := 0; i < sz; i++ {
 		e := uo.Apply(al.Get(i))
-		if !al.isValidType(e) {
-			err = fmt.Errorf("type mismatch : expected %s got %s", al.typeURL, getTypeName(e))
+		//TODO CHECK IF YOU CAN WORK WITH JUST ERR AND REMOVE EXTRA TYEP ERROR
+		if typeError := al.isValidType(e); typeError != nil {
+			err = typeError
 			return
 		}
 
@@ -250,12 +252,12 @@ func (al *ArrayList) Set(i int, e interface{}) (interface{}, error) {
 		return nil, fmt.Errorf("list is empty")
 	}
 
-	if !al.isValidIndex(i) {
-		return nil, fmt.Errorf("invalid index %d", i)
+	if err := al.isValidIndex(i); err != nil {
+		return nil, err
 	}
 
-	if !al.isValidType(e) {
-		return nil, fmt.Errorf("type mismatch : expected %s got %s", al.typeURL, getTypeName(e))
+	if err := al.isValidType(e); err != nil {
+		return nil, err
 	}
 
 	al.data[i] = e
@@ -275,12 +277,13 @@ func (al *ArrayList) SubList(s int, e int) (List, error) {
 		return nil, fmt.Errorf("end cannot be smaller than start")
 	}
 
-	if !al.isValidIndex(s) {
-		return nil, fmt.Errorf("invalid index %d", s)
+	if err := al.isValidIndex(s); err != nil {
+		return nil, err
 	}
 
+	//TODO USE IS VALID INDEX METHOD HERE
 	if e < 0 || e > al.Size() {
-		return nil, fmt.Errorf("invalid index %d", e)
+		return nil, liberror.NewIndexOutOfBoundError(e)
 	}
 
 	tempData := make([]interface{}, 0)
@@ -318,12 +321,18 @@ func (ali *arrayListIterator) Next() interface{} {
 	return e
 }
 
-func (al *ArrayList) isValidIndex(i int) bool {
-	return i >= 0 && i < al.Size()
+func (al *ArrayList) isValidIndex(i int) error {
+	if i < 0 || i >= al.Size() {
+		return liberror.NewIndexOutOfBoundError(i)
+	}
+	return nil
 }
 
-func (al *ArrayList) isValidType(e interface{}) bool {
-	return getTypeName(e) == al.typeURL
+func (al *ArrayList) isValidType(e interface{}) error {
+	if getTypeName(e) != al.typeURL {
+		return liberror.NewTypeMismatchError(al.typeURL, getTypeName(e))
+	}
+	return nil
 }
 
 func filterArrayList(al *ArrayList, inverse bool, l ...interface{}) (bool, error) {
@@ -332,8 +341,8 @@ func filterArrayList(al *ArrayList, inverse bool, l ...interface{}) (bool, error
 	}
 
 	for _, e := range l {
-		if !al.isValidType(e) {
-			return false, fmt.Errorf("type mismatch : expected %s got %s", al.typeURL, getTypeName(e))
+		if err := al.isValidType(e); err != nil {
+			return false, err
 		}
 	}
 

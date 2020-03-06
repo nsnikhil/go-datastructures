@@ -2,6 +2,7 @@ package list
 
 import (
 	"errors"
+	"github.com/nsnikhil/go-datastructures/liberror"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"math/rand"
@@ -64,76 +65,7 @@ func TestFinderLinearSearch(t *testing.T) {
 				return newLinearFinder().search(al, "a")
 			},
 			expectedResult: -1,
-			expectedError:  errors.New("type mismatch : expected int got string"),
-		},
-	}
-
-	for _, testCase := range testCases {
-		t.Run(testCase.name, func(t *testing.T) {
-			res, err := testCase.actualResult()
-			assert.Equal(t, testCase.expectedError, err)
-			assert.Equal(t, testCase.expectedResult, res)
-		})
-	}
-}
-
-func TestFinderConcurrentSearch(t *testing.T) {
-	testCases := []struct {
-		name           string
-		actualResult   func() (int, error)
-		expectedResult int
-		expectedError  error
-	}{
-		{
-			name: "return index when element is found at start",
-			actualResult: func() (int, error) {
-				return newConcurrentFinder().search(getList(), 100)
-			},
-			expectedResult: 0,
-		},
-		{
-			name: "return index when element is found at end",
-			actualResult: func() (int, error) {
-				return newConcurrentFinder().search(getList(), 0)
-			},
-			expectedResult: 100,
-		},
-		{
-			name: "return index when element is found at break point",
-			actualResult: func() (int, error) {
-				return newConcurrentFinder().search(getList(), 90)
-			},
-			expectedResult: 10,
-		},
-		{
-			name: "return -1 with error when element is not found",
-			actualResult: func() (int, error) {
-				return newConcurrentFinder().search(getList(), 105)
-			},
-			expectedResult: -1,
-			expectedError:  errors.New("element 105 not found in the list"),
-		},
-		{
-			name: "return -1 with error when list is empty",
-			actualResult: func() (int, error) {
-				al, err := NewArrayList()
-				require.NoError(t, err)
-
-				return newConcurrentFinder().search(al, 1)
-			},
-			expectedResult: -1,
-			expectedError:  errors.New("list is empty"),
-		},
-		{
-			name: "return -1 with error when element is of different type",
-			actualResult: func() (int, error) {
-				al, err := NewArrayList(1, 2)
-				require.NoError(t, err)
-
-				return newConcurrentFinder().search(al, "a")
-			},
-			expectedResult: -1,
-			expectedError:  errors.New("type mismatch : expected int got string"),
+			expectedError:  liberror.NewTypeMismatchError("int", "string"),
 		},
 	}
 
@@ -169,18 +101,4 @@ func BenchmarkLinearFinder(b *testing.B) {
 		e := rand.Intn(s-0+1) + 0
 		_, _ = f.search(l, e)
 	}
-
-}
-
-func BenchmarkConcurrentFinder(b *testing.B) {
-	s := b.N
-	l := generateList(s)
-	f := newConcurrentFinder()
-	rand.Seed(time.Now().UnixNano())
-
-	for i := 0; i < s; i++ {
-		e := rand.Intn(s-0+1) + 0
-		_, _ = f.search(l, e)
-	}
-
 }

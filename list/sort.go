@@ -3,67 +3,19 @@ package list
 import "github.com/nsnikhil/go-datastructures/functions/comparator"
 
 type sorter interface {
+
+	/*
+		sorts an list given a specified comparator.
+
+		params:
+		l: the list to sort.
+		c: the comparator to use while sorting.
+	*/
 	sort(l List, c comparator.Comparator)
 }
 
 func newSorter() sorter {
 	return newQuickSorter()
-}
-
-type mergeSort struct{}
-
-func newMergeSorter() sorter {
-	return mergeSort{}
-}
-
-func (ms mergeSort) sort(l List, c comparator.Comparator) {
-	mergeSortUtil(l, c, 0, l.Size()-1)
-}
-
-func merge(l List, c comparator.Comparator, s, m, e int) {
-	i := s
-	j := m + 1
-
-	temp, _ := NewArrayList()
-
-	for i <= m && j <= e {
-		res, _ := c.Compare(l.Get(i), l.Get(j))
-		if res < 0 {
-			_ = temp.Add(l.Get(i))
-			i++
-		} else {
-			_ = temp.Add(l.Get(j))
-			j++
-		}
-	}
-
-	for i <= m {
-		_ = temp.Add(l.Get(i))
-		i++
-	}
-
-	for j <= e {
-		_ = temp.Add(l.Get(j))
-		j++
-	}
-
-	it := temp.Iterator()
-
-	k := s
-	for it.HasNext() && k <= e {
-		_, _ = l.Set(k, it.Next())
-		k++
-	}
-
-}
-
-func mergeSortUtil(l List, c comparator.Comparator, s, e int) {
-	if s < e {
-		mid := (s + e) / 2
-		mergeSortUtil(l, c, s, mid)
-		mergeSortUtil(l, c, mid+1, e)
-		merge(l, c, s, mid, e)
-	}
 }
 
 type quickSort struct{}

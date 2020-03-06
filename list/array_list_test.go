@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/nsnikhil/go-datastructures/functions/comparator"
+	"github.com/nsnikhil/go-datastructures/liberror"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"testing"
@@ -39,7 +40,7 @@ func TestCreateNewArrayList(t *testing.T) {
 				return NewArrayList(1, "2")
 			},
 			expectedResult: (*ArrayList)(nil),
-			expectedError:  errors.New("type mismatch : expected int got string"),
+			expectedError:  liberror.NewTypeMismatchError("int", "string"),
 		},
 	}
 
@@ -150,7 +151,7 @@ func TestArrayListAdd(t *testing.T) {
 				return list.Size(), err
 			},
 			expectedSize:  1,
-			expectedError: fmt.Errorf("type mismatch : expected int got string"),
+			expectedError: liberror.NewTypeMismatchError("int", "string"),
 		},
 		{
 			name: "test Size is 2 after adding structs",
@@ -392,7 +393,7 @@ func TestArrayListSet(t *testing.T) {
 				require.NoError(t, err)
 				return al.Set(5, 3)
 			},
-			expectedError: errors.New("invalid index 5"),
+			expectedError: liberror.NewIndexOutOfBoundError(5),
 		},
 	}
 
@@ -536,7 +537,7 @@ func TestArrayListAddAt(t *testing.T) {
 				typeURL: "int",
 				data:    []interface{}{1, 2, 3, 5},
 			},
-			expectedError: errors.New("invalid index 4"),
+			expectedError: liberror.NewIndexOutOfBoundError(4),
 		},
 		{
 			name: "test return error when adding element of invalid type",
@@ -550,7 +551,7 @@ func TestArrayListAddAt(t *testing.T) {
 				typeURL: "int",
 				data:    []interface{}{1, 2, 3, 5},
 			},
-			expectedError: errors.New("type mismatch : expected int got string"),
+			expectedError: liberror.NewTypeMismatchError("int", "string"),
 		},
 	}
 	for _, testCase := range testCases {
@@ -718,7 +719,7 @@ func TestArrayListContains(t *testing.T) {
 				return al.Contains("a")
 			},
 			expectedResult: false,
-			expectedError:  errors.New("type mismatch : expected int got string"),
+			expectedError:  liberror.NewTypeMismatchError("int", "string"),
 		},
 	}
 
@@ -768,7 +769,7 @@ func TestArrayListContainsAll(t *testing.T) {
 				return al.ContainsAll(6, 1, "a")
 			},
 			expectedResult: false,
-			expectedError:  errors.New("type mismatch : expected int got string"),
+			expectedError:  liberror.NewTypeMismatchError("int", "string"),
 		},
 	}
 
@@ -818,7 +819,7 @@ func TestArrayListIndexOf(t *testing.T) {
 				return al.IndexOf("a")
 			},
 			expectedResult: -1,
-			expectedError:  errors.New("type mismatch : expected int got string"),
+			expectedError:  liberror.NewTypeMismatchError("int", "string"),
 		},
 	}
 	for _, testCase := range testCases {
@@ -902,7 +903,7 @@ func TestArrayListLastIndexOf(t *testing.T) {
 				return al.LastIndexOf("a")
 			},
 			expectedResult: -1,
-			expectedError:  errors.New("type mismatch : expected int got string"),
+			expectedError:  liberror.NewTypeMismatchError("int", "string"),
 		},
 	}
 
@@ -971,7 +972,7 @@ func TestArrayListRemoveElement(t *testing.T) {
 				typeURL: "int",
 				data:    []interface{}{1, 2, 3, 4},
 			},
-			expectedError: errors.New("type mismatch : expected int got string"),
+			expectedError: liberror.NewTypeMismatchError("int", "string"),
 		},
 	}
 
@@ -1021,7 +1022,7 @@ func TestArrayListRemoveAt(t *testing.T) {
 				typeURL: "int",
 				data:    []interface{}{1, 2, 3, 4},
 			},
-			expectedError: errors.New("invalid index 4"),
+			expectedError: liberror.NewIndexOutOfBoundError(4),
 		},
 	}
 
@@ -1072,7 +1073,7 @@ func TestArrayListRemoveAll(t *testing.T) {
 				typeURL: "int",
 				data:    []interface{}{1, 2, 3, 4},
 			},
-			expectedError: errors.New("type mismatch : expected int got string"),
+			expectedError: liberror.NewTypeMismatchError("int", "string"),
 		},
 	}
 
@@ -1146,7 +1147,7 @@ func TestArrayListReplaceAll(t *testing.T) {
 				typeURL: "int",
 				data:    []interface{}{1, 2},
 			},
-			expectedError: errors.New("type mismatch : expected int got string"),
+			expectedError: liberror.NewTypeMismatchError("int", "string"),
 		},
 	}
 
@@ -1213,7 +1214,7 @@ func TestArrayListRetainAll(t *testing.T) {
 				typeURL: "int",
 				data:    []interface{}{1, 2, 3, 4},
 			},
-			expectedError: errors.New("type mismatch : expected int got string"),
+			expectedError: liberror.NewTypeMismatchError("int", "string"),
 		},
 	}
 
@@ -1293,7 +1294,7 @@ func TestArrayListSubList(t *testing.T) {
 
 				return al.SubList(-1, 6)
 			},
-			expectedError: errors.New("invalid index -1"),
+			expectedError: liberror.NewIndexOutOfBoundError(-1),
 		},
 		{
 			name: "test Get sublist return error for invalid end index",
@@ -1303,7 +1304,7 @@ func TestArrayListSubList(t *testing.T) {
 
 				return al.SubList(0, 10)
 			},
-			expectedError: errors.New("invalid index 10"),
+			expectedError: liberror.NewIndexOutOfBoundError(10),
 		},
 		{
 			name: "test get sublist return error when end is less than start",
@@ -1335,18 +1336,18 @@ func TestAllArrayListAPI(t *testing.T) {
 
 	err = al.Add("a")
 	require.Error(t, err)
-	assert.Equal(t, "type mismatch : expected int got string", err.Error())
+	assert.Equal(t, liberror.NewTypeMismatchError("int", "string"), err)
 
 	err = al.AddAt(0, 1)
 	require.NoError(t, err)
 
 	err = al.AddAt(2, 1)
 	require.Error(t, err)
-	assert.Equal(t, "invalid index 2", err.Error())
+	assert.Equal(t, liberror.NewIndexOutOfBoundError(2), err)
 
 	err = al.AddAt(0, "a")
 	require.Error(t, err)
-	assert.Equal(t, "type mismatch : expected int got string", err.Error())
+	assert.Equal(t, liberror.NewTypeMismatchError("int", "string"), err)
 
 	err = al.AddAll(3, 4, 5)
 	require.NoError(t, err)
@@ -1366,7 +1367,7 @@ func TestAllArrayListAPI(t *testing.T) {
 
 	ok, err = al.Contains("a")
 	require.Error(t, err)
-	assert.Equal(t, "type mismatch : expected int got string", err.Error())
+	assert.Equal(t, liberror.NewTypeMismatchError("int", "string"), err)
 	assert.False(t, ok)
 
 	ok, err = al.ContainsAll(2, 4, 5)
@@ -1380,7 +1381,7 @@ func TestAllArrayListAPI(t *testing.T) {
 
 	ok, err = al.ContainsAll(4, "a")
 	require.Error(t, err)
-	assert.Equal(t, "type mismatch : expected int got string", err.Error())
+	assert.Equal(t, liberror.NewTypeMismatchError("int", "string"), err)
 	assert.False(t, ok)
 
 	ele := al.Get(0)
@@ -1400,7 +1401,7 @@ func TestAllArrayListAPI(t *testing.T) {
 
 	id, err = al.IndexOf("a")
 	require.Error(t, err)
-	assert.Equal(t, "type mismatch : expected int got string", err.Error())
+	assert.Equal(t, liberror.NewTypeMismatchError("int", "string"), err)
 	assert.Equal(t, -1, id)
 
 	ok = al.IsEmpty()
@@ -1427,7 +1428,7 @@ func TestAllArrayListAPI(t *testing.T) {
 
 	id, err = al.LastIndexOf("a")
 	require.Error(t, err)
-	assert.Equal(t, "type mismatch : expected int got string", err.Error())
+	assert.Equal(t, liberror.NewTypeMismatchError("int", "string"), err)
 	assert.Equal(t, -1, id)
 
 	ok, err = al.Remove(1)
@@ -1441,7 +1442,7 @@ func TestAllArrayListAPI(t *testing.T) {
 
 	ok, err = al.Remove("a")
 	require.Error(t, err)
-	assert.Equal(t, "type mismatch : expected int got string", err.Error())
+	assert.Equal(t, liberror.NewTypeMismatchError("int", "string"), err)
 	assert.False(t, ok)
 
 	ele, err = al.RemoveAt(0)
@@ -1450,7 +1451,7 @@ func TestAllArrayListAPI(t *testing.T) {
 
 	ele, err = al.RemoveAt(10)
 	require.Error(t, err)
-	assert.Equal(t, "invalid index 10", err.Error())
+	assert.Equal(t, liberror.NewIndexOutOfBoundError(10), err)
 	assert.Nil(t, ele)
 
 	require.NoError(t, al.Add(3))
@@ -1461,7 +1462,7 @@ func TestAllArrayListAPI(t *testing.T) {
 
 	ok, err = al.RemoveAll(3, "a")
 	require.Error(t, err)
-	assert.Equal(t, "type mismatch : expected int got string", err.Error())
+	assert.Equal(t, liberror.NewTypeMismatchError("int", "string"), err)
 	require.False(t, ok)
 
 	err = al.ReplaceAll(testIntIncOperator{})
@@ -1479,7 +1480,7 @@ func TestAllArrayListAPI(t *testing.T) {
 
 	ok, err = al.RetainAll(1, 3, 5, "a")
 	require.Error(t, err)
-	assert.Equal(t, "type mismatch : expected int got string", err.Error())
+	assert.Equal(t, liberror.NewTypeMismatchError("int", "string"), err)
 	require.False(t, ok)
 
 	ele, err = al.Set(0, 7)
@@ -1488,12 +1489,12 @@ func TestAllArrayListAPI(t *testing.T) {
 
 	ele, err = al.Set(3, 8)
 	require.Error(t, err)
-	assert.Equal(t, "invalid index 3", err.Error())
+	assert.Equal(t, liberror.NewIndexOutOfBoundError(3), err)
 	assert.Nil(t, ele)
 
 	ele, err = al.Set(1, "a")
 	require.Error(t, err)
-	assert.Equal(t, "type mismatch : expected int got string", err.Error())
+	assert.Equal(t, liberror.NewTypeMismatchError("int", "string"), err)
 	assert.Nil(t, ele)
 
 	sz := al.Size()
@@ -1547,11 +1548,11 @@ func TestAllArrayListAPI(t *testing.T) {
 
 	err = al.Add("a")
 	require.Error(t, err)
-	assert.Equal(t, "type mismatch : expected int got string", err.Error())
+	assert.Equal(t, liberror.NewTypeMismatchError("int", "string"), err)
 
 	err = al.AddAll("a", "b")
 	require.Error(t, err)
-	assert.Equal(t, "type mismatch : expected int got string", err.Error())
+	assert.Equal(t, liberror.NewTypeMismatchError("int", "string"), err)
 
 	err = al.AddAll(1, "a", "b")
 	require.Error(t, err)

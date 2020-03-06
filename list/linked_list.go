@@ -5,6 +5,7 @@ import (
 	"github.com/nsnikhil/go-datastructures/functions/comparator"
 	"github.com/nsnikhil/go-datastructures/functions/iterator"
 	"github.com/nsnikhil/go-datastructures/functions/operator"
+	"github.com/nsnikhil/go-datastructures/liberror"
 )
 
 type node struct {
@@ -34,7 +35,7 @@ func newLinkedList(data ...interface{}) (*linkedList, error) {
 
 	for i := 1; i < len(data); i++ {
 		if getTypeName(data[i]) != typeURL {
-			return nil, fmt.Errorf("type mismatch : expected %s got %s", typeURL, getTypeName(data[i]))
+			return nil, liberror.NewTypeMismatchError(typeURL, getTypeName(data[i]))
 		}
 	}
 
@@ -59,8 +60,8 @@ func (ll *linkedList) Add(e interface{}) error {
 		return nil
 	}
 
-	if !ll.isValidType(e) {
-		return fmt.Errorf("type mismatch : expected %s got %s", ll.typeURL, getTypeName(e))
+	if err := ll.isValidType(e); err != nil {
+		return err
 	}
 
 	if ll.IsEmpty() {
@@ -86,12 +87,12 @@ func (ll *linkedList) AddAt(i int, e interface{}) error {
 		return nil
 	}
 
-	if !ll.isValidIndex(i) {
-		return fmt.Errorf("invalid index %d", i)
+	if err := ll.isValidIndex(i); err != nil {
+		return err
 	}
 
-	if !ll.isValidType(e) {
-		return fmt.Errorf("type mismatch : expected %s got %s", ll.typeURL, getTypeName(e))
+	if err := ll.isValidType(e); err != nil {
+		return err
 	}
 
 	tempNode := newNode(e)
@@ -138,8 +139,8 @@ func (ll *linkedList) AddAll(l ...interface{}) error {
 		temp = ll.root
 	} else {
 
-		if !ll.isValidType(l[idx]) {
-			return fmt.Errorf("type mismatch : expected %s got %s", ll.typeURL, getTypeName(l[idx]))
+		if err := ll.isValidType(l[idx]); err != nil {
+			return err
 		}
 
 		if ll.IsEmpty() {
@@ -187,7 +188,7 @@ func (ll *linkedList) ContainsAll(l ...interface{}) (bool, error) {
 }
 
 func (ll *linkedList) Get(i int) interface{} {
-	if ll.IsEmpty() || !ll.isValidIndex(i) {
+	if err := ll.isValidIndex(i); ll.IsEmpty() || err != nil {
 		return nil
 	}
 
@@ -206,8 +207,8 @@ func (ll *linkedList) IndexOf(e interface{}) (int, error) {
 		return -1, fmt.Errorf("list is empty")
 	}
 
-	if !ll.isValidType(e) {
-		return invalidIndex, fmt.Errorf("type mismatch : expected %s got %s", ll.typeURL, getTypeName(e))
+	if err := ll.isValidType(e); err != nil {
+		return invalidIndex, err
 	}
 
 	i, _ := newFinder().search(ll, e)
@@ -232,8 +233,8 @@ func (ll *linkedList) LastIndexOf(e interface{}) (int, error) {
 		return -1, fmt.Errorf("list is empty")
 	}
 
-	if !ll.isValidType(e) {
-		return invalidIndex, fmt.Errorf("type mismatch : expected %s got %s", ll.typeURL, getTypeName(e))
+	if err := ll.isValidType(e); err != nil {
+		return invalidIndex, err
 	}
 
 	i := invalidIndex
@@ -260,8 +261,8 @@ func (ll *linkedList) Remove(e interface{}) (bool, error) {
 		return false, fmt.Errorf("list is empty")
 	}
 
-	if !ll.isValidType(e) {
-		return false, fmt.Errorf("type mismatch : expected %s got %s", ll.typeURL, getTypeName(e))
+	if err := ll.isValidType(e); err != nil {
+		return false, err
 	}
 
 	i, err := ll.IndexOf(e)
@@ -290,8 +291,8 @@ func (ll *linkedList) RemoveAt(i int) (interface{}, error) {
 		return nil, fmt.Errorf("list is empty")
 	}
 
-	if !ll.isValidIndex(i) {
-		return nil, fmt.Errorf("invalid index %d", i)
+	if err := ll.isValidIndex(i); err != nil {
+		return nil, err
 	}
 
 	temp := ll.root
@@ -328,8 +329,9 @@ func (ll *linkedList) ReplaceAll(uo operator.UnaryOperator) (err error) {
 
 	for temp != nil {
 		e := uo.Apply(temp.data)
-		if !ll.isValidType(e) {
-			err = fmt.Errorf("type mismatch : expected %s got %s", ll.typeURL, getTypeName(e))
+		//TODO CAN YOU JUST USE ERR INSTEAD OF NEW VARIABLE
+		if typeError := ll.isValidType(e); typeError != nil {
+			err = typeError
 			return
 		}
 
@@ -349,12 +351,12 @@ func (ll *linkedList) Set(i int, e interface{}) (interface{}, error) {
 		return nil, fmt.Errorf("list is empty")
 	}
 
-	if !ll.isValidIndex(i) {
-		return nil, fmt.Errorf("invalid index %d", i)
+	if err := ll.isValidIndex(i); err != nil {
+		return nil, err
 	}
 
-	if !ll.isValidType(e) {
-		return nil, fmt.Errorf("type mismatch : expected %s got %s", ll.typeURL, getTypeName(e))
+	if err := ll.isValidType(e); err != nil {
+		return nil, err
 	}
 
 	temp := ll.root
@@ -399,12 +401,13 @@ func (ll *linkedList) SubList(s int, e int) (List, error) {
 		return nil, fmt.Errorf("end cannot be smaller than start")
 	}
 
-	if !ll.isValidIndex(s) {
-		return nil, fmt.Errorf("invalid index %d", s)
+	if err := ll.isValidIndex(s); err != nil {
+		return nil, err
 	}
 
+	//TODO USE IS VALID INDEX METHOD HERE
 	if e < 0 || e > ll.Size() {
-		return nil, fmt.Errorf("invalid index %d", e)
+		return nil, liberror.NewIndexOutOfBoundError(e)
 	}
 
 	tempLL, err := newLinkedList()
@@ -432,12 +435,18 @@ func (ll *linkedList) SubList(s int, e int) (List, error) {
 	return tempLL, nil
 }
 
-func (ll *linkedList) isValidIndex(i int) bool {
-	return i >= 0 && i < ll.Size()
+func (ll *linkedList) isValidIndex(i int) error {
+	if i < 0 || i >= ll.Size() {
+		return liberror.NewIndexOutOfBoundError(i)
+	}
+	return nil
 }
 
-func (ll *linkedList) isValidType(e interface{}) bool {
-	return getTypeName(e) == ll.typeURL
+func (ll *linkedList) isValidType(e interface{}) error {
+	if getTypeName(e) != ll.typeURL {
+		return liberror.NewTypeMismatchError(ll.typeURL, getTypeName(e))
+	}
+	return nil
 }
 
 func filterLinkedList(ll *linkedList, inverse bool, l ...interface{}) (bool, error) {
@@ -450,8 +459,8 @@ func filterLinkedList(ll *linkedList, inverse bool, l ...interface{}) (bool, err
 	}
 
 	for _, e := range l {
-		if !ll.isValidType(e) {
-			return false, fmt.Errorf("type mismatch : expected %s got %s", ll.typeURL, getTypeName(e))
+		if err := ll.isValidType(e); err != nil {
+			return false, err
 		}
 	}
 
