@@ -5,6 +5,7 @@ import (
 	"github.com/nsnikhil/go-datastructures/functions/comparator"
 	"github.com/nsnikhil/go-datastructures/functions/iterator"
 	"github.com/nsnikhil/go-datastructures/functions/operator"
+	"github.com/nsnikhil/go-datastructures/functions/predicate"
 	"github.com/nsnikhil/go-datastructures/liberror"
 )
 
@@ -107,6 +108,13 @@ func (al *ArrayList) AddAll(l ...interface{}) error {
 
 func (al *ArrayList) Clear() {
 	al.data = nil
+}
+
+func (al *ArrayList) Clone() (List, error) {
+	if al.IsEmpty() {
+		return NewArrayList()
+	}
+	return al.SubList(0, al.Size())
 }
 
 func (al *ArrayList) Contains(e interface{}) (bool, error) {
@@ -217,6 +225,40 @@ func (al *ArrayList) RemoveAt(i int) (interface{}, error) {
 
 func (al *ArrayList) RemoveAll(l ...interface{}) (bool, error) {
 	return filterArrayList(al, false, l...)
+}
+
+func (al *ArrayList) RemoveIf(predicate predicate.Predicate) (bool, error) {
+	var l []interface{}
+
+	it := al.Iterator()
+
+	for it.HasNext() {
+		e := it.Next()
+		if predicate.Test(e) {
+			l = append(l, e)
+		}
+	}
+
+	return filterArrayList(al, false, l...)
+}
+
+func (al *ArrayList) RemoveRange(from, to int) (bool, error) {
+	if to < from {
+		return false, fmt.Errorf("to cannot be smaller than from")
+	}
+
+	if err := al.isValidIndex(from); err != nil {
+		return false, err
+	}
+
+	//TODO USE IS VALID INDEX METHOD HERE
+	if to < 0 || to > al.Size() {
+		return false, liberror.NewIndexOutOfBoundError(to)
+	}
+
+	al.data = append(al.data[:from], al.data[to:]...)
+
+	return true, nil
 }
 
 func (al *ArrayList) ReplaceAll(uo operator.UnaryOperator) (err error) {

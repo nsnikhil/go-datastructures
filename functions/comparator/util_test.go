@@ -45,7 +45,18 @@ func TestPrebuiltComparator(t *testing.T) {
 			},
 		},
 		{
-			name: "test integer comparator return error for type mismatch",
+			name: "test integer comparator return error for type mismatch of first argument",
+			actualResult: func() (int, error) {
+				ic := NewIntegerComparator()
+				return ic.Compare("invalid", 2)
+			},
+			expectedResult: func(res int) bool {
+				return res == math.MinInt32
+			},
+			expectedError: errors.New("invalid type : expected int got string"),
+		},
+		{
+			name: "test integer comparator return error for type mismatch of second argument",
 			actualResult: func() (int, error) {
 				ic := NewIntegerComparator()
 				return ic.Compare(2, "invalid")
@@ -86,7 +97,18 @@ func TestPrebuiltComparator(t *testing.T) {
 			},
 		},
 		{
-			name: "test string comparator return error for type mismatch",
+			name: "test string comparator return error for type for first mismatch",
+			actualResult: func() (int, error) {
+				ic := NewStringComparator()
+				return ic.Compare(1, "ab")
+			},
+			expectedResult: func(res int) bool {
+				return res == math.MinInt32
+			},
+			expectedError: errors.New("invalid type : expected string got int"),
+		},
+		{
+			name: "test string comparator return error for type for second mismatch",
 			actualResult: func() (int, error) {
 				ic := NewStringComparator()
 				return ic.Compare("ab", 1)

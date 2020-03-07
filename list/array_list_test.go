@@ -7,6 +7,7 @@ import (
 	"github.com/nsnikhil/go-datastructures/liberror"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"strings"
 	"testing"
 )
 
@@ -636,6 +637,21 @@ func TestArrayListAddAll(t *testing.T) {
 				data:    []interface{}{1, 2},
 			},
 		},
+		{
+			name: "test add all when list is empty and type was set",
+			actualResult: func() (error, List) {
+				al, err := NewArrayList(1, 2)
+				require.NoError(t, err)
+
+				al.Clear()
+
+				return al.AddAll(1, 2), al
+			},
+			expectedResult: &ArrayList{
+				typeURL: "int",
+				data:    []interface{}{1, 2},
+			},
+		},
 	}
 
 	for _, testCase := range testCases {
@@ -678,6 +694,50 @@ func TestArrayListClear(t *testing.T) {
 	for _, testCase := range testCases {
 		t.Run(testCase.name, func(t *testing.T) {
 			assert.Equal(t, 0, testCase.result())
+		})
+	}
+}
+
+func TestArrayListClone(t *testing.T) {
+	testCases := []struct {
+		name           string
+		actualResult   func() (List, error)
+		expectedResult List
+		expectedError  error
+	}{
+		{
+			name: "test clone integer array list",
+			actualResult: func() (List, error) {
+				al, err := NewArrayList(1, 2, 3, 4)
+				require.NoError(t, err)
+
+				return al.Clone()
+			},
+			expectedResult: &ArrayList{
+				typeURL: "int",
+				data:    []interface{}{1, 2, 3, 4},
+			},
+		},
+		{
+			name: "test clone empty array list",
+			actualResult: func() (List, error) {
+				al, err := NewArrayList()
+				require.NoError(t, err)
+
+				return al.Clone()
+			},
+			expectedResult: &ArrayList{
+				typeURL: "na",
+				data:    []interface{}(nil),
+			},
+		},
+	}
+
+	for _, testCase := range testCases {
+		t.Run(testCase.name, func(t *testing.T) {
+			res, err := testCase.actualResult()
+			assert.Equal(t, testCase.expectedError, err)
+			assert.Equal(t, testCase.expectedResult, res)
 		})
 	}
 }
@@ -1074,6 +1134,218 @@ func TestArrayListRemoveAll(t *testing.T) {
 				data:    []interface{}{1, 2, 3, 4},
 			},
 			expectedError: liberror.NewTypeMismatchError("int", "string"),
+		},
+	}
+
+	for _, testCase := range testCases {
+		t.Run(testCase.name, func(t *testing.T) {
+			res, err := testCase.actualResult()
+			assert.Equal(t, testCase.expectedError, err)
+			assert.Equal(t, testCase.expectedResult, res)
+		})
+	}
+}
+
+type isEven struct{}
+
+func (ie isEven) Test(e interface{}) bool {
+	return e.(int)%2 == 0
+}
+
+type containsA struct{}
+
+func (ca containsA) Test(e interface{}) bool {
+	return strings.Contains(e.(string), "a")
+}
+
+func TestArrayListRemoveIf(t *testing.T) {
+	testCases := []struct {
+		name           string
+		actualResult   func() (List, error)
+		expectedResult List
+		expectedError  error
+	}{
+		{
+			name: "test remove if number is even",
+			actualResult: func() (List, error) {
+				al, err := NewArrayList(1, 2, 3, 4)
+				require.NoError(t, err)
+
+				ok, err := al.RemoveIf(isEven{})
+				require.True(t, ok)
+
+				return al, err
+			},
+			expectedResult: &ArrayList{
+				typeURL: "int",
+				data:    []interface{}{1, 3},
+			},
+		},
+		{
+			name: "test remove if string contains a",
+			actualResult: func() (List, error) {
+				al, err := NewArrayList("a", "bcd", "abg", "efg", "gb")
+				require.NoError(t, err)
+
+				ok, err := al.RemoveIf(containsA{})
+				require.True(t, ok)
+
+				return al, err
+			},
+			expectedResult: &ArrayList{
+				typeURL: "string",
+				data:    []interface{}{"bcd", "efg", "gb"},
+			},
+		},
+		{
+			name: "test remove no element when no element match predicate",
+			actualResult: func() (List, error) {
+				al, err := NewArrayList("bcd", "efg", "hij")
+				require.NoError(t, err)
+
+				ok, err := al.RemoveIf(containsA{})
+				require.True(t, ok)
+
+				return al, err
+			},
+			expectedResult: &ArrayList{
+				typeURL: "string",
+				data:    []interface{}{"bcd", "efg", "hij"},
+			},
+		},
+		{
+			name: "test return error when list is empty",
+			actualResult: func() (List, error) {
+				al, err := NewArrayList()
+				require.NoError(t, err)
+
+				ok, err := al.RemoveIf(isEven{})
+				require.False(t, ok)
+
+				return al, err
+			},
+			expectedResult: &ArrayList{
+				typeURL: "na",
+				data:    []interface{}(nil),
+			},
+			expectedError: errors.New("list is empty"),
+		},
+	}
+
+	for _, testCase := range testCases {
+		t.Run(testCase.name, func(t *testing.T) {
+			res, err := testCase.actualResult()
+			assert.Equal(t, testCase.expectedError, err)
+			assert.Equal(t, testCase.expectedResult, res)
+		})
+	}
+}
+
+func TestArrayListRemoveRange(t *testing.T) {
+	testCases := []struct {
+		name           string
+		actualResult   func() (List, error)
+		expectedResult List
+		expectedError  error
+	}{
+		{
+			name: "test remove elements from range 0 to 3",
+			actualResult: func() (List, error) {
+				al, err := NewArrayList(1, 2, 3, 4, 5, 6, 7, 8)
+				require.NoError(t, err)
+
+				ok, err := al.RemoveRange(0, 3)
+				require.True(t, ok)
+
+				return al, err
+			},
+			expectedResult: &ArrayList{
+				typeURL: "int",
+				data:    []interface{}{4, 5, 6, 7, 8},
+			},
+		},
+		{
+			name: "test remove elements from range 2 to 4",
+			actualResult: func() (List, error) {
+				al, err := NewArrayList(1, 2, 3, 4)
+				require.NoError(t, err)
+
+				ok, err := al.RemoveRange(2, 4)
+				require.True(t, ok)
+
+				return al, err
+			},
+			expectedResult: &ArrayList{
+				typeURL: "int",
+				data:    []interface{}{1, 2},
+			},
+		},
+		{
+			name: "test remove no elements when to and from are the same",
+			actualResult: func() (List, error) {
+				al, err := NewArrayList(1, 2, 3, 4)
+				require.NoError(t, err)
+
+				ok, err := al.RemoveRange(0, 0)
+				require.True(t, ok)
+
+				return al, err
+			},
+			expectedResult: &ArrayList{
+				typeURL: "int",
+				data:    []interface{}{1, 2, 3, 4},
+			},
+		},
+		{
+			name: "test return error when to is smaller than from",
+			actualResult: func() (List, error) {
+				al, err := NewArrayList(1, 2, 3, 4)
+				require.NoError(t, err)
+
+				ok, err := al.RemoveRange(1, 0)
+				require.False(t, ok)
+
+				return al, err
+			},
+			expectedResult: &ArrayList{
+				typeURL: "int",
+				data:    []interface{}{1, 2, 3, 4},
+			},
+			expectedError: errors.New("to cannot be smaller than from"),
+		},
+		{
+			name: "test return error when from is an invalid index",
+			actualResult: func() (List, error) {
+				al, err := NewArrayList(1, 2, 3, 4)
+				require.NoError(t, err)
+
+				ok, err := al.RemoveRange(-1, 2)
+				require.False(t, ok)
+
+				return al, err
+			},
+			expectedResult: &ArrayList{
+				typeURL: "int",
+				data:    []interface{}{1, 2, 3, 4},
+			},
+			expectedError: liberror.NewIndexOutOfBoundError(-1),
+		},
+		{
+			name: "test return error when to is an invalid index",
+			actualResult: func() (List, error) {
+				al, err := NewArrayList(1, 2, 3, 4)
+				require.NoError(t, err)
+
+				ok, err := al.RemoveRange(1, 10)
+				require.False(t, ok)
+
+				return al, err
+			},
+			expectedResult: &ArrayList{
+				typeURL: "int",
+				data:    []interface{}{1, 2, 3, 4},
+			},
+			expectedError: liberror.NewIndexOutOfBoundError(10),
 		},
 	}
 

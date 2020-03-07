@@ -19,14 +19,14 @@ func newNode(data interface{}) *node {
 	}
 }
 
-type linkedList struct {
+type LinkedList struct {
 	typeURL string
 	root    *node
 }
 
-func newLinkedList(data ...interface{}) (*linkedList, error) {
+func NewLinkedList(data ...interface{}) (*LinkedList, error) {
 	if len(data) == 0 {
-		return &linkedList{
+		return &LinkedList{
 			typeURL: na,
 		}, nil
 	}
@@ -39,7 +39,7 @@ func newLinkedList(data ...interface{}) (*linkedList, error) {
 		}
 	}
 
-	ll := &linkedList{
+	ll := &LinkedList{
 		typeURL: typeURL,
 		root:    newNode(data[0]),
 	}
@@ -53,7 +53,7 @@ func newLinkedList(data ...interface{}) (*linkedList, error) {
 	return ll, nil
 }
 
-func (ll *linkedList) Add(e interface{}) error {
+func (ll *LinkedList) Add(e interface{}) error {
 	if ll.typeURL == na {
 		ll.root = newNode(e)
 		ll.typeURL = getTypeName(e)
@@ -78,10 +78,11 @@ func (ll *linkedList) Add(e interface{}) error {
 	temp.next = newNode(e)
 
 	return nil
+
 }
 
-func (ll *linkedList) AddAt(i int, e interface{}) error {
-	if ll.IsEmpty() && ll.typeURL == na {
+func (ll *LinkedList) AddAt(i int, e interface{}) error {
+	if ll.typeURL == na {
 		ll.root = newNode(e)
 		ll.typeURL = getTypeName(e)
 		return nil
@@ -117,7 +118,7 @@ func (ll *linkedList) AddAt(i int, e interface{}) error {
 	return nil
 }
 
-func (ll *linkedList) AddAll(l ...interface{}) error {
+func (ll *LinkedList) AddAll(l ...interface{}) error {
 	if len(l) == 0 {
 		return nil
 	}
@@ -164,11 +165,39 @@ func (ll *linkedList) AddAll(l ...interface{}) error {
 	return nil
 }
 
-func (ll *linkedList) Clear() {
+func (ll *LinkedList) AddFirst(e interface{}) error {
+	temp := ll.root
+
+	if ll.typeURL == na {
+		ll.typeURL = getTypeName(e)
+	} else {
+		if err := ll.isValidType(e); err != nil {
+			return err
+		}
+	}
+
+	ll.root = newNode(e)
+	ll.root.next = temp
+
+	return nil
+}
+
+func (ll *LinkedList) AddLast(e interface{}) error {
+	return ll.Add(e)
+}
+
+func (ll *LinkedList) Clear() {
 	ll.root = nil
 }
 
-func (ll *linkedList) Contains(e interface{}) (bool, error) {
+func (ll *LinkedList) Clone() (List, error) {
+	if ll.IsEmpty() {
+		return NewLinkedList()
+	}
+	return ll.SubList(0, ll.Size())
+}
+
+func (ll *LinkedList) Contains(e interface{}) (bool, error) {
 	_, err := newFinder().search(ll, e)
 	if err != nil {
 		return false, err
@@ -177,7 +206,7 @@ func (ll *linkedList) Contains(e interface{}) (bool, error) {
 	return true, nil
 }
 
-func (ll *linkedList) ContainsAll(l ...interface{}) (bool, error) {
+func (ll *LinkedList) ContainsAll(l ...interface{}) (bool, error) {
 	for _, e := range l {
 		if _, err := ll.Contains(e); err != nil {
 			return false, err
@@ -187,7 +216,7 @@ func (ll *linkedList) ContainsAll(l ...interface{}) (bool, error) {
 	return true, nil
 }
 
-func (ll *linkedList) Get(i int) interface{} {
+func (ll *LinkedList) Get(i int) interface{} {
 	if err := ll.isValidIndex(i); ll.IsEmpty() || err != nil {
 		return nil
 	}
@@ -202,7 +231,15 @@ func (ll *linkedList) Get(i int) interface{} {
 	return temp.data
 }
 
-func (ll *linkedList) IndexOf(e interface{}) (int, error) {
+func (ll *LinkedList) GetFirst() interface{} {
+	return ll.Get(0)
+}
+
+func (ll *LinkedList) GetLast() interface{} {
+	return ll.Get(ll.Size() - 1)
+}
+
+func (ll *LinkedList) IndexOf(e interface{}) (int, error) {
 	if ll.IsEmpty() {
 		return -1, fmt.Errorf("list is empty")
 	}
@@ -220,15 +257,15 @@ func (ll *linkedList) IndexOf(e interface{}) (int, error) {
 
 }
 
-func (ll *linkedList) IsEmpty() bool {
+func (ll *LinkedList) IsEmpty() bool {
 	return ll.Size() == 0
 }
 
-func (ll *linkedList) Iterator() iterator.Iterator {
+func (ll *LinkedList) Iterator() iterator.Iterator {
 	return newLinkedListIterator(ll)
 }
 
-func (ll *linkedList) LastIndexOf(e interface{}) (int, error) {
+func (ll *LinkedList) LastIndexOf(e interface{}) (int, error) {
 	if ll.IsEmpty() {
 		return -1, fmt.Errorf("list is empty")
 	}
@@ -256,7 +293,7 @@ func (ll *linkedList) LastIndexOf(e interface{}) (int, error) {
 	return i, nil
 }
 
-func (ll *linkedList) Remove(e interface{}) (bool, error) {
+func (ll *LinkedList) Remove(e interface{}) (bool, error) {
 	if ll.IsEmpty() {
 		return false, fmt.Errorf("list is empty")
 	}
@@ -270,23 +307,14 @@ func (ll *linkedList) Remove(e interface{}) (bool, error) {
 		return false, err
 	}
 
-	if ll.root.data == e {
-		ll.root = ll.root.next
-		return true, nil
+	if _, err := ll.RemoveAt(i); err != nil {
+		return false, err
 	}
-
-	temp := ll.root
-
-	for temp.next.data != e {
-		temp = temp.next
-	}
-
-	temp.next = temp.next.next
 
 	return true, nil
 }
 
-func (ll *linkedList) RemoveAt(i int) (interface{}, error) {
+func (ll *LinkedList) RemoveAt(i int) (interface{}, error) {
 	if ll.IsEmpty() {
 		return nil, fmt.Errorf("list is empty")
 	}
@@ -314,11 +342,36 @@ func (ll *linkedList) RemoveAt(i int) (interface{}, error) {
 	return e.data, nil
 }
 
-func (ll *linkedList) RemoveAll(l ...interface{}) (bool, error) {
+func (ll *LinkedList) RemoveAll(l ...interface{}) (bool, error) {
 	return filterLinkedList(ll, false, l...)
 }
 
-func (ll *linkedList) ReplaceAll(uo operator.UnaryOperator) (err error) {
+func (ll *LinkedList) RemoveFirst() (interface{}, error) {
+	return ll.RemoveAt(0)
+}
+
+func (ll *LinkedList) RemoveFirstOccurrence(e interface{}) (bool, error) {
+	return ll.Remove(e)
+}
+
+func (ll *LinkedList) RemoveLast() (interface{}, error) {
+	return ll.RemoveAt(ll.Size() - 1)
+}
+
+func (ll *LinkedList) RemoveLastOccurrence(e interface{}) (bool, error) {
+	i, err := ll.LastIndexOf(e)
+	if err != nil {
+		return false, err
+	}
+
+	if _, err := ll.RemoveAt(i); err != nil {
+		return false, err
+	}
+
+	return true, nil
+}
+
+func (ll *LinkedList) ReplaceAll(uo operator.UnaryOperator) (err error) {
 	defer func() {
 		if r := recover(); r != nil {
 			err = fmt.Errorf("type mismatch : %v", r)
@@ -342,11 +395,16 @@ func (ll *linkedList) ReplaceAll(uo operator.UnaryOperator) (err error) {
 	return
 }
 
-func (ll *linkedList) RetainAll(l ...interface{}) (bool, error) {
+func (ll *LinkedList) RetainAll(l ...interface{}) (bool, error) {
+	//if len(l) == 0 {
+	//	ll.Clear()
+	//	return true, nil
+	//}
+
 	return filterLinkedList(ll, true, l...)
 }
 
-func (ll *linkedList) Set(i int, e interface{}) (interface{}, error) {
+func (ll *LinkedList) Set(i int, e interface{}) (interface{}, error) {
 	if ll.IsEmpty() {
 		return nil, fmt.Errorf("list is empty")
 	}
@@ -371,7 +429,7 @@ func (ll *linkedList) Set(i int, e interface{}) (interface{}, error) {
 	return temp.data, nil
 }
 
-func (ll *linkedList) Size() int {
+func (ll *LinkedList) Size() int {
 	count := 0
 	temp := ll.root
 
@@ -383,8 +441,8 @@ func (ll *linkedList) Size() int {
 	return count
 }
 
-func (ll *linkedList) Sort(c comparator.Comparator) {
-	al := ll.toArrayList()
+func (ll *LinkedList) Sort(c comparator.Comparator) {
+	al := ll.ToArrayList()
 	al.Sort(c)
 
 	it := al.Iterator()
@@ -396,7 +454,7 @@ func (ll *linkedList) Sort(c comparator.Comparator) {
 	}
 }
 
-func (ll *linkedList) SubList(s int, e int) (List, error) {
+func (ll *LinkedList) SubList(s int, e int) (List, error) {
 	if e < s {
 		return nil, fmt.Errorf("end cannot be smaller than start")
 	}
@@ -410,7 +468,7 @@ func (ll *linkedList) SubList(s int, e int) (List, error) {
 		return nil, liberror.NewIndexOutOfBoundError(e)
 	}
 
-	tempLL, err := newLinkedList()
+	tempLL, err := NewLinkedList()
 	if err != nil {
 		return nil, err
 	}
@@ -435,25 +493,21 @@ func (ll *linkedList) SubList(s int, e int) (List, error) {
 	return tempLL, nil
 }
 
-func (ll *linkedList) isValidIndex(i int) error {
+func (ll *LinkedList) isValidIndex(i int) error {
 	if i < 0 || i >= ll.Size() {
 		return liberror.NewIndexOutOfBoundError(i)
 	}
 	return nil
 }
 
-func (ll *linkedList) isValidType(e interface{}) error {
+func (ll *LinkedList) isValidType(e interface{}) error {
 	if getTypeName(e) != ll.typeURL {
 		return liberror.NewTypeMismatchError(ll.typeURL, getTypeName(e))
 	}
 	return nil
 }
 
-func filterLinkedList(ll *linkedList, inverse bool, l ...interface{}) (bool, error) {
-	if len(l) == 0 {
-		return false, nil
-	}
-
+func filterLinkedList(ll *LinkedList, inverse bool, l ...interface{}) (bool, error) {
 	if ll.IsEmpty() {
 		return false, fmt.Errorf("list is empty")
 	}
@@ -520,10 +574,10 @@ func filterLinkedList(ll *linkedList, inverse bool, l ...interface{}) (bool, err
 
 type linkedListIterator struct {
 	currNode *node
-	ll       *linkedList
+	ll       *LinkedList
 }
 
-func newLinkedListIterator(ll *linkedList) *linkedListIterator {
+func newLinkedListIterator(ll *LinkedList) *linkedListIterator {
 	return &linkedListIterator{
 		currNode: ll.root,
 		ll:       ll,
@@ -546,7 +600,7 @@ func (ll *linkedListIterator) Next() interface{} {
 	return e
 }
 
-func (ll *linkedList) toArrayList() *ArrayList {
+func (ll *LinkedList) ToArrayList() *ArrayList {
 	var e []interface{}
 	it := ll.Iterator()
 

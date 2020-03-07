@@ -59,6 +59,11 @@ type List interface {
 	Clear()
 
 	/*
+		return an new object that is the clone of current list or an error if the clone fails.
+	*/
+	Clone() (List, error)
+
+	/*
 		use to check if the element is present in the list.
 
 		params:
