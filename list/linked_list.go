@@ -396,11 +396,6 @@ func (ll *LinkedList) ReplaceAll(uo operator.UnaryOperator) (err error) {
 }
 
 func (ll *LinkedList) RetainAll(l ...interface{}) (bool, error) {
-	//if len(l) == 0 {
-	//	ll.Clear()
-	//	return true, nil
-	//}
-
 	return filterLinkedList(ll, true, l...)
 }
 
