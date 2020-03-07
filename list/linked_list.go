@@ -11,6 +11,7 @@ import (
 type node struct {
 	data interface{}
 	next *node
+	prev *node
 }
 
 func newNode(data interface{}) *node {
@@ -19,9 +20,13 @@ func newNode(data interface{}) *node {
 	}
 }
 
+/*
+	Implementation of doubly linked list
+*/
 type LinkedList struct {
 	typeURL string
-	root    *node
+	first   *node
+	last    *node
 }
 
 func NewLinkedList(data ...interface{}) (*LinkedList, error) {
@@ -41,21 +46,27 @@ func NewLinkedList(data ...interface{}) (*LinkedList, error) {
 
 	ll := &LinkedList{
 		typeURL: typeURL,
-		root:    newNode(data[0]),
+		first:   newNode(data[0]),
 	}
 
-	temp := ll.root
+	curr := ll.first
 	for i := 1; i < len(data); i++ {
-		temp.next = newNode(data[i])
-		temp = temp.next
+		prev := curr
+
+		curr.next = newNode(data[i])
+		curr = curr.next
+		curr.prev = prev
 	}
+
+	ll.last = curr
 
 	return ll, nil
 }
 
 func (ll *LinkedList) Add(e interface{}) error {
 	if ll.typeURL == na {
-		ll.root = newNode(e)
+		ll.first = newNode(e)
+		ll.last = ll.first
 		ll.typeURL = getTypeName(e)
 		return nil
 	}
@@ -64,18 +75,20 @@ func (ll *LinkedList) Add(e interface{}) error {
 		return err
 	}
 
+	tempNode := newNode(e)
+
 	if ll.IsEmpty() {
-		ll.root = newNode(e)
+		ll.first = tempNode
+		ll.last = tempNode
 		return nil
 	}
 
-	temp := ll.root
+	temp := ll.last
 
-	for temp.next != nil {
-		temp = temp.next
-	}
+	temp.next = tempNode
+	temp.next.prev = temp
 
-	temp.next = newNode(e)
+	ll.last = tempNode
 
 	return nil
 
@@ -83,7 +96,8 @@ func (ll *LinkedList) Add(e interface{}) error {
 
 func (ll *LinkedList) AddAt(i int, e interface{}) error {
 	if ll.typeURL == na {
-		ll.root = newNode(e)
+		ll.first = newNode(e)
+		ll.last = ll.first
 		ll.typeURL = getTypeName(e)
 		return nil
 	}
@@ -97,23 +111,27 @@ func (ll *LinkedList) AddAt(i int, e interface{}) error {
 	}
 
 	tempNode := newNode(e)
+	curr := ll.first
 
 	if i == 0 {
-		tempNode.next = ll.root
-		ll.root = tempNode
+		tempNode.next = curr
+		curr.prev = tempNode
+		ll.first = tempNode
 		return nil
 	}
 
-	temp := ll.root
-
 	for i > 1 {
 		i--
-		temp = temp.next
+		curr = curr.next
 	}
 
-	tempNext := temp.next
-	temp.next = tempNode
-	tempNode.next = tempNext
+	currNext := curr.next
+	curr.next = tempNode
+
+	tempNode.next = currNext
+	tempNode.prev = curr
+
+	currNext.prev = tempNode
 
 	return nil
 }
@@ -130,14 +148,15 @@ func (ll *LinkedList) AddAll(l ...interface{}) error {
 	}
 
 	idx := 0
-	var temp *node
+	var curr *node
 
 	if ll.typeURL == na {
-		ll.root = newNode(l[idx])
+		ll.first = newNode(l[idx])
+		ll.last = ll.first
 		ll.typeURL = getTypeName(l[idx])
 
 		idx++
-		temp = ll.root
+		curr = ll.first
 	} else {
 
 		if err := ll.isValidType(l[idx]); err != nil {
@@ -145,28 +164,34 @@ func (ll *LinkedList) AddAll(l ...interface{}) error {
 		}
 
 		if ll.IsEmpty() {
-			ll.root = newNode(l[idx])
+			ll.first = newNode(l[idx])
+			ll.last = ll.first
 			idx++
 		}
 
-		temp = ll.root
+		curr = ll.first
 
-		for temp.next != nil {
-			temp = temp.next
+		for curr.next != nil {
+			curr = curr.next
 		}
 
 	}
 
 	for ; idx < len(l); idx++ {
-		temp.next = newNode(l[idx])
-		temp = temp.next
+		prev := curr
+
+		curr.next = newNode(l[idx])
+		curr = curr.next
+		curr.prev = prev
 	}
+
+	ll.last = curr
 
 	return nil
 }
 
 func (ll *LinkedList) AddFirst(e interface{}) error {
-	temp := ll.root
+	curr := ll.first
 
 	if ll.typeURL == na {
 		ll.typeURL = getTypeName(e)
@@ -176,8 +201,16 @@ func (ll *LinkedList) AddFirst(e interface{}) error {
 		}
 	}
 
-	ll.root = newNode(e)
-	ll.root.next = temp
+	tempNode := newNode(e)
+
+	ll.first = tempNode
+	ll.first.next = curr
+
+	if curr != nil {
+		curr.prev = tempNode
+	} else {
+		ll.last = tempNode
+	}
 
 	return nil
 }
@@ -187,7 +220,8 @@ func (ll *LinkedList) AddLast(e interface{}) error {
 }
 
 func (ll *LinkedList) Clear() {
-	ll.root = nil
+	ll.first = nil
+	ll.last = nil
 }
 
 func (ll *LinkedList) Clone() (List, error) {
@@ -221,7 +255,7 @@ func (ll *LinkedList) Get(i int) interface{} {
 		return nil
 	}
 
-	temp := ll.root
+	temp := ll.first
 
 	for i != 0 {
 		i--
@@ -232,11 +266,19 @@ func (ll *LinkedList) Get(i int) interface{} {
 }
 
 func (ll *LinkedList) GetFirst() interface{} {
-	return ll.Get(0)
+	if ll.IsEmpty() {
+		return nil
+	}
+
+	return ll.first.data
 }
 
 func (ll *LinkedList) GetLast() interface{} {
-	return ll.Get(ll.Size() - 1)
+	if ll.IsEmpty() {
+		return nil
+	}
+
+	return ll.last.data
 }
 
 func (ll *LinkedList) IndexOf(e interface{}) (int, error) {
@@ -265,6 +307,10 @@ func (ll *LinkedList) Iterator() iterator.Iterator {
 	return newLinkedListIterator(ll)
 }
 
+func (ll *LinkedList) DescendingIterator() iterator.Iterator {
+	return newLinkedListDescendingIterator(ll)
+}
+
 func (ll *LinkedList) LastIndexOf(e interface{}) (int, error) {
 	if ll.IsEmpty() {
 		return -1, fmt.Errorf("list is empty")
@@ -274,16 +320,18 @@ func (ll *LinkedList) LastIndexOf(e interface{}) (int, error) {
 		return invalidIndex, err
 	}
 
-	i := invalidIndex
-	count := 0
-	temp := ll.root
+	it := ll.DescendingIterator()
 
-	for temp != nil {
-		if temp.data == e {
+	i := invalidIndex
+	count := ll.Size() - 1
+
+	for it.HasNext() {
+		t := it.Next()
+		if t == e {
 			i = count
+			break
 		}
-		temp = temp.next
-		count++
+		count--
 	}
 
 	if i == invalidIndex {
@@ -314,6 +362,7 @@ func (ll *LinkedList) Remove(e interface{}) (bool, error) {
 	return true, nil
 }
 
+//noinspection GoNilness
 func (ll *LinkedList) RemoveAt(i int) (interface{}, error) {
 	if ll.IsEmpty() {
 		return nil, fmt.Errorf("list is empty")
@@ -323,23 +372,37 @@ func (ll *LinkedList) RemoveAt(i int) (interface{}, error) {
 		return nil, err
 	}
 
-	temp := ll.root
+	var curr *node
+	curr = ll.first
 
-	if i == 0 {
-		ll.root = ll.root.next
-		return temp.data, nil
-	}
-
-	for i-1 > 0 {
-		temp = temp.next
+	for curr != nil && i > 0 {
+		curr = curr.next
 		i--
 	}
 
-	e := temp.next
+	if curr.prev == nil {
+		ll.first = curr.next
 
-	temp.next = temp.next.next
+		if curr.next != nil {
+			curr.next.prev = curr.prev
+		} else {
+			ll.last = ll.first
+		}
 
-	return e.data, nil
+		return curr.data, nil
+	}
+
+	if curr.next == nil {
+		ll.last = curr.prev
+		curr.prev.next = curr.next
+
+		return curr.data, nil
+	}
+
+	curr.prev.next = curr.next
+	curr.next.prev = curr.prev
+
+	return curr.data, nil
 }
 
 func (ll *LinkedList) RemoveAll(l ...interface{}) (bool, error) {
@@ -355,7 +418,22 @@ func (ll *LinkedList) RemoveFirstOccurrence(e interface{}) (bool, error) {
 }
 
 func (ll *LinkedList) RemoveLast() (interface{}, error) {
-	return ll.RemoveAt(ll.Size() - 1)
+	if ll.IsEmpty() {
+		return nil, fmt.Errorf("list is empty")
+	}
+
+	curr := ll.last
+	val := curr.data
+
+	if curr.prev == nil {
+		ll.Clear()
+		return val, nil
+	}
+
+	ll.last = curr.prev
+	curr.prev.next = nil
+
+	return val, nil
 }
 
 func (ll *LinkedList) RemoveLastOccurrence(e interface{}) (bool, error) {
@@ -371,28 +449,20 @@ func (ll *LinkedList) RemoveLastOccurrence(e interface{}) (bool, error) {
 	return true, nil
 }
 
-func (ll *LinkedList) ReplaceAll(uo operator.UnaryOperator) (err error) {
-	defer func() {
-		if r := recover(); r != nil {
-			err = fmt.Errorf("type mismatch : %v", r)
-		}
-	}()
-
-	temp := ll.root
+func (ll *LinkedList) ReplaceAll(uo operator.UnaryOperator) error {
+	temp := ll.first
 
 	for temp != nil {
 		e := uo.Apply(temp.data)
-		//TODO CAN YOU JUST USE ERR INSTEAD OF NEW VARIABLE
-		if typeError := ll.isValidType(e); typeError != nil {
-			err = typeError
-			return
+		if err := ll.isValidType(e); err != nil {
+			return err
 		}
 
 		temp.data = e
 		temp = temp.next
 	}
 
-	return
+	return nil
 }
 
 func (ll *LinkedList) RetainAll(l ...interface{}) (bool, error) {
@@ -412,21 +482,21 @@ func (ll *LinkedList) Set(i int, e interface{}) (interface{}, error) {
 		return nil, err
 	}
 
-	temp := ll.root
+	curr := ll.first
 
-	for i-1 > 0 {
+	for i > 0 {
 		i--
-		temp = temp.next
+		curr = curr.next
 	}
 
-	temp.data = e
+	curr.data = e
 
-	return temp.data, nil
+	return curr.data, nil
 }
 
 func (ll *LinkedList) Size() int {
 	count := 0
-	temp := ll.root
+	temp := ll.first
 
 	for temp != nil {
 		temp = temp.next
@@ -441,7 +511,7 @@ func (ll *LinkedList) Sort(c comparator.Comparator) {
 	al.Sort(c)
 
 	it := al.Iterator()
-	temp := ll.root
+	temp := ll.first
 
 	for temp != nil && it.HasNext() {
 		temp.data = it.Next()
@@ -468,7 +538,7 @@ func (ll *LinkedList) SubList(s int, e int) (List, error) {
 		return nil, err
 	}
 
-	temp := ll.root
+	temp := ll.first
 
 	n := s
 
@@ -478,7 +548,7 @@ func (ll *LinkedList) SubList(s int, e int) (List, error) {
 	}
 
 	for temp != nil && n < e {
-		if err = tempLL.Add(temp.data); err != nil {
+		if err = tempLL.AddLast(temp.data); err != nil {
 			return nil, err
 		}
 		temp = temp.next
@@ -518,50 +588,44 @@ func filterLinkedList(ll *LinkedList, inverse bool, l ...interface{}) (bool, err
 		dataMap[e] = true
 	}
 
-	temp := ll.root
-	var prev *node
-	isLast := false
+	curr := ll.first
 
-	for temp != nil {
+	for curr != nil {
 
-		isPresent := false
+		shouldRemove := false
 
 		if inverse {
-			isPresent = !dataMap[temp.data]
+			shouldRemove = !dataMap[curr.data]
 		} else {
-			isPresent = dataMap[temp.data]
+			shouldRemove = dataMap[curr.data]
 		}
 
-		if isPresent {
+		if shouldRemove {
 
-			/*
-				since we cannot perform *temp = *temp.next if temp is the last element in the list
-				we break out of the loop
-			*/
-			if temp.next != nil {
-				*temp = *temp.next
+			if curr.prev == nil {
+				ll.first = curr.next
+
+				if curr.next != nil {
+					curr.next.prev = curr.prev
+				} else {
+					ll.last = ll.first
+					break
+				}
+
+			} else if curr.next == nil {
+
+				ll.last = curr.prev
+				curr.prev.next = curr.next
+
 			} else {
-				isLast = true
-				break
+				curr.prev.next = curr.next
+				curr.next.prev = curr.prev
 			}
 
-		} else {
-			prev = temp
-			temp = temp.next
 		}
 
-	}
+		curr = curr.next
 
-	/*
-		if the last element was one of the elements to be removed to change that element prev to point to nil
-		also if list only contains one element and that element has to be removed then set root as nil
-	*/
-	if isLast {
-		if prev != nil {
-			prev.next = nil
-		} else {
-			ll.root = nil
-		}
 	}
 
 	return true, nil
@@ -574,7 +638,7 @@ type linkedListIterator struct {
 
 func newLinkedListIterator(ll *LinkedList) *linkedListIterator {
 	return &linkedListIterator{
-		currNode: ll.root,
+		currNode: ll.first,
 		ll:       ll,
 	}
 }
@@ -591,6 +655,34 @@ func (ll *linkedListIterator) Next() interface{} {
 	e := ll.currNode.data
 
 	ll.currNode = ll.currNode.next
+
+	return e
+}
+
+type linkedListDescendingIterator struct {
+	currNode *node
+	ll       *LinkedList
+}
+
+func newLinkedListDescendingIterator(ll *LinkedList) *linkedListDescendingIterator {
+	return &linkedListDescendingIterator{
+		currNode: ll.last,
+		ll:       ll,
+	}
+}
+
+func (ll *linkedListDescendingIterator) HasNext() bool {
+	return ll.currNode != nil
+}
+
+func (ll *linkedListDescendingIterator) Next() interface{} {
+	if ll.currNode == nil {
+		return nil
+	}
+
+	e := ll.currNode.data
+
+	ll.currNode = ll.currNode.prev
 
 	return e
 }

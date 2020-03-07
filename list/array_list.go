@@ -146,7 +146,7 @@ func (al *ArrayList) Get(i int) interface{} {
 
 func (al *ArrayList) IndexOf(e interface{}) (int, error) {
 	if al.IsEmpty() {
-		return -1, fmt.Errorf("list is empty")
+		return invalidIndex, fmt.Errorf("list is empty")
 	}
 
 	if err := al.isValidType(e); err != nil {
@@ -171,7 +171,7 @@ func (al *ArrayList) Iterator() iterator.Iterator {
 
 func (al *ArrayList) LastIndexOf(e interface{}) (int, error) {
 	if al.IsEmpty() {
-		return -1, fmt.Errorf("list is empty")
+		return invalidIndex, fmt.Errorf("list is empty")
 	}
 
 	if err := al.isValidType(e); err != nil {
@@ -261,20 +261,14 @@ func (al *ArrayList) RemoveRange(from, to int) (bool, error) {
 	return true, nil
 }
 
-func (al *ArrayList) ReplaceAll(uo operator.UnaryOperator) (err error) {
-	defer func() {
-		if r := recover(); r != nil {
-			err = fmt.Errorf("type mismatch : %v", r)
-		}
-	}()
-
+func (al *ArrayList) ReplaceAll(uo operator.UnaryOperator) error {
 	sz := al.Size()
 	for i := 0; i < sz; i++ {
+
 		e := uo.Apply(al.Get(i))
-		//TODO CHECK IF YOU CAN WORK WITH JUST ERR AND REMOVE EXTRA TYEP ERROR
-		if typeError := al.isValidType(e); typeError != nil {
-			err = typeError
-			return
+
+		if err := al.isValidType(e); err != nil {
+			return err
 		}
 
 		if _, err := al.Set(i, e); err != nil {
@@ -282,7 +276,7 @@ func (al *ArrayList) ReplaceAll(uo operator.UnaryOperator) (err error) {
 		}
 	}
 
-	return
+	return nil
 }
 
 func (al *ArrayList) RetainAll(l ...interface{}) (bool, error) {

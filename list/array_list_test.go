@@ -361,7 +361,7 @@ func TestArrayListSet(t *testing.T) {
 		expectedError  error
 	}{
 		{
-			name: "test Set value at index 3",
+			name: "test set value at index 3",
 			actualResult: func() (interface{}, error) {
 				al, err := NewArrayList(1, 2, 3, 4)
 				require.NoError(t, err)
@@ -370,31 +370,54 @@ func TestArrayListSet(t *testing.T) {
 			expectedResult: 5,
 		},
 		{
-			name: "test Set value at index 0",
+			name: "test set value at index 0",
 			actualResult: func() (interface{}, error) {
 				al, err := NewArrayList(1, 2, 3, 4)
 				require.NoError(t, err)
+
 				return al.Set(0, 2)
 			},
 			expectedResult: 2,
 		},
 		{
-			name: "test Set value at index 1",
+			name: "test set value at index 1",
 			actualResult: func() (interface{}, error) {
 				al, err := NewArrayList(1, 2, 3, 4)
 				require.NoError(t, err)
+
 				return al.Set(1, 4)
 			},
 			expectedResult: 4,
 		},
 		{
-			name: "test failed to Set value due to invalid index",
+			name: "test failed to set value due to invalid index",
 			actualResult: func() (interface{}, error) {
 				al, err := NewArrayList(1, 2, 3, 4)
 				require.NoError(t, err)
+
 				return al.Set(5, 3)
 			},
 			expectedError: liberror.NewIndexOutOfBoundError(5),
+		},
+		{
+			name: "test set fails when list is empty",
+			actualResult: func() (interface{}, error) {
+				al, err := NewArrayList()
+				require.NoError(t, err)
+
+				return al.Set(0, 3)
+			},
+			expectedError: errors.New("list is empty"),
+		},
+		{
+			name: "test failed to set value due to type mismatch",
+			actualResult: func() (interface{}, error) {
+				al, err := NewArrayList(1, 2, 3, 4)
+				require.NoError(t, err)
+
+				return al.Set(0, "a")
+			},
+			expectedError: liberror.NewTypeMismatchError("int", "string"),
 		},
 	}
 
@@ -625,7 +648,7 @@ func TestArrayListAddAll(t *testing.T) {
 			},
 		},
 		{
-			name: "test add all when list is empty",
+			name: "test add all when list is new",
 			actualResult: func() (error, List) {
 				al, err := NewArrayList()
 				require.NoError(t, err)
@@ -636,6 +659,22 @@ func TestArrayListAddAll(t *testing.T) {
 				typeURL: "int",
 				data:    []interface{}{1, 2},
 			},
+		},
+		{
+			name: "test add all when list is empty",
+			actualResult: func() (error, List) {
+				al, err := NewArrayList(1, 2)
+				require.NoError(t, err)
+
+				al.Clear()
+
+				return al.AddAll("a", "b"), al
+			},
+			expectedResult: &ArrayList{
+				typeURL: "int",
+				data:    []interface{}(nil),
+			},
+			expectedError: liberror.NewTypeMismatchError("int", "string"),
 		},
 		{
 			name: "test add all when list is empty and type was set",
@@ -871,6 +910,17 @@ func TestArrayListIndexOf(t *testing.T) {
 			expectedError:  errors.New("element 0 not found in the list"),
 		},
 		{
+			name: "return error when list is empty",
+			actualResult: func() (int, error) {
+				al, err := NewArrayList()
+				require.NoError(t, err)
+
+				return al.IndexOf(0)
+			},
+			expectedResult: -1,
+			expectedError:  errors.New("list is empty"),
+		},
+		{
 			name: "return type mismatch error when searching for invalid type",
 			actualResult: func() (int, error) {
 				al, err := NewArrayList(1, 2, 3, 4)
@@ -955,6 +1005,17 @@ func TestArrayListLastIndexOf(t *testing.T) {
 			expectedError:  errors.New("element 0 not found in the list"),
 		},
 		{
+			name: "return error when list is empty",
+			actualResult: func() (int, error) {
+				al, err := NewArrayList()
+				require.NoError(t, err)
+
+				return al.LastIndexOf(0)
+			},
+			expectedResult: -1,
+			expectedError:  errors.New("list is empty"),
+		},
+		{
 			name: "return type mismatch error when searching for different type",
 			actualResult: func() (int, error) {
 				al, err := NewArrayList(1, 2, 3, 1, 4)
@@ -1018,6 +1079,23 @@ func TestArrayListRemoveElement(t *testing.T) {
 			expectedError: errors.New("element 0 not found in the list"),
 		},
 		{
+			name: "test return false and error when list is empty",
+			actualResult: func() (List, error) {
+				al, err := NewArrayList()
+				require.NoError(t, err)
+
+				ok, err := al.Remove(0)
+				require.False(t, ok)
+
+				return al, err
+			},
+			expectedResult: &ArrayList{
+				typeURL: "na",
+				data:    []interface{}(nil),
+			},
+			expectedError: errors.New("list is empty"),
+		},
+		{
 			name: "test return false when trying to Remove element of different type",
 			actualResult: func() (List, error) {
 				al, err := NewArrayList(1, 2, 3, 4)
@@ -1066,6 +1144,23 @@ func TestArrayListRemoveAt(t *testing.T) {
 				typeURL: "int",
 				data:    []interface{}{1, 3, 4},
 			},
+		},
+		{
+			name: "test return error when list is empty",
+			actualResult: func() (List, error) {
+				al, err := NewArrayList()
+				require.NoError(t, err)
+
+				e, err := al.RemoveAt(0)
+				assert.Nil(t, e)
+
+				return al, err
+			},
+			expectedResult: &ArrayList{
+				typeURL: "na",
+				data:    []interface{}(nil),
+			},
+			expectedError: errors.New("list is empty"),
 		},
 		{
 			name: "test failed to remove element at invalid index",
@@ -1597,277 +1692,4 @@ func TestArrayListSubList(t *testing.T) {
 			assert.Equal(t, testCase.expectedResult, res)
 		})
 	}
-}
-
-func TestAllArrayListAPI(t *testing.T) {
-	al, err := NewArrayList()
-	require.NoError(t, err)
-
-	err = al.Add(2)
-	require.NoError(t, err)
-
-	err = al.Add("a")
-	require.Error(t, err)
-	assert.Equal(t, liberror.NewTypeMismatchError("int", "string"), err)
-
-	err = al.AddAt(0, 1)
-	require.NoError(t, err)
-
-	err = al.AddAt(2, 1)
-	require.Error(t, err)
-	assert.Equal(t, liberror.NewIndexOutOfBoundError(2), err)
-
-	err = al.AddAt(0, "a")
-	require.Error(t, err)
-	assert.Equal(t, liberror.NewTypeMismatchError("int", "string"), err)
-
-	err = al.AddAll(3, 4, 5)
-	require.NoError(t, err)
-
-	err = al.AddAll(5, 6, "a")
-	require.Error(t, err)
-	assert.Equal(t, "type mismatch : all elements must be of same type", err.Error())
-
-	ok, err := al.Contains(1)
-	require.NoError(t, err)
-	assert.True(t, ok)
-
-	ok, err = al.Contains(8)
-	require.Error(t, err)
-	assert.Equal(t, "element 8 not found in the list", err.Error())
-	assert.False(t, ok)
-
-	ok, err = al.Contains("a")
-	require.Error(t, err)
-	assert.Equal(t, liberror.NewTypeMismatchError("int", "string"), err)
-	assert.False(t, ok)
-
-	ok, err = al.ContainsAll(2, 4, 5)
-	require.NoError(t, err)
-	assert.True(t, ok)
-
-	ok, err = al.ContainsAll(4, 7)
-	require.Error(t, err)
-	assert.Equal(t, "element 7 not found in the list", err.Error())
-	assert.False(t, ok)
-
-	ok, err = al.ContainsAll(4, "a")
-	require.Error(t, err)
-	assert.Equal(t, liberror.NewTypeMismatchError("int", "string"), err)
-	assert.False(t, ok)
-
-	ele := al.Get(0)
-	assert.Equal(t, 1, ele)
-
-	ele = al.Get(10)
-	assert.Nil(t, ele)
-
-	id, err := al.IndexOf(2)
-	require.NoError(t, err)
-	assert.Equal(t, 1, id)
-
-	id, err = al.IndexOf(10)
-	require.Error(t, err)
-	assert.Equal(t, "element 10 not found in the list", err.Error())
-	assert.Equal(t, -1, id)
-
-	id, err = al.IndexOf("a")
-	require.Error(t, err)
-	assert.Equal(t, liberror.NewTypeMismatchError("int", "string"), err)
-	assert.Equal(t, -1, id)
-
-	ok = al.IsEmpty()
-	require.False(t, ok)
-
-	it := al.Iterator()
-
-	count := 1
-	for it.HasNext() {
-		assert.Equal(t, count, it.Next())
-		count++
-	}
-
-	require.NoError(t, al.Add(1))
-
-	id, err = al.LastIndexOf(1)
-	require.NoError(t, err)
-	assert.Equal(t, 5, id)
-
-	id, err = al.LastIndexOf(10)
-	require.Error(t, err)
-	assert.Equal(t, "element 10 not found in the list", err.Error())
-	assert.Equal(t, -1, id)
-
-	id, err = al.LastIndexOf("a")
-	require.Error(t, err)
-	assert.Equal(t, liberror.NewTypeMismatchError("int", "string"), err)
-	assert.Equal(t, -1, id)
-
-	ok, err = al.Remove(1)
-	require.NoError(t, err)
-	assert.True(t, ok)
-
-	ok, err = al.Remove(10)
-	require.Error(t, err)
-	assert.Equal(t, "element 10 not found in the list", err.Error())
-	assert.False(t, ok)
-
-	ok, err = al.Remove("a")
-	require.Error(t, err)
-	assert.Equal(t, liberror.NewTypeMismatchError("int", "string"), err)
-	assert.False(t, ok)
-
-	ele, err = al.RemoveAt(0)
-	require.NoError(t, err)
-	assert.Equal(t, 2, ele)
-
-	ele, err = al.RemoveAt(10)
-	require.Error(t, err)
-	assert.Equal(t, liberror.NewIndexOutOfBoundError(10), err)
-	assert.Nil(t, ele)
-
-	require.NoError(t, al.Add(3))
-
-	ok, err = al.RemoveAll(3, 5)
-	require.NoError(t, err)
-	require.True(t, ok)
-
-	ok, err = al.RemoveAll(3, "a")
-	require.Error(t, err)
-	assert.Equal(t, liberror.NewTypeMismatchError("int", "string"), err)
-	require.False(t, ok)
-
-	err = al.ReplaceAll(testIntIncOperator{})
-	require.NoError(t, err)
-
-	err = al.ReplaceAll(testStringConcatOperator{})
-	require.Error(t, err)
-	assert.Equal(t, "type mismatch : interface conversion: interface {} is int, not string", err.Error())
-
-	require.NoError(t, al.AddAll(4, 6, 3, 1))
-
-	ok, err = al.RetainAll(6, 2, 4)
-	require.NoError(t, err)
-	require.True(t, ok)
-
-	ok, err = al.RetainAll(1, 3, 5, "a")
-	require.Error(t, err)
-	assert.Equal(t, liberror.NewTypeMismatchError("int", "string"), err)
-	require.False(t, ok)
-
-	ele, err = al.Set(0, 7)
-	require.NoError(t, err)
-	assert.Equal(t, 7, ele)
-
-	ele, err = al.Set(3, 8)
-	require.Error(t, err)
-	assert.Equal(t, liberror.NewIndexOutOfBoundError(3), err)
-	assert.Nil(t, ele)
-
-	ele, err = al.Set(1, "a")
-	require.Error(t, err)
-	assert.Equal(t, liberror.NewTypeMismatchError("int", "string"), err)
-	assert.Nil(t, ele)
-
-	sz := al.Size()
-	assert.Equal(t, 3, sz)
-
-	al.Sort(comparator.NewIntegerComparator())
-
-	val := []int{4, 6, 7}
-	i := 0
-	it = al.Iterator()
-	for it.HasNext() {
-		assert.Equal(t, val[i], it.Next())
-		i++
-	}
-
-	sl, err := al.SubList(0, 0)
-	require.NoError(t, err)
-	assert.Equal(t, tempArrayList(), sl)
-
-	sl, err = al.SubList(1, 1)
-	require.NoError(t, err)
-	assert.Equal(t, tempArrayList(), sl)
-
-	sl, err = al.SubList(2, 2)
-	require.NoError(t, err)
-	assert.Equal(t, tempArrayList(), sl)
-
-	sl, err = al.SubList(0, 1)
-	require.NoError(t, err)
-	assert.Equal(t, tempArrayList(4), sl)
-
-	sl, err = al.SubList(0, 2)
-	require.NoError(t, err)
-	assert.Equal(t, tempArrayList(4, 6), sl)
-
-	sl, err = al.SubList(1, 2)
-	require.NoError(t, err)
-	assert.Equal(t, tempArrayList(6), sl)
-
-	sl, err = al.SubList(1, 3)
-	require.NoError(t, err)
-	assert.Equal(t, tempArrayList(6, 7), sl)
-
-	sl, err = al.SubList(2, 3)
-	require.NoError(t, err)
-	assert.Equal(t, tempArrayList(7), sl)
-
-	al.Clear()
-
-	assert.Equal(t, 0, al.Size())
-
-	err = al.Add("a")
-	require.Error(t, err)
-	assert.Equal(t, liberror.NewTypeMismatchError("int", "string"), err)
-
-	err = al.AddAll("a", "b")
-	require.Error(t, err)
-	assert.Equal(t, liberror.NewTypeMismatchError("int", "string"), err)
-
-	err = al.AddAll(1, "a", "b")
-	require.Error(t, err)
-	assert.Equal(t, "type mismatch : all elements must be of same type", err.Error())
-
-	id, err = al.IndexOf(1)
-	require.Error(t, err)
-	assert.Equal(t, "list is empty", err.Error())
-	assert.Equal(t, -1, id)
-
-	id, err = al.LastIndexOf(1)
-	require.Error(t, err)
-	assert.Equal(t, "list is empty", err.Error())
-	assert.Equal(t, -1, id)
-
-	ok, err = al.Remove(1)
-	require.Error(t, err)
-	assert.Equal(t, "list is empty", err.Error())
-	require.False(t, ok)
-
-	ele, err = al.RemoveAt(0)
-	require.Error(t, err)
-	assert.Equal(t, "list is empty", err.Error())
-	assert.Nil(t, ele)
-
-	ok, err = al.RemoveAll(1, 2)
-	require.Error(t, err)
-	assert.Equal(t, "list is empty", err.Error())
-	require.False(t, ok)
-
-	ok, err = al.RetainAll(1, 2)
-	require.Error(t, err)
-	assert.Equal(t, "list is empty", err.Error())
-	require.False(t, ok)
-
-	ele, err = al.Set(0, 1)
-	require.Error(t, err)
-	assert.Equal(t, "list is empty", err.Error())
-	assert.Nil(t, ele)
-
-}
-
-func tempArrayList(data ...interface{}) *ArrayList {
-	al, _ := NewArrayList(data...)
-	return al
 }
