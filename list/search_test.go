@@ -135,9 +135,16 @@ func TestFinderConcurrentSearch(t *testing.T) {
 		{
 			name: "return index when element is found at start",
 			actualResult: func() (int, error) {
-				return newConcurrentFinder().search(arrayList(t, sz), 11000)
+				return newConcurrentFinder().search(arrayList(t, sz), 1000000)
 			},
-			expectedResult: 989000,
+			expectedResult: 0,
+		},
+		{
+			name: "return index when element is found at end",
+			actualResult: func() (int, error) {
+				return newConcurrentFinder().search(arrayList(t, sz), 500000)
+			},
+			expectedResult: 500000,
 		},
 		{
 			name: "return index when element is found at end",
@@ -188,7 +195,6 @@ func TestFinderConcurrentSearch(t *testing.T) {
 }
 
 func TestFinderDoublySearch(t *testing.T) {
-
 	testCases := []struct {
 		name           string
 		actualResult   func() (int, error)
