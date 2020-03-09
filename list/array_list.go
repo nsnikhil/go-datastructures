@@ -119,7 +119,7 @@ func (al *ArrayList) Clone() (List, error) {
 
 func (al *ArrayList) Contains(e interface{}) (bool, error) {
 
-	_, err := newFinder().search(al, e)
+	_, err := newFinder(concurrent).search(al, e)
 	if err != nil {
 		return false, err
 	}
@@ -153,7 +153,7 @@ func (al *ArrayList) IndexOf(e interface{}) (int, error) {
 		return invalidIndex, err
 	}
 
-	i, _ := newFinder().search(al, e)
+	i, _ := newFinder(concurrent).search(al, e)
 	if i == invalidIndex {
 		return invalidIndex, fmt.Errorf("element %v not found in the list", e)
 	}

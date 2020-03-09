@@ -11,7 +11,7 @@ This Project aims to port/build well known and commonly used data structures to 
 #### List
 - [x] ArrayList
 - [x] Doubly LinkedList
-- [ ] Skip xList
+- [ ] Skip List
 
 #### Map
 - [ ] Hash Map

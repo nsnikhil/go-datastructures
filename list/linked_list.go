@@ -20,9 +20,6 @@ func newNode(data interface{}) *node {
 	}
 }
 
-/*
-	Implementation of doubly linked list
-*/
 type LinkedList struct {
 	typeURL string
 	first   *node
@@ -232,7 +229,7 @@ func (ll *LinkedList) Clone() (List, error) {
 }
 
 func (ll *LinkedList) Contains(e interface{}) (bool, error) {
-	_, err := newFinder().search(ll, e)
+	_, err := newFinder(doubly).search(ll, e)
 	if err != nil {
 		return false, err
 	}
@@ -290,7 +287,7 @@ func (ll *LinkedList) IndexOf(e interface{}) (int, error) {
 		return invalidIndex, err
 	}
 
-	i, _ := newFinder().search(ll, e)
+	i, _ := newFinder(doubly).search(ll, e)
 	if i == invalidIndex {
 		return invalidIndex, fmt.Errorf("element %v not found in the list", e)
 	}
@@ -362,7 +359,6 @@ func (ll *LinkedList) Remove(e interface{}) (bool, error) {
 	return true, nil
 }
 
-//noinspection GoNilness
 func (ll *LinkedList) RemoveAt(i int) (interface{}, error) {
 	if ll.IsEmpty() {
 		return nil, fmt.Errorf("list is empty")
