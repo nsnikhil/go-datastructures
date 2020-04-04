@@ -6,6 +6,10 @@ This Project aims to port/build well known and commonly used data structures to 
 
 ---
 
+#### This library uses reflection for every method call to verify if the type the element to add is same as other elements in the list.
+
+---
+
 ### DataStructures this project wish to cover, this list might grow with time:  
 
 #### List
