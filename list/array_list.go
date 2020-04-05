@@ -7,6 +7,7 @@ import (
 	"github.com/nsnikhil/go-datastructures/functions/operator"
 	"github.com/nsnikhil/go-datastructures/functions/predicate"
 	"github.com/nsnikhil/go-datastructures/liberror"
+	"github.com/nsnikhil/go-datastructures/utils"
 )
 
 type ArrayList struct {
@@ -21,11 +22,11 @@ func NewArrayList(data ...interface{}) (*ArrayList, error) {
 		}, nil
 	}
 
-	typeURL := getTypeName(data[0])
+	typeURL := utils.GetTypeName(data[0])
 
 	for i := 1; i < len(data); i++ {
-		if getTypeName(data[i]) != typeURL {
-			return nil, liberror.NewTypeMismatchError(typeURL, getTypeName(data[i]))
+		if utils.GetTypeName(data[i]) != typeURL {
+			return nil, liberror.NewTypeMismatchError(typeURL, utils.GetTypeName(data[i]))
 		}
 	}
 
@@ -39,7 +40,7 @@ func (al *ArrayList) Add(e interface{}) error {
 
 	if al.Size() == 0 && al.typeURL == na {
 		al.data = append(al.data, e)
-		al.typeURL = getTypeName(e)
+		al.typeURL = utils.GetTypeName(e)
 		return nil
 	}
 
@@ -54,7 +55,7 @@ func (al *ArrayList) Add(e interface{}) error {
 func (al *ArrayList) AddAt(i int, e interface{}) error {
 	if al.IsEmpty() && al.typeURL == na {
 		al.data = append(al.data, e)
-		al.typeURL = getTypeName(e)
+		al.typeURL = utils.GetTypeName(e)
 		return nil
 	}
 
@@ -77,7 +78,7 @@ func (al *ArrayList) AddAll(l ...interface{}) error {
 	}
 
 	for i := 0; i < len(l)-1; i++ {
-		if getTypeName(l[i]) != getTypeName(l[i+1]) {
+		if utils.GetTypeName(l[i]) != utils.GetTypeName(l[i+1]) {
 			return fmt.Errorf("type mismatch : all elements must be of same type")
 		}
 	}
@@ -86,7 +87,7 @@ func (al *ArrayList) AddAll(l ...interface{}) error {
 
 	if al.typeURL == na {
 		al.data = append(al.data, l[idx])
-		al.typeURL = getTypeName(l[idx])
+		al.typeURL = utils.GetTypeName(l[idx])
 		idx++
 	} else {
 
@@ -365,8 +366,8 @@ func (al *ArrayList) isValidIndex(i int) error {
 }
 
 func (al *ArrayList) isValidType(e interface{}) error {
-	if getTypeName(e) != al.typeURL {
-		return liberror.NewTypeMismatchError(al.typeURL, getTypeName(e))
+	if utils.GetTypeName(e) != al.typeURL {
+		return liberror.NewTypeMismatchError(al.typeURL, utils.GetTypeName(e))
 	}
 	return nil
 }

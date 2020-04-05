@@ -6,6 +6,7 @@ import (
 	"github.com/nsnikhil/go-datastructures/functions/iterator"
 	"github.com/nsnikhil/go-datastructures/functions/operator"
 	"github.com/nsnikhil/go-datastructures/liberror"
+	"github.com/nsnikhil/go-datastructures/utils"
 )
 
 type node struct {
@@ -33,11 +34,11 @@ func NewLinkedList(data ...interface{}) (*LinkedList, error) {
 		}, nil
 	}
 
-	typeURL := getTypeName(data[0])
+	typeURL := utils.GetTypeName(data[0])
 
 	for i := 1; i < len(data); i++ {
-		if getTypeName(data[i]) != typeURL {
-			return nil, liberror.NewTypeMismatchError(typeURL, getTypeName(data[i]))
+		if utils.GetTypeName(data[i]) != typeURL {
+			return nil, liberror.NewTypeMismatchError(typeURL, utils.GetTypeName(data[i]))
 		}
 	}
 
@@ -64,7 +65,7 @@ func (ll *LinkedList) Add(e interface{}) error {
 	if ll.typeURL == na {
 		ll.first = newNode(e)
 		ll.last = ll.first
-		ll.typeURL = getTypeName(e)
+		ll.typeURL = utils.GetTypeName(e)
 		return nil
 	}
 
@@ -95,7 +96,7 @@ func (ll *LinkedList) AddAt(i int, e interface{}) error {
 	if ll.typeURL == na {
 		ll.first = newNode(e)
 		ll.last = ll.first
-		ll.typeURL = getTypeName(e)
+		ll.typeURL = utils.GetTypeName(e)
 		return nil
 	}
 
@@ -139,7 +140,7 @@ func (ll *LinkedList) AddAll(l ...interface{}) error {
 	}
 
 	for i := 0; i < len(l)-1; i++ {
-		if getTypeName(l[i]) != getTypeName(l[i+1]) {
+		if utils.GetTypeName(l[i]) != utils.GetTypeName(l[i+1]) {
 			return fmt.Errorf("type mismatch : all elements must be of same type")
 		}
 	}
@@ -150,7 +151,7 @@ func (ll *LinkedList) AddAll(l ...interface{}) error {
 	if ll.typeURL == na {
 		ll.first = newNode(l[idx])
 		ll.last = ll.first
-		ll.typeURL = getTypeName(l[idx])
+		ll.typeURL = utils.GetTypeName(l[idx])
 
 		idx++
 		curr = ll.first
@@ -191,7 +192,7 @@ func (ll *LinkedList) AddFirst(e interface{}) error {
 	curr := ll.first
 
 	if ll.typeURL == na {
-		ll.typeURL = getTypeName(e)
+		ll.typeURL = utils.GetTypeName(e)
 	} else {
 		if err := ll.isValidType(e); err != nil {
 			return err
@@ -562,8 +563,8 @@ func (ll *LinkedList) isValidIndex(i int) error {
 }
 
 func (ll *LinkedList) isValidType(e interface{}) error {
-	if getTypeName(e) != ll.typeURL {
-		return liberror.NewTypeMismatchError(ll.typeURL, getTypeName(e))
+	if utils.GetTypeName(e) != ll.typeURL {
+		return liberror.NewTypeMismatchError(ll.typeURL, utils.GetTypeName(e))
 	}
 	return nil
 }

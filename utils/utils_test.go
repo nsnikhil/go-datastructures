@@ -1,4 +1,4 @@
-package list
+package utils
 
 import (
 	"github.com/stretchr/testify/assert"
@@ -14,14 +14,14 @@ func TestGetTypeName(t *testing.T) {
 		{
 			name: "return type name as int",
 			actualResult: func() string {
-				return getTypeName(1)
+				return GetTypeName(1)
 			},
 			expectedResult: "int",
 		},
 		{
 			name: "return type name as string",
 			actualResult: func() string {
-				return getTypeName("abc")
+				return GetTypeName("abc")
 			},
 			expectedResult: "string",
 		},
@@ -29,7 +29,7 @@ func TestGetTypeName(t *testing.T) {
 			name: "return type name as someObj",
 			actualResult: func() string {
 				type someObj struct{}
-				return getTypeName(someObj{})
+				return GetTypeName(someObj{})
 			},
 			expectedResult: "someObj",
 		},
@@ -37,14 +37,14 @@ func TestGetTypeName(t *testing.T) {
 			name: "return type name as na for interface",
 			actualResult: func() string {
 				var e interface{}
-				return getTypeName(e)
+				return GetTypeName(e)
 			},
 			expectedResult: "na",
 		},
 		{
 			name: "return type name as na for nil",
 			actualResult: func() string {
-				return getTypeName(nil)
+				return GetTypeName(nil)
 			},
 			expectedResult: "na",
 		},

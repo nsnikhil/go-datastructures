@@ -43,7 +43,7 @@ This Project aims to port/build well known and commonly used data structures to 
 - [ ] B-Tree
 
 #### Heaps
-- [ ] Heap
+- [x] Heap
 
 #### Graph
 - [ ] Graphs
@@ -86,7 +86,8 @@ This Project aims to port/build well known and commonly used data structures to 
 ### Known Issues
 
 1. Multiple implementation of sorting algorithm.
-2. Concurrent search dose not provide enough performance benefits and also the benchmark test for the same sometimes gets into infinite loop. 
+2. Concurrent search dose not provide enough performance benefits and also the benchmark test for the same sometimes gets into infinite loop.
+3. In heap one can add two elements even though the comparator type and element type is not same.  
 
 ---
 

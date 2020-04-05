@@ -1,7 +1,8 @@
 package comparator
 
 import (
-	"fmt"
+	"github.com/nsnikhil/go-datastructures/liberror"
+	"github.com/nsnikhil/go-datastructures/utils"
 	"math"
 	"reflect"
 	"strings"
@@ -15,11 +16,11 @@ func NewIntegerComparator() IntegerComparator {
 
 func (ic IntegerComparator) Compare(one interface{}, two interface{}) (int, error) {
 	if reflect.TypeOf(one).Name() != reflect.TypeOf(0).Name() {
-		return math.MinInt32, fmt.Errorf("invalid type : expected int got %s", reflect.TypeOf(one).Name())
+		return math.MinInt32, liberror.NewTypeMismatchError("int", utils.GetTypeName(one))
 	}
 
 	if reflect.TypeOf(two).Name() != reflect.TypeOf(0).Name() {
-		return math.MinInt32, fmt.Errorf("invalid type : expected int got %s", reflect.TypeOf(two).Name())
+		return math.MinInt32, liberror.NewTypeMismatchError("int", utils.GetTypeName(two))
 	}
 
 	return one.(int) - two.(int), nil
@@ -33,11 +34,11 @@ func NewStringComparator() StringComparator {
 
 func (tc StringComparator) Compare(one interface{}, two interface{}) (int, error) {
 	if reflect.TypeOf(one).Name() != reflect.TypeOf("").Name() {
-		return math.MinInt32, fmt.Errorf("invalid type : expected string got %s", reflect.TypeOf(one).Name())
+		return math.MinInt32, liberror.NewTypeMismatchError("string", utils.GetTypeName(one))
 	}
 
 	if reflect.TypeOf(two).Name() != reflect.TypeOf("").Name() {
-		return math.MinInt32, fmt.Errorf("invalid type : expected string got %s", reflect.TypeOf(two).Name())
+		return math.MinInt32, liberror.NewTypeMismatchError("string", utils.GetTypeName(two))
 	}
 
 	return strings.Compare(one.(string), two.(string)), nil

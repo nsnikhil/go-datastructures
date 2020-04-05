@@ -1,8 +1,8 @@
-package list
+package utils
 
 import "reflect"
 
-func getTypeName(e interface{}) string {
+func GetTypeName(e interface{}) string {
 	if e == nil {
 		return na
 	}
