@@ -137,32 +137,32 @@ func (bh *binaryHeap) Clear() {
 }
 
 func (bh *binaryHeap) Iterator() iterator.Iterator {
-	return newMaxHeapIterator(bh)
+	return newBinaryHeapIterator(bh)
 }
 
-type maxHeapIterator struct {
+type binaryHeapIterator struct {
 	currentIndex int
 	h            *binaryHeap
 }
 
-func newMaxHeapIterator(mx *binaryHeap) *maxHeapIterator {
-	return &maxHeapIterator{
+func newBinaryHeapIterator(bh *binaryHeap) *binaryHeapIterator {
+	return &binaryHeapIterator{
 		currentIndex: 0,
-		h:            mx,
+		h:            bh,
 	}
 }
 
-func (mxi *maxHeapIterator) HasNext() bool {
-	return mxi.currentIndex != mxi.h.Size()
+func (bhi *binaryHeapIterator) HasNext() bool {
+	return bhi.currentIndex != bhi.h.Size()
 }
 
-func (mxi *maxHeapIterator) Next() interface{} {
-	if mxi.currentIndex >= mxi.h.Size() {
+func (bhi *binaryHeapIterator) Next() interface{} {
+	if bhi.currentIndex >= bhi.h.Size() {
 		return nil
 	}
 
-	e := mxi.h.data[mxi.currentIndex]
-	mxi.currentIndex++
+	e := bhi.h.data[bhi.currentIndex]
+	bhi.currentIndex++
 
 	return e
 }
