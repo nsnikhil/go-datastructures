@@ -2,6 +2,7 @@ package heap
 
 import (
 	"github.com/nsnikhil/go-datastructures/functions/comparator"
+	"github.com/nsnikhil/go-datastructures/liberror"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )
@@ -36,6 +37,32 @@ func TestHeapSort(t *testing.T) {
 				return err, data
 			},
 			expectedResult: []interface{}{0, 1, 2, 3, 4, 5, 6, 7, 8, 9},
+		},
+		{
+			name: "test sort fails when data are of different type",
+			actualResult: func() (error, []interface{}) {
+				hs := newHeapSort()
+				data := []interface{}{1, 2, "a", "b"}
+
+				err := hs.sort(comparator.NewIntegerComparator(), false, &data)
+
+				return err, data
+			},
+			expectedError:  liberror.NewTypeMismatchError("int", "string"),
+			expectedResult: []interface{}{1, 2, "a", "b"},
+		},
+		{
+			name: "test sort fails when comparator returns error",
+			actualResult: func() (error, []interface{}) {
+				hs := newHeapSort()
+				data := []interface{}{1, 2}
+
+				err := hs.sort(comparator.NewStringComparator(), false, &data)
+
+				return err, data
+			},
+			expectedError:  liberror.NewTypeMismatchError("string", "int"),
+			expectedResult: []interface{}{1, 2},
 		},
 	}
 
