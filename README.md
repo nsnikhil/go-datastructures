@@ -38,6 +38,7 @@ This Project aims to port/build well known and commonly used data structures to 
 - [ ] Red Black Tree
 - [ ] N-Ary Tree
 - [ ] Segment Tree
+- [x] Trie
 
 #### B-trees
 - [ ] B-Tree
@@ -57,7 +58,6 @@ This Project aims to port/build well known and commonly used data structures to 
 - [ ] Hash Table
 - [ ] Hash Tree
 - [ ] Bloom Filters
-- [ ] Trie
 - [ ] Compressed Trie
 - [ ] Hash Trie
 
