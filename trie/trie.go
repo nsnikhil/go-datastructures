@@ -33,10 +33,10 @@ func (t *Trie) Insert(s string) error {
 	}
 
 	for _, d := range s {
-		if n.links[d-a] == nil {
-			n.links[d-a] = newNode()
+		if n.links[d] == nil {
+			n.links[d] = newNode()
 		}
-		n = n.links[d-a]
+		n = n.links[d]
 	}
 
 	n.endOfWord = true
@@ -62,12 +62,11 @@ func search(word string, n *node) *node {
 	}
 
 	for _, q := range word {
-		idx := q - a
-		if n.links[idx] == nil {
+		if n.links[q] == nil {
 			return nil
 		}
 
-		n = n.links[idx]
+		n = n.links[q]
 	}
 
 	return n
@@ -95,6 +94,6 @@ func traverse(n *node, prefix string, res *[]string) {
 	}
 
 	for i, l := range n.links {
-		traverse(l, fmt.Sprintf("%s%c", prefix, i+a), res)
+		traverse(l, fmt.Sprintf("%s%c", prefix, i), res)
 	}
 }

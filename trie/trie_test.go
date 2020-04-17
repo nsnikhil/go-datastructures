@@ -39,6 +39,13 @@ func TestTrieInsert(t *testing.T) {
 			},
 		},
 		{
+			name: "insert two unicode into trie",
+			actualResult: func() error {
+				tr := NewTrie()
+				return tr.Insert("%ìǗΨԹ")
+			},
+		},
+		{
 			name: "insert failed when root is nil",
 			actualResult: func() error {
 				tr := &Trie{}
@@ -90,6 +97,16 @@ func TestTrieSearchWord(t *testing.T) {
 				require.NoError(t, tr.Insert("other"))
 
 				return tr.SearchWord("test") && tr.SearchWord("other")
+			},
+			expectedResult: true,
+		},
+		{
+			name: "test return true for unicode characters",
+			actualResult: func() bool {
+				tr := NewTrie()
+				require.NoError(t, tr.Insert("%ìǗΨԹ"))
+
+				return tr.SearchWord("%ìǗΨԹ")
 			},
 			expectedResult: true,
 		},
@@ -177,6 +194,16 @@ func TestTrieSearchPrefix(t *testing.T) {
 				require.NoError(t, tr.Insert("test"))
 
 				return tr.SearchPrefix("test")
+			},
+			expectedResult: true,
+		},
+		{
+			name: "test return true when searching for unicode character prefix",
+			actualResult: func() bool {
+				tr := NewTrie()
+				require.NoError(t, tr.Insert("%ìǗΨԹ"))
+
+				return tr.SearchPrefix("%ì")
 			},
 			expectedResult: true,
 		},
