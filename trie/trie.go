@@ -5,8 +5,6 @@ import (
 	"fmt"
 )
 
-const a = 97
-
 type node struct {
 	endOfWord bool
 	links     map[rune]*node
