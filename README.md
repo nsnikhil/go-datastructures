@@ -26,10 +26,13 @@ This Project aims to port/build well known and commonly used data structures to 
 - [ ] Set
 
 #### Stack
-- [ ] Stack
+- [x] Stack
 
 #### Queue
-- [ ] Queue
+- [x] Linked Queue
+- [x] DeQue
+- [x] Blocking Queue
+- [x] Priority Queue
 
 #### Tree
 - [ ] Binary Tree
