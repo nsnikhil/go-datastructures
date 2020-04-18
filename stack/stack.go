@@ -8,7 +8,7 @@ type Stack struct {
 	ll *list.LinkedList
 }
 
-func newStack() (*Stack, error) {
+func NewStack() (*Stack, error) {
 	ll, err := list.NewLinkedList()
 	if err != nil {
 		return nil, err

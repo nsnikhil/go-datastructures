@@ -9,7 +9,7 @@ import (
 )
 
 func TestCreateNewStack(t *testing.T) {
-	actualResult, err := newStack()
+	actualResult, err := NewStack()
 	require.NoError(t, err)
 
 	ll, err := list.NewLinkedList()
@@ -29,7 +29,7 @@ func TestStackPush(t *testing.T) {
 		{
 			name: "insert an element into Empty Stack",
 			actualResult: func() (error, *Stack) {
-				s, err := newStack()
+				s, err := NewStack()
 				require.NoError(t, err)
 
 				return s.Push(1), s
@@ -44,7 +44,7 @@ func TestStackPush(t *testing.T) {
 		{
 			name: "insert two element into Empty Stack",
 			actualResult: func() (error, *Stack) {
-				s, err := newStack()
+				s, err := NewStack()
 				require.NoError(t, err)
 
 				err = s.Push(1)
@@ -64,7 +64,7 @@ func TestStackPush(t *testing.T) {
 		{
 			name: "return error when inserting different type of elements",
 			actualResult: func() (error, *Stack) {
-				s, err := newStack()
+				s, err := NewStack()
 				require.NoError(t, err)
 
 				err = s.Push(1)
@@ -102,7 +102,7 @@ func TestStackPop(t *testing.T) {
 		{
 			name: "Pop one element from to make Stack Empty",
 			actualResult: func() (error, []interface{}, *Stack) {
-				s, err := newStack()
+				s, err := NewStack()
 				require.NoError(t, err)
 
 				require.NoError(t, s.Push(1))
@@ -123,7 +123,7 @@ func TestStackPop(t *testing.T) {
 		{
 			name: "Pop one element from Stack",
 			actualResult: func() (error, []interface{}, *Stack) {
-				s, err := newStack()
+				s, err := NewStack()
 				require.NoError(t, err)
 
 				require.NoError(t, s.Push(1))
@@ -144,7 +144,7 @@ func TestStackPop(t *testing.T) {
 		{
 			name: "Pop four elements from Stack",
 			actualResult: func() (error, []interface{}, *Stack) {
-				s, err := newStack()
+				s, err := NewStack()
 				require.NoError(t, err)
 
 				require.NoError(t, s.Push(1))
@@ -217,7 +217,7 @@ func TestStackPeek(t *testing.T) {
 		{
 			name: "Peek top element from Stack of size 1",
 			actualResult: func() (error, interface{}, *Stack) {
-				s, err := newStack()
+				s, err := NewStack()
 				require.NoError(t, err)
 
 				require.NoError(t, s.Push(1))
@@ -237,7 +237,7 @@ func TestStackPeek(t *testing.T) {
 		{
 			name: "Peek first element from Stack of size 2",
 			actualResult: func() (error, interface{}, *Stack) {
-				s, err := newStack()
+				s, err := NewStack()
 				require.NoError(t, err)
 
 				require.NoError(t, s.Push(1))
@@ -258,7 +258,7 @@ func TestStackPeek(t *testing.T) {
 		{
 			name: "Peek first element from Stack of size 5",
 			actualResult: func() (error, interface{}, *Stack) {
-				s, err := newStack()
+				s, err := NewStack()
 				require.NoError(t, err)
 
 				require.NoError(t, s.Push(1))
@@ -305,7 +305,7 @@ func TestStackEmpty(t *testing.T) {
 		{
 			name: "return true when Stack is Empty",
 			actualResult: func() bool {
-				s, err := newStack()
+				s, err := NewStack()
 				require.NoError(t, err)
 
 				return s.Empty()
@@ -315,7 +315,7 @@ func TestStackEmpty(t *testing.T) {
 		{
 			name: "return false when Stack is not Empty",
 			actualResult: func() bool {
-				s, err := newStack()
+				s, err := NewStack()
 				require.NoError(t, err)
 
 				require.NoError(t, s.Push(1))
@@ -342,7 +342,7 @@ func TestStackCount(t *testing.T) {
 		{
 			name: "return Count 0 when Stack is Empty",
 			actualResult: func() int {
-				s, err := newStack()
+				s, err := NewStack()
 				require.NoError(t, err)
 
 				require.NoError(t, s.Push(1))
@@ -354,7 +354,7 @@ func TestStackCount(t *testing.T) {
 		{
 			name: "return Count 1 when Stack has 1 element",
 			actualResult: func() int {
-				s, err := newStack()
+				s, err := NewStack()
 				require.NoError(t, err)
 
 				require.NoError(t, s.Push(1))
@@ -367,7 +367,7 @@ func TestStackCount(t *testing.T) {
 		{
 			name: "return Count 1 when Stack has 2 elements",
 			actualResult: func() int {
-				s, err := newStack()
+				s, err := NewStack()
 				require.NoError(t, err)
 
 				return s.Count()
@@ -392,7 +392,7 @@ func TestStackClear(t *testing.T) {
 		{
 			name: "should return true for Empty call after clearing Stack",
 			actualResult: func() bool {
-				s, err := newStack()
+				s, err := NewStack()
 				require.NoError(t, err)
 
 				s.Clear()
@@ -404,7 +404,7 @@ func TestStackClear(t *testing.T) {
 		{
 			name: "should return true for Empty call after clearing Stack two",
 			actualResult: func() bool {
-				s, err := newStack()
+				s, err := NewStack()
 				require.NoError(t, err)
 
 				require.NoError(t, s.Push(1))
@@ -434,7 +434,7 @@ func TestStackSearch(t *testing.T) {
 		{
 			name: "return index of element in Stack",
 			actualResult: func() (int, error) {
-				s, err := newStack()
+				s, err := NewStack()
 				require.NoError(t, err)
 
 				require.NoError(t, s.Push(1))
@@ -447,7 +447,7 @@ func TestStackSearch(t *testing.T) {
 		{
 			name: "return index of element in Stack two",
 			actualResult: func() (int, error) {
-				s, err := newStack()
+				s, err := NewStack()
 				require.NoError(t, err)
 
 				require.NoError(t, s.Push(1))
@@ -462,7 +462,7 @@ func TestStackSearch(t *testing.T) {
 		{
 			name: "return -1 when element is not present in Stack",
 			actualResult: func() (int, error) {
-				s, err := newStack()
+				s, err := NewStack()
 				require.NoError(t, err)
 
 				require.NoError(t, s.Push(1))
@@ -475,7 +475,7 @@ func TestStackSearch(t *testing.T) {
 		{
 			name: "return -1 when searching in Empty Stack",
 			actualResult: func() (int, error) {
-				s, err := newStack()
+				s, err := NewStack()
 				require.NoError(t, err)
 
 				return s.Search(1)
