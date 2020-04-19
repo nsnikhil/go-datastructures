@@ -18,7 +18,7 @@ type ArrayList struct {
 func NewArrayList(data ...interface{}) (*ArrayList, error) {
 	if len(data) == 0 {
 		return &ArrayList{
-			typeURL: na,
+			typeURL: utils.NA,
 		}, nil
 	}
 
@@ -38,7 +38,7 @@ func NewArrayList(data ...interface{}) (*ArrayList, error) {
 
 func (al *ArrayList) Add(e interface{}) error {
 
-	if al.Size() == 0 && al.typeURL == na {
+	if al.Size() == 0 && al.typeURL == utils.NA {
 		al.data = append(al.data, e)
 		al.typeURL = utils.GetTypeName(e)
 		return nil
@@ -53,7 +53,7 @@ func (al *ArrayList) Add(e interface{}) error {
 }
 
 func (al *ArrayList) AddAt(i int, e interface{}) error {
-	if al.IsEmpty() && al.typeURL == na {
+	if al.IsEmpty() && al.typeURL == utils.NA {
 		al.data = append(al.data, e)
 		al.typeURL = utils.GetTypeName(e)
 		return nil
@@ -85,7 +85,7 @@ func (al *ArrayList) AddAll(l ...interface{}) error {
 
 	idx := 0
 
-	if al.typeURL == na {
+	if al.typeURL == utils.NA {
 		al.data = append(al.data, l[idx])
 		al.typeURL = utils.GetTypeName(l[idx])
 		idx++
@@ -147,16 +147,16 @@ func (al *ArrayList) Get(i int) interface{} {
 
 func (al *ArrayList) IndexOf(e interface{}) (int, error) {
 	if al.IsEmpty() {
-		return invalidIndex, fmt.Errorf("list is empty")
+		return utils.InvalidIndex, fmt.Errorf("list is empty")
 	}
 
 	if err := al.isValidType(e); err != nil {
-		return invalidIndex, err
+		return utils.InvalidIndex, err
 	}
 
 	i, _ := newFinder(concurrent).search(al, e)
-	if i == invalidIndex {
-		return invalidIndex, fmt.Errorf("element %v not found in the list", e)
+	if i == utils.InvalidIndex {
+		return utils.InvalidIndex, fmt.Errorf("element %v not found in the list", e)
 	}
 
 	return i, nil
@@ -172,11 +172,11 @@ func (al *ArrayList) Iterator() iterator.Iterator {
 
 func (al *ArrayList) LastIndexOf(e interface{}) (int, error) {
 	if al.IsEmpty() {
-		return invalidIndex, fmt.Errorf("list is empty")
+		return utils.InvalidIndex, fmt.Errorf("list is empty")
 	}
 
 	if err := al.isValidType(e); err != nil {
-		return invalidIndex, err
+		return utils.InvalidIndex, err
 	}
 
 	i := al.Size() - 1
@@ -187,7 +187,7 @@ func (al *ArrayList) LastIndexOf(e interface{}) (int, error) {
 		i--
 	}
 
-	return invalidIndex, fmt.Errorf("element %v not found in the list", e)
+	return utils.InvalidIndex, fmt.Errorf("element %v not found in the list", e)
 }
 
 func (al *ArrayList) Remove(e interface{}) (bool, error) {
@@ -200,7 +200,7 @@ func (al *ArrayList) Remove(e interface{}) (bool, error) {
 	}
 
 	i, err := al.IndexOf(e)
-	if err != nil || i == invalidIndex {
+	if err != nil || i == utils.InvalidIndex {
 		return false, err
 	}
 
@@ -387,7 +387,7 @@ func filterArrayList(al *ArrayList, inverse bool, l ...interface{}) (bool, error
 	for _, e := range l {
 		i, _ := al.IndexOf(e)
 
-		if i == invalidIndex {
+		if i == utils.InvalidIndex {
 			continue
 		}
 

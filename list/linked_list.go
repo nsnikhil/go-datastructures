@@ -30,7 +30,7 @@ type LinkedList struct {
 func NewLinkedList(data ...interface{}) (*LinkedList, error) {
 	if len(data) == 0 {
 		return &LinkedList{
-			typeURL: na,
+			typeURL: utils.NA,
 		}, nil
 	}
 
@@ -62,7 +62,7 @@ func NewLinkedList(data ...interface{}) (*LinkedList, error) {
 }
 
 func (ll *LinkedList) Add(e interface{}) error {
-	if ll.typeURL == na {
+	if ll.typeURL == utils.NA {
 		ll.first = newNode(e)
 		ll.last = ll.first
 		ll.typeURL = utils.GetTypeName(e)
@@ -93,7 +93,7 @@ func (ll *LinkedList) Add(e interface{}) error {
 }
 
 func (ll *LinkedList) AddAt(i int, e interface{}) error {
-	if ll.typeURL == na {
+	if ll.typeURL == utils.NA {
 		ll.first = newNode(e)
 		ll.last = ll.first
 		ll.typeURL = utils.GetTypeName(e)
@@ -148,7 +148,7 @@ func (ll *LinkedList) AddAll(l ...interface{}) error {
 	idx := 0
 	var curr *node
 
-	if ll.typeURL == na {
+	if ll.typeURL == utils.NA {
 		ll.first = newNode(l[idx])
 		ll.last = ll.first
 		ll.typeURL = utils.GetTypeName(l[idx])
@@ -191,7 +191,7 @@ func (ll *LinkedList) AddAll(l ...interface{}) error {
 func (ll *LinkedList) AddFirst(e interface{}) error {
 	curr := ll.first
 
-	if ll.typeURL == na {
+	if ll.typeURL == utils.NA {
 		ll.typeURL = utils.GetTypeName(e)
 	} else {
 		if err := ll.isValidType(e); err != nil {
@@ -285,12 +285,12 @@ func (ll *LinkedList) IndexOf(e interface{}) (int, error) {
 	}
 
 	if err := ll.isValidType(e); err != nil {
-		return invalidIndex, err
+		return utils.InvalidIndex, err
 	}
 
 	i, _ := newFinder(doubly).search(ll, e)
-	if i == invalidIndex {
-		return invalidIndex, fmt.Errorf("element %v not found in the list", e)
+	if i == utils.InvalidIndex {
+		return utils.InvalidIndex, fmt.Errorf("element %v not found in the list", e)
 	}
 
 	return i, nil
@@ -315,12 +315,12 @@ func (ll *LinkedList) LastIndexOf(e interface{}) (int, error) {
 	}
 
 	if err := ll.isValidType(e); err != nil {
-		return invalidIndex, err
+		return utils.InvalidIndex, err
 	}
 
 	it := ll.DescendingIterator()
 
-	i := invalidIndex
+	i := utils.InvalidIndex
 	count := ll.Size() - 1
 
 	for it.HasNext() {
@@ -332,8 +332,8 @@ func (ll *LinkedList) LastIndexOf(e interface{}) (int, error) {
 		count--
 	}
 
-	if i == invalidIndex {
-		return invalidIndex, fmt.Errorf("element %v not found in the list", e)
+	if i == utils.InvalidIndex {
+		return utils.InvalidIndex, fmt.Errorf("element %v not found in the list", e)
 	}
 
 	return i, nil
@@ -349,7 +349,7 @@ func (ll *LinkedList) Remove(e interface{}) (bool, error) {
 	}
 
 	i, err := ll.IndexOf(e)
-	if err != nil || i == invalidIndex {
+	if err != nil || i == utils.InvalidIndex {
 		return false, err
 	}
 

@@ -4,7 +4,7 @@ import "reflect"
 
 func GetTypeName(e interface{}) string {
 	if e == nil {
-		return na
+		return NA
 	}
 	return reflect.TypeOf(e).Name()
 }

@@ -1,6 +1,6 @@
 package utils
 
 const (
-	na           = "na"
+	NA           = "na"
 	InvalidIndex = -1
 )
