@@ -35,7 +35,7 @@ func TestQuickSort(t *testing.T) {
 	testCases := []struct {
 		name           string
 		actualResult   func() List
-		expectedResult List
+		expectedResult func() List
 	}{
 		{
 			name: "sort integer list",
@@ -47,9 +47,11 @@ func TestQuickSort(t *testing.T) {
 
 				return al
 			},
-			expectedResult: &ArrayList{
-				typeURL: "int",
-				data:    []interface{}{1, 2, 3, 4, 5},
+			expectedResult: func() List {
+				al, err := NewArrayList(1, 2, 3, 4, 5)
+				require.NoError(t, err)
+
+				return al
 			},
 		},
 		{
@@ -62,9 +64,11 @@ func TestQuickSort(t *testing.T) {
 
 				return al
 			},
-			expectedResult: &ArrayList{
-				typeURL: "string",
-				data:    []interface{}{"a", "b", "c", "d", "e"},
+			expectedResult: func() List {
+				al, err := NewArrayList("a", "b", "c", "d", "e")
+				require.NoError(t, err)
+
+				return al
 			},
 		},
 		{
@@ -77,16 +81,18 @@ func TestQuickSort(t *testing.T) {
 
 				return al
 			},
-			expectedResult: &ArrayList{
-				typeURL: "testObj",
-				data:    []interface{}{newTestObj(1, 4), newTestObj(2, 3), newTestObj(4, 6)},
+			expectedResult: func() List {
+				al, err := NewArrayList(newTestObj(1, 4), newTestObj(2, 3), newTestObj(4, 6))
+				require.NoError(t, err)
+
+				return al
 			},
 		},
 	}
 
 	for _, testCase := range testCases {
 		t.Run(testCase.name, func(t *testing.T) {
-			assert.Equal(t, testCase.expectedResult, testCase.actualResult())
+			assert.Equal(t, testCase.expectedResult(), testCase.actualResult())
 		})
 	}
 }

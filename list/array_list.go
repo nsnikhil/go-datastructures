@@ -11,53 +11,48 @@ import (
 	"github.com/nsnikhil/go-datastructures/utils"
 )
 
+type factors struct {
+	upperLoadFactor float64
+	lowerLoadFactor float64
+
+	scalingFactor int
+	capacity      int
+}
+
 type ArrayList struct {
 	typeURL string
-	data    []interface{}
+	*factors
+	size int
+	data []interface{}
 }
 
 func NewArrayList(data ...interface{}) (*ArrayList, error) {
+	al := &ArrayList{
+		factors: &factors{upperLoadFactor: upperLoadFactor, lowerLoadFactor: lowerLoadFactor, scalingFactor: scalingFactor, capacity: initialCapacity},
+		size:    nought,
+		typeURL: utils.NA,
+		data:    make([]interface{}, initialCapacity),
+	}
+
 	if len(data) == 0 {
-		return &ArrayList{
-			typeURL: utils.NA,
-		}, nil
+		return al, nil
 	}
 
-	typeURL := utils.GetTypeName(data[0])
-
-	for i := 1; i < len(data); i++ {
-		if utils.GetTypeName(data[i]) != typeURL {
-			return nil, liberror.NewTypeMismatchError(typeURL, utils.GetTypeName(data[i]))
-		}
+	if err := addAll(al, data...); err != nil {
+		return nil, err
 	}
 
-	return &ArrayList{
-		typeURL: typeURL,
-		data:    data,
-	}, nil
+	return al, nil
 }
 
 func (al *ArrayList) Add(e interface{}) error {
-
-	if al.Size() == 0 && al.typeURL == utils.NA {
-		al.data = append(al.data, e)
-		al.typeURL = utils.GetTypeName(e)
-		return nil
-	}
-
-	if err := al.isValidType(e); err != nil {
-		return err
-	}
-
-	al.data = append(al.data, e)
-	return nil
+	return addAll(al, e)
 }
 
 func (al *ArrayList) AddAt(i int, e interface{}) error {
 	if al.IsEmpty() && al.typeURL == utils.NA {
-		al.data = append(al.data, e)
 		al.typeURL = utils.GetTypeName(e)
-		return nil
+		return addAll(al, e)
 	}
 
 	if err := al.isValidIndex(i); err != nil {
@@ -68,12 +63,24 @@ func (al *ArrayList) AddAt(i int, e interface{}) error {
 		return err
 	}
 
-	al.data = append(al.data[:i], append([]interface{}{e}, al.data[i:]...)...)
+	checkIncreaseCapacity(al)
+
+	for j := al.Size(); j > i; j-- {
+		al.data[j] = al.data[j-1]
+	}
+
+	al.data[i] = e
+
+	al.size++
 
 	return nil
 }
 
 func (al *ArrayList) AddAll(l ...interface{}) error {
+	return addAll(al, l...)
+}
+
+func addAll(al *ArrayList, l ...interface{}) error {
 	if len(l) == 0 {
 		return nil
 	}
@@ -84,39 +91,48 @@ func (al *ArrayList) AddAll(l ...interface{}) error {
 		}
 	}
 
-	idx := 0
+	eleType := utils.GetTypeName(l[0])
 
 	if al.typeURL == utils.NA {
-		al.data = append(al.data, l[idx])
-		al.typeURL = utils.GetTypeName(l[idx])
-		idx++
-	} else {
-
-		if err := al.isValidType(l[idx]); err != nil {
-			return err
-		}
-
-		if al.IsEmpty() {
-			al.data = append(al.data, l[idx])
-			idx++
-		}
-
+		al.typeURL = eleType
+	} else if al.typeURL != eleType {
+		return liberror.NewTypeMismatchError(al.typeURL, eleType)
 	}
 
-	al.data = append(al.data, l[idx:]...)
+	for _, e := range l {
+		if err := add(al, e); err != nil {
+			return nil
+		}
+	}
+
+	return nil
+}
+
+func add(al *ArrayList, e interface{}) error {
+	checkIncreaseCapacity(al)
+
+	if al.typeURL != utils.GetTypeName(e) {
+		return liberror.NewTypeMismatchError(al.typeURL, utils.GetTypeName(e))
+	}
+
+	al.data[al.size] = e
+	al.size++
 
 	return nil
 }
 
 func (al *ArrayList) Clear() {
-	al.data = nil
+	for i := 0; i < al.Size(); i++ {
+		al.data[i] = nil
+	}
+	al.size = nought
 }
 
 func (al *ArrayList) Clone() (List, error) {
 	if al.IsEmpty() {
 		return NewArrayList()
 	}
-	return al.SubList(0, al.Size())
+	return al.SubList(nought, al.Size())
 }
 
 func (al *ArrayList) Contains(e interface{}) (bool, error) {
@@ -164,7 +180,7 @@ func (al *ArrayList) IndexOf(e interface{}) (int, error) {
 }
 
 func (al *ArrayList) IsEmpty() bool {
-	return al.Size() == 0
+	return al.Size() == nought
 }
 
 func (al *ArrayList) Iterator() iterator.Iterator {
@@ -205,7 +221,7 @@ func (al *ArrayList) Remove(e interface{}) (bool, error) {
 		return false, err
 	}
 
-	al.data = append(al.data[0:i], al.data[i+1:]...)
+	removeAt(al, i)
 
 	return true, nil
 }
@@ -223,6 +239,15 @@ func (al *ArrayList) RemoveAt(i int) (interface{}, error) {
 	removeAt(al, i)
 
 	return e, nil
+}
+
+func removeAt(al *ArrayList, i int) {
+	for j := i; j < al.Size(); j++ {
+		al.data[j] = al.data[j+1]
+	}
+
+	al.size--
+	checkDecreaseCapacity(al)
 }
 
 func (al *ArrayList) RemoveAll(l ...interface{}) (bool, error) {
@@ -253,12 +278,23 @@ func (al *ArrayList) RemoveRange(from, to int) (bool, error) {
 		return false, err
 	}
 
-	//TODO USE IS VALID INDEX METHOD HERE
 	if to < 0 || to > al.Size() {
 		return false, liberror.NewIndexOutOfBoundError(to)
 	}
 
-	al.data = append(al.data[:from], al.data[to:]...)
+	idx := to
+	for i := from; i < al.Size(); i++ {
+		if idx < al.Size() {
+			al.data[i] = al.data[idx]
+			idx++
+		} else {
+			al.data[i] = interface{}(nil)
+		}
+	}
+
+	al.size -= to - from
+
+	checkDecreaseCapacity(al)
 
 	return true, nil
 }
@@ -329,7 +365,7 @@ func (al *ArrayList) Set(i int, e interface{}) (interface{}, error) {
 }
 
 func (al *ArrayList) Size() int {
-	return len(al.data)
+	return al.size
 }
 
 func (al *ArrayList) Sort(c comparator.Comparator) {
@@ -345,17 +381,22 @@ func (al *ArrayList) SubList(s int, e int) (List, error) {
 		return nil, err
 	}
 
-	//TODO USE IS VALID INDEX METHOD HERE
 	if e < 0 || e > al.Size() {
 		return nil, liberror.NewIndexOutOfBoundError(e)
 	}
 
-	tempData := make([]interface{}, 0)
-	for i := s; i < e; i++ {
-		tempData = append(tempData, al.Get(i))
+	tempList, err := NewArrayList()
+	if err != nil {
+		return nil, err
 	}
 
-	return NewArrayList(tempData...)
+	for i := s; i < e; i++ {
+		if err := tempList.Add(al.Get(i)); err != nil {
+			return nil, err
+		}
+	}
+
+	return tempList, nil
 }
 
 type arrayListIterator struct {
@@ -422,25 +463,61 @@ func filterArrayList(al *ArrayList, inverse bool, l ...interface{}) (bool, error
 	}
 
 	sz := al.Size()
-	tempData := make([]interface{}, 0)
+	tempData := make([]interface{}, al.capacity)
+	k := 0
 	for i := 0; i < sz; i++ {
 		if inverse {
 			if idx[i] {
-				tempData = append(tempData, al.Get(i))
+				tempData[k] = al.Get(i)
+				k++
 			}
 		} else {
 			if !idx[i] {
-				tempData = append(tempData, al.Get(i))
+				tempData[k] = al.Get(i)
+				k++
 			}
 		}
 	}
 
 	al.data = tempData
 
+	if inverse {
+		al.size = len(l)
+	} else {
+		al.size -= len(l)
+	}
+
+	checkDecreaseCapacity(al)
+
 	return true, nil
 
 }
 
-func removeAt(al *ArrayList, i int) {
-	al.data = append(al.data[0:i], al.data[i+1:]...)
+func checkIncreaseCapacity(al *ArrayList) {
+	if al.size >= int(float64(al.capacity)*al.upperLoadFactor) {
+		al.capacity *= al.scalingFactor
+		al.data = resize(al.capacity, al.data)
+	}
+}
+
+func checkDecreaseCapacity(al *ArrayList) {
+	if al.capacity != initialCapacity && al.size <= int(float64(al.capacity)*al.lowerLoadFactor) {
+		al.capacity /= al.scalingFactor
+		al.data = resize(al.capacity, al.data)
+	}
+}
+
+func resize(capacity int, data []interface{}) []interface{} {
+	temp := make([]interface{}, capacity)
+
+	sz := len(data)
+	if len(temp) < sz {
+		sz = len(temp)
+	}
+
+	for i := 0; i < sz; i++ {
+		temp[i] = data[i]
+	}
+
+	return temp
 }
