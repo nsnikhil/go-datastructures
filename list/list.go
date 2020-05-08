@@ -54,16 +54,6 @@ type List interface {
 	AddAll(l ...interface{}) error
 
 	/*
-		add the first value if not present else adds the other value.
-
-		params:
-		first: the value to add.
-		other: the value to add if first if present.
-		error: return error if the list is empty or if type mismatch.
-	*/
-	Upsert(first, other interface{}) error
-
-	/*
 		clears the content of list.
 	*/
 	Clear()

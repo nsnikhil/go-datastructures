@@ -218,19 +218,6 @@ func (ll *LinkedList) AddLast(e interface{}) error {
 	return ll.Add(e)
 }
 
-func (ll *LinkedList) Upsert(first, other interface{}) error {
-	err := ll.Replace(first, other)
-	if err == nil {
-		return nil
-	}
-
-	if errors.As(err, &liberror.TypeMismatchError{}) {
-		return err
-	}
-
-	return ll.AddLast(first)
-}
-
 func (ll *LinkedList) Clear() {
 	ll.first = nil
 	ll.last = nil

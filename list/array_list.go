@@ -108,19 +108,6 @@ func (al *ArrayList) AddAll(l ...interface{}) error {
 	return nil
 }
 
-func (al *ArrayList) Upsert(first, other interface{}) error {
-	err := al.Replace(first, other)
-	if err == nil {
-		return nil
-	}
-
-	if errors.As(err, &liberror.TypeMismatchError{}) {
-		return err
-	}
-
-	return al.Add(first)
-}
-
 func (al *ArrayList) Clear() {
 	al.data = nil
 }
