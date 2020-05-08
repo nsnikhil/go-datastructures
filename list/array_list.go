@@ -1,6 +1,7 @@
 package list
 
 import (
+	"errors"
 	"fmt"
 	"github.com/nsnikhil/go-datastructures/functions/comparator"
 	"github.com/nsnikhil/go-datastructures/functions/iterator"
@@ -105,6 +106,19 @@ func (al *ArrayList) AddAll(l ...interface{}) error {
 	al.data = append(al.data, l[idx:]...)
 
 	return nil
+}
+
+func (al *ArrayList) Upsert(first, other interface{}) error {
+	err := al.Replace(first, other)
+	if err == nil {
+		return nil
+	}
+
+	if errors.As(err, &liberror.TypeMismatchError{}) {
+		return err
+	}
+
+	return al.Add(first)
 }
 
 func (al *ArrayList) Clear() {
@@ -260,6 +274,32 @@ func (al *ArrayList) RemoveRange(from, to int) (bool, error) {
 	al.data = append(al.data[:from], al.data[to:]...)
 
 	return true, nil
+}
+
+func (al *ArrayList) Replace(old, new interface{}) error {
+	if al.IsEmpty() {
+		return errors.New("list is empty")
+	}
+
+	oldType := utils.GetTypeName(old)
+	newType := utils.GetTypeName(new)
+
+	if al.typeURL != oldType {
+		return liberror.NewTypeMismatchError(al.typeURL, oldType)
+	}
+
+	if al.typeURL != newType {
+		return liberror.NewTypeMismatchError(al.typeURL, newType)
+	}
+
+	id, err := al.IndexOf(old)
+	if err != nil {
+		return err
+	}
+
+	al.data[id] = new
+
+	return nil
 }
 
 func (al *ArrayList) ReplaceAll(uo operator.UnaryOperator) error {

@@ -1,6 +1,7 @@
 package list
 
 import (
+	"errors"
 	"fmt"
 	"github.com/nsnikhil/go-datastructures/functions/comparator"
 	"github.com/nsnikhil/go-datastructures/functions/iterator"
@@ -217,6 +218,19 @@ func (ll *LinkedList) AddLast(e interface{}) error {
 	return ll.Add(e)
 }
 
+func (ll *LinkedList) Upsert(first, other interface{}) error {
+	err := ll.Replace(first, other)
+	if err == nil {
+		return nil
+	}
+
+	if errors.As(err, &liberror.TypeMismatchError{}) {
+		return err
+	}
+
+	return ll.AddLast(first)
+}
+
 func (ll *LinkedList) Clear() {
 	ll.first = nil
 	ll.last = nil
@@ -377,6 +391,10 @@ func (ll *LinkedList) RemoveAt(i int) (interface{}, error) {
 		i--
 	}
 
+	if curr == nil {
+		return nil, liberror.NewIndexOutOfBoundError(i)
+	}
+
 	if curr.prev == nil {
 		ll.first = curr.next
 
@@ -444,6 +462,37 @@ func (ll *LinkedList) RemoveLastOccurrence(e interface{}) (bool, error) {
 	}
 
 	return true, nil
+}
+
+func (ll *LinkedList) Replace(old, new interface{}) error {
+	if ll.IsEmpty() {
+		return errors.New("list is empty")
+	}
+
+	oldType := utils.GetTypeName(old)
+	newType := utils.GetTypeName(new)
+
+	if ll.typeURL != oldType {
+		return liberror.NewTypeMismatchError(ll.typeURL, oldType)
+	}
+
+	if ll.typeURL != newType {
+		return liberror.NewTypeMismatchError(ll.typeURL, newType)
+	}
+
+	curr := ll.first
+
+	for curr != nil && curr.data != old {
+		curr = curr.next
+	}
+
+	if curr == nil {
+		return fmt.Errorf("element %v not found in the list", old)
+	}
+
+	curr.data = new
+
+	return nil
 }
 
 func (ll *LinkedList) ReplaceAll(uo operator.UnaryOperator) error {

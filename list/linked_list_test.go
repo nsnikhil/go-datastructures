@@ -867,6 +867,118 @@ func TestLinkedListAllAdd(t *testing.T) {
 	}
 }
 
+func TestLinkedListUpsert(t *testing.T) {
+	testCases := []struct {
+		name           string
+		actualResult   func() (error, List)
+		expectedResult func() List
+		expectedError  error
+	}{
+		{
+			name: "test upsert value to a empty list",
+			actualResult: func() (error, List) {
+				ll, err := NewLinkedList()
+				require.NoError(t, err)
+
+				return ll.Upsert(1, 2), ll
+			},
+			expectedResult: func() List {
+				ll, err := NewLinkedList(1)
+				require.NoError(t, err)
+
+				return ll
+			},
+		},
+		{
+			name: "test upsert value to non empty list",
+			actualResult: func() (error, List) {
+				ll, err := NewLinkedList(1, 2)
+				require.NoError(t, err)
+
+				return ll.Upsert(3, 0), ll
+			},
+			expectedResult: func() List {
+				ll, err := NewLinkedList(1, 2, 3)
+				require.NoError(t, err)
+
+				return ll
+			},
+		},
+		{
+			name: "test upsert replace value when present",
+			actualResult: func() (error, List) {
+				ll, err := NewLinkedList(1, 2)
+				require.NoError(t, err)
+
+				return ll.Upsert(2, 3), ll
+			},
+			expectedResult: func() List {
+				ll, err := NewLinkedList(1, 3)
+				require.NoError(t, err)
+
+				return ll
+			},
+		},
+		{
+			name: "test return error when type is different of first value",
+			actualResult: func() (error, List) {
+				ll, err := NewLinkedList(1, 2)
+				require.NoError(t, err)
+
+				return ll.Upsert('a', 3), ll
+			},
+			expectedResult: func() List {
+				ll, err := NewLinkedList(1, 2)
+				require.NoError(t, err)
+
+				return ll
+			},
+			expectedError: liberror.NewTypeMismatchError("int", "int32"),
+		},
+		{
+			name: "test return error when type is different of other value",
+			actualResult: func() (error, List) {
+				ll, err := NewLinkedList(1, 2)
+				require.NoError(t, err)
+
+				return ll.Upsert(2, 'a'), ll
+			},
+			expectedResult: func() List {
+				ll, err := NewLinkedList(1, 2)
+				require.NoError(t, err)
+
+				return ll
+			},
+			expectedError: liberror.NewTypeMismatchError("int", "int32"),
+		},
+		{
+			name: "test return error when type is different for both the value",
+			actualResult: func() (error, List) {
+				ll, err := NewLinkedList(1, 2)
+				require.NoError(t, err)
+
+				return ll.Upsert('a', 'b'), ll
+			},
+			expectedResult: func() List {
+				ll, err := NewLinkedList(1, 2)
+				require.NoError(t, err)
+
+				return ll
+			},
+			expectedError: liberror.NewTypeMismatchError("int", "int32"),
+		},
+	}
+
+	for _, testCase := range testCases {
+		t.Run(testCase.name, func(t *testing.T) {
+			err, res := testCase.actualResult()
+
+			assert.Equal(t, testCase.expectedError, err)
+			assert.Equal(t, testCase.expectedResult(), res)
+		})
+	}
+}
+
 func TestLinkedListClear(t *testing.T) {
 	testCases := []struct {
 		name   string
@@ -2114,6 +2226,135 @@ func TestLinkedListRemoveLastOccurrence(t *testing.T) {
 	for _, testCase := range testCases {
 		t.Run(testCase.name, func(t *testing.T) {
 			res, err := testCase.actualResult()
+			assert.Equal(t, testCase.expectedError, err)
+			assert.Equal(t, testCase.expectedResult(), res)
+		})
+	}
+}
+
+func TestLinkedListReplace(t *testing.T) {
+	testCases := []struct {
+		name           string
+		actualResult   func() (error, List)
+		expectedResult func() List
+		expectedError  error
+	}{
+		{
+			name: "test replace a given value with new one",
+			actualResult: func() (error, List) {
+				ll, err := NewLinkedList(1)
+				require.NoError(t, err)
+
+				return ll.Replace(1, 2), ll
+			},
+			expectedResult: func() List {
+				ll, err := NewLinkedList(2)
+				require.NoError(t, err)
+
+				return ll
+			},
+		},
+		{
+			name: "test replace a given value with new one two",
+			actualResult: func() (error, List) {
+				ll, err := NewLinkedList(1, 2, 5, 4)
+				require.NoError(t, err)
+
+				return ll.Replace(5, 3), ll
+			},
+			expectedResult: func() List {
+				ll, err := NewLinkedList(1, 2, 3, 4)
+				require.NoError(t, err)
+
+				return ll
+			},
+		},
+		{
+			name: "test return error when item is not found in the list",
+			actualResult: func() (error, List) {
+				ll, err := NewLinkedList(1, 2)
+				require.NoError(t, err)
+
+				return ll.Replace(5, 3), ll
+			},
+			expectedResult: func() List {
+				ll, err := NewLinkedList(1, 2)
+				require.NoError(t, err)
+
+				return ll
+			},
+			expectedError: errors.New("element 5 not found in the list"),
+		},
+		{
+			name: "test return error when old item has different type",
+			actualResult: func() (error, List) {
+				ll, err := NewLinkedList(1, 2)
+				require.NoError(t, err)
+
+				return ll.Replace('a', 3), ll
+			},
+			expectedResult: func() List {
+				ll, err := NewLinkedList(1, 2)
+				require.NoError(t, err)
+
+				return ll
+			},
+			expectedError: liberror.NewTypeMismatchError("int", "int32"),
+		},
+		{
+			name: "test return error when new item has different type",
+			actualResult: func() (error, List) {
+				ll, err := NewLinkedList(1, 2)
+				require.NoError(t, err)
+
+				return ll.Replace(1, 'a'), ll
+			},
+			expectedResult: func() List {
+				ll, err := NewLinkedList(1, 2)
+				require.NoError(t, err)
+
+				return ll
+			},
+			expectedError: liberror.NewTypeMismatchError("int", "int32"),
+		},
+		{
+			name: "test return error when new and old item has different type",
+			actualResult: func() (error, List) {
+				ll, err := NewLinkedList(1, 2)
+				require.NoError(t, err)
+
+				return ll.Replace('a', 'b'), ll
+			},
+			expectedResult: func() List {
+				ll, err := NewLinkedList(1, 2)
+				require.NoError(t, err)
+
+				return ll
+			},
+			expectedError: liberror.NewTypeMismatchError("int", "int32"),
+		},
+		{
+			name: "test return error when list is empty",
+			actualResult: func() (error, List) {
+				ll, err := NewLinkedList()
+				require.NoError(t, err)
+
+				return ll.Replace(1, 2), ll
+			},
+			expectedResult: func() List {
+				ll, err := NewLinkedList()
+				require.NoError(t, err)
+
+				return ll
+			},
+			expectedError: errors.New("list is empty"),
+		},
+	}
+
+	for _, testCase := range testCases {
+		t.Run(testCase.name, func(t *testing.T) {
+			err, res := testCase.actualResult()
+
 			assert.Equal(t, testCase.expectedError, err)
 			assert.Equal(t, testCase.expectedResult(), res)
 		})

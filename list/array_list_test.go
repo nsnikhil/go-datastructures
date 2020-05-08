@@ -179,6 +179,106 @@ func TestArrayListAdd(t *testing.T) {
 	}
 }
 
+func TestArrayListUpsert(t *testing.T) {
+	testCases := []struct {
+		name           string
+		actualResult   func() (error, List)
+		expectedResult List
+		expectedError  error
+	}{
+		{
+			name: "test upsert value to a empty list",
+			actualResult: func() (error, List) {
+				al, err := NewArrayList()
+				require.NoError(t, err)
+
+				return al.Upsert(1, 2), al
+			},
+			expectedResult: &ArrayList{
+				typeURL: "int",
+				data:    []interface{}{1},
+			},
+		},
+		{
+			name: "test upsert value to non empty list",
+			actualResult: func() (error, List) {
+				al, err := NewArrayList(1, 2)
+				require.NoError(t, err)
+
+				return al.Upsert(3, 0), al
+			},
+			expectedResult: &ArrayList{
+				typeURL: "int",
+				data:    []interface{}{1, 2, 3},
+			},
+		},
+		{
+			name: "test upsert replace value when present",
+			actualResult: func() (error, List) {
+				al, err := NewArrayList(1, 2)
+				require.NoError(t, err)
+
+				return al.Upsert(2, 3), al
+			},
+			expectedResult: &ArrayList{
+				typeURL: "int",
+				data:    []interface{}{1, 3},
+			},
+		},
+		{
+			name: "test return error when type is different of first value",
+			actualResult: func() (error, List) {
+				al, err := NewArrayList(1, 2)
+				require.NoError(t, err)
+
+				return al.Upsert('a', 3), al
+			},
+			expectedResult: &ArrayList{
+				typeURL: "int",
+				data:    []interface{}{1, 2},
+			},
+			expectedError: liberror.NewTypeMismatchError("int", "int32"),
+		},
+		{
+			name: "test return error when type is different of other value",
+			actualResult: func() (error, List) {
+				al, err := NewArrayList(1, 2)
+				require.NoError(t, err)
+
+				return al.Upsert(2, 'a'), al
+			},
+			expectedResult: &ArrayList{
+				typeURL: "int",
+				data:    []interface{}{1, 2},
+			},
+			expectedError: liberror.NewTypeMismatchError("int", "int32"),
+		},
+		{
+			name: "test return error when type is different for both the value",
+			actualResult: func() (error, List) {
+				al, err := NewArrayList(1, 2)
+				require.NoError(t, err)
+
+				return al.Upsert('a', 'b'), al
+			},
+			expectedResult: &ArrayList{
+				typeURL: "int",
+				data:    []interface{}{1, 2},
+			},
+			expectedError: liberror.NewTypeMismatchError("int", "int32"),
+		},
+	}
+
+	for _, testCase := range testCases {
+		t.Run(testCase.name, func(t *testing.T) {
+			err, res := testCase.actualResult()
+
+			assert.Equal(t, testCase.expectedError, err)
+			assert.Equal(t, testCase.expectedResult, res)
+		})
+	}
+}
+
 func TestArrayListGet(t *testing.T) {
 	testCases := []struct {
 		name           string
@@ -1467,6 +1567,121 @@ type testInvalidOperator struct{}
 
 func (ts testInvalidOperator) Apply(e interface{}) interface{} {
 	return fmt.Sprintf("%d", e.(int))
+}
+
+func TestArrayListReplace(t *testing.T) {
+	testCases := []struct {
+		name           string
+		actualResult   func() (error, List)
+		expectedResult List
+		expectedError  error
+	}{
+		{
+			name: "test replace a given value with new one",
+			actualResult: func() (error, List) {
+				al, err := NewArrayList(1)
+				require.NoError(t, err)
+
+				return al.Replace(1, 2), al
+			},
+			expectedResult: &ArrayList{
+				typeURL: "int",
+				data:    []interface{}{2},
+			},
+		},
+		{
+			name: "test replace a given value with new one two",
+			actualResult: func() (error, List) {
+				al, err := NewArrayList(1, 2, 5, 4)
+				require.NoError(t, err)
+
+				return al.Replace(5, 3), al
+			},
+			expectedResult: &ArrayList{
+				typeURL: "int",
+				data:    []interface{}{1, 2, 3, 4},
+			},
+		},
+		{
+			name: "test return error when item is not found in the list",
+			actualResult: func() (error, List) {
+				al, err := NewArrayList(1, 2)
+				require.NoError(t, err)
+
+				return al.Replace(5, 3), al
+			},
+			expectedResult: &ArrayList{
+				typeURL: "int",
+				data:    []interface{}{1, 2},
+			},
+			expectedError: errors.New("element 5 not found in the list"),
+		},
+		{
+			name: "test return error when old item has different type",
+			actualResult: func() (error, List) {
+				al, err := NewArrayList(1, 2)
+				require.NoError(t, err)
+
+				return al.Replace('a', 3), al
+			},
+			expectedResult: &ArrayList{
+				typeURL: "int",
+				data:    []interface{}{1, 2},
+			},
+			expectedError: liberror.NewTypeMismatchError("int", "int32"),
+		},
+		{
+			name: "test return error when new item has different type",
+			actualResult: func() (error, List) {
+				al, err := NewArrayList(1, 2)
+				require.NoError(t, err)
+
+				return al.Replace(1, 'a'), al
+			},
+			expectedResult: &ArrayList{
+				typeURL: "int",
+				data:    []interface{}{1, 2},
+			},
+			expectedError: liberror.NewTypeMismatchError("int", "int32"),
+		},
+		{
+			name: "test return error when old and new item has different type",
+			actualResult: func() (error, List) {
+				al, err := NewArrayList(1, 2)
+				require.NoError(t, err)
+
+				return al.Replace('a', 'b'), al
+			},
+			expectedResult: &ArrayList{
+				typeURL: "int",
+				data:    []interface{}{1, 2},
+			},
+			expectedError: liberror.NewTypeMismatchError("int", "int32"),
+		},
+		{
+			name: "test return error when list is empty",
+			actualResult: func() (error, List) {
+				al, err := NewArrayList()
+				require.NoError(t, err)
+
+				return al.Replace(1, 2), al
+			},
+			expectedResult: &ArrayList{
+				typeURL: "na",
+				data:    []interface{}(nil),
+			},
+			expectedError: errors.New("list is empty"),
+		},
+	}
+
+	for _, testCase := range testCases {
+		t.Run(testCase.name, func(t *testing.T) {
+			err, res := testCase.actualResult()
+
+			assert.Equal(t, testCase.expectedError, err)
+			assert.Equal(t, testCase.expectedResult, res)
+		})
+	}
 }
 
 func TestArrayListReplaceAll(t *testing.T) {

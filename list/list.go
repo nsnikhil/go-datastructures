@@ -54,6 +54,16 @@ type List interface {
 	AddAll(l ...interface{}) error
 
 	/*
+		add the first value if not present else adds the other value.
+
+		params:
+		first: the value to add.
+		other: the value to add if first if present.
+		error: return error if the list is empty or if type mismatch.
+	*/
+	Upsert(first, other interface{}) error
+
+	/*
 		clears the content of list.
 	*/
 	Clear()
@@ -182,6 +192,16 @@ type List interface {
 		type mismatch error if any element is of different type then what was set for the list.
 	*/
 	RemoveAll(l ...interface{}) (bool, error)
+
+	/*
+		replace and given value with another one.
+
+		params:
+		old: the value to be replaced.
+		new: the value to replace with.
+		error: return error if the list is empty or if the element is not found or if type mismatch.
+	*/
+	Replace(old, new interface{}) error
 
 	/*
 		runs and function over all the element in the list, eg inc operator to increment all the
