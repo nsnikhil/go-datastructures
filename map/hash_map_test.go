@@ -639,6 +639,43 @@ func TestHashMapPutAll(t *testing.T) {
 			},
 			expectedError: liberror.NewTypeMismatchError("int32", "int"),
 		},
+		{
+			name: "return error when argument is empty",
+			actualResult: func() (error, Map) {
+				hm, err := NewHashMap(NewPair(1,'a'))
+				require.NoError(t, err)
+
+				return hm.PutAll(), hm
+			},
+			expectedResult: func() Map {
+				d := make([]*list.LinkedList, 16)
+				hs := sha3.New512()
+
+				values := []*Pair{NewPair(1, 'a')}
+
+				for _, value := range values {
+					idx, err := indexOf(&hs, value.k, 16)
+					require.NoError(t, err)
+					if d[idx] == nil {
+						ll, err := list.NewLinkedList()
+						require.NoError(t, err)
+
+						d[idx] = ll
+					}
+
+					require.NoError(t, d[idx].AddLast(NewPair(value.k, value.v)))
+				}
+
+				return &HashMap{
+					typeURL: &typeURL{keyTypeURL: "int", valueTypeURL: "int32"},
+					factors: &factors{capacity: 16, upperLoadFactor: 0.75, lowerLoadFactor: 0.40, scalingFactor: 2},
+					counter: &counter{elementCount: 1, countMap: map[int]bool{0: true}, uniqueCount: 1},
+					h:       hs,
+					data:    d,
+				}
+			},
+			expectedError: errors.New("argument list is empty"),
+		},
 	}
 
 	for _, testCase := range testCases {

@@ -275,6 +275,10 @@ func (hmi *hashMapIterator) Next() interface{} {
 }
 
 func insertAll(hm *HashMap, p ...*Pair) error {
+	if len(p) == nought {
+		return errors.New("argument list is empty")
+	}
+
 	kt, vt, err := validateType(p...)
 	if err != nil {
 		return err
