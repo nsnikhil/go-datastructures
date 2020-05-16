@@ -18,12 +18,12 @@ This Project aims to port/build well known and commonly used data structures to 
 - [ ] Skip List
 
 #### Map
-- [ ] Hash Map
+- [x] Hash Map
 - [ ] Linked Hash Map
 - [ ] Tree Map
 
 #### Set
-- [ ] Set
+- [x] HashSet
 
 #### Stack
 - [x] Stack
