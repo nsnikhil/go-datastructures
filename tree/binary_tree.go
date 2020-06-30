@@ -660,11 +660,108 @@ func (bt *BinaryTree) VerticalViewIterator() iterator.Iterator {
 }
 
 func (bt *BinaryTree) LeftViewIterator() iterator.Iterator {
-	return nil
+	return newBtLeftVOrderIterator(bt)
+}
+
+type btLeftVOrderIterator struct {
+	curr *binaryNode
+	q    queue.Queue
+	v    bool
+}
+
+func newBtLeftVOrderIterator(bt *BinaryTree) iterator.Iterator {
+	q, _ := queue.NewLinkedQueue()
+	_ = q.Add(bt.root)
+
+	return &btLeftVOrderIterator{
+		curr: bt.root,
+		q:    q,
+	}
+}
+
+func (bfv *btLeftVOrderIterator) HasNext() bool {
+	return !bfv.q.Empty()
+}
+
+func (bfv *btLeftVOrderIterator) Next() interface{} {
+	sz := bfv.q.Count()
+
+	var res *binaryNode = nil
+
+	for i := 0; i < sz; i++ {
+		curr, _ := bfv.q.Remove()
+
+		if res == nil {
+			res = curr.(*binaryNode)
+		}
+
+		if curr.(*binaryNode).left != nil {
+			_ = bfv.q.Add(curr.(*binaryNode).left)
+		}
+
+		if curr.(*binaryNode).right != nil {
+			_ = bfv.q.Add(curr.(*binaryNode).right)
+		}
+
+	}
+
+	if bfv.v {
+		return res
+	}
+
+	return res.data
 }
 
 func (bt *BinaryTree) RightViewIterator() iterator.Iterator {
-	return nil
+	return newBtRightVOrderIterator(bt)
+}
+
+type btRightVOrderIterator struct {
+	curr *binaryNode
+	q    queue.Queue
+	v    bool
+}
+
+func newBtRightVOrderIterator(bt *BinaryTree) iterator.Iterator {
+	q, _ := queue.NewLinkedQueue()
+	_ = q.Add(bt.root)
+
+	return &btRightVOrderIterator{
+		curr: bt.root,
+		q:    q,
+	}
+}
+
+func (brv *btRightVOrderIterator) HasNext() bool {
+	return !brv.q.Empty()
+}
+
+func (brv *btRightVOrderIterator) Next() interface{} {
+	sz := brv.q.Count()
+
+	var res *binaryNode = nil
+
+	for i := 0; i < sz; i++ {
+		curr, _ := brv.q.Remove()
+
+		if res == nil {
+			res = curr.(*binaryNode)
+		}
+
+		if curr.(*binaryNode).right != nil {
+			_ = brv.q.Add(curr.(*binaryNode).right)
+		}
+
+		if curr.(*binaryNode).left != nil {
+			_ = brv.q.Add(curr.(*binaryNode).left)
+		}
+	}
+
+	if brv.v {
+		return res
+	}
+
+	return res.data
 }
 
 func (bt *BinaryTree) TopViewIterator() iterator.Iterator {
