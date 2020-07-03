@@ -8,6 +8,7 @@ import (
 	"github.com/nsnikhil/go-datastructures/liberror"
 	"github.com/nsnikhil/go-datastructures/list"
 	"github.com/nsnikhil/go-datastructures/queue"
+	"github.com/nsnikhil/go-datastructures/set"
 	"github.com/nsnikhil/go-datastructures/stack"
 	"github.com/nsnikhil/go-datastructures/utils"
 )
@@ -15,6 +16,7 @@ import (
 type binaryNode struct {
 	data interface{}
 	//level  int // NOT IMPLEMENTED
+	hd     int
 	left   *binaryNode
 	right  *binaryNode
 	parent *binaryNode
@@ -37,6 +39,16 @@ func (bn *binaryNode) childCount() int {
 		c++
 	}
 	return c
+}
+
+func (bn *binaryNode) clone() *binaryNode {
+	return &binaryNode{
+		data:   bn.data,
+		hd:     bn.hd,
+		left:   bn.left,
+		right:  bn.right,
+		parent: bn.parent,
+	}
 }
 
 func newBinaryNode(data interface{}) *binaryNode {
@@ -280,6 +292,14 @@ func (bt *BinaryTree) Empty() bool {
 func (bt *BinaryTree) Clear() {
 	bt.root = nil
 	bt.count = utils.Naught
+}
+
+func (bt *BinaryTree) Clone() Tree {
+	return &BinaryTree{
+		typeURL: bt.typeURL,
+		count:   bt.count,
+		root:    cloneNodes(bt.root, nil),
+	}
 }
 
 func (bt *BinaryTree) Mirror() (bool, error) {
@@ -788,11 +808,57 @@ func (brv *btRightVOrderIterator) Next() interface{} {
 }
 
 func (bt *BinaryTree) TopViewIterator() iterator.Iterator {
-	return nil
+	return newBtTopVOrderIterator(bt.Clone().(*BinaryTree))
+}
+
+type btTopVOrderIterator struct {
+	it iterator.Iterator
+	v  bool
+}
+
+func newBtTopVOrderIterator(bt *BinaryTree) iterator.Iterator {
+	return &btTopVOrderIterator{
+		it: horizontalIterator(bt, false),
+	}
+}
+
+func (btv *btTopVOrderIterator) HasNext() bool {
+	return btv.it.HasNext()
+}
+
+func (btv *btTopVOrderIterator) Next() interface{} {
+	if btv.v {
+		return btv.it.Next()
+	}
+
+	return btv.it.Next().(*binaryNode).data
 }
 
 func (bt *BinaryTree) BottomViewIterator() iterator.Iterator {
-	return nil
+	return newBtBottomVOrderIterator(bt.Clone().(*BinaryTree))
+}
+
+type btBottomVOrderIterator struct {
+	it iterator.Iterator
+	v  bool
+}
+
+func newBtBottomVOrderIterator(bt *BinaryTree) iterator.Iterator {
+	return &btBottomVOrderIterator{
+		it: horizontalIterator(bt, true),
+	}
+}
+
+func (brv *btBottomVOrderIterator) HasNext() bool {
+	return brv.it.HasNext()
+}
+
+func (brv *btBottomVOrderIterator) Next() interface{} {
+	if brv.v {
+		return brv.it.Next()
+	}
+
+	return brv.it.Next().(*binaryNode).data
 }
 
 func lastNode(bt *BinaryTree) (*binaryNode, *binaryNode) {
@@ -1054,4 +1120,68 @@ func paths(n *binaryNode, temp *list.LinkedList, res list.List) error {
 	}
 
 	return nil
+}
+
+func cloneNodes(n *binaryNode, p *binaryNode) *binaryNode {
+	if n == nil {
+		return nil
+	}
+
+	bn := &binaryNode{}
+	bn.data = n.data
+	bn.parent = p
+	bn.left = cloneNodes(n.left, bn)
+	bn.right = cloneNodes(n.right, bn)
+
+	return bn
+}
+
+func horizontalIterator(bt *BinaryTree, bottom bool) iterator.Iterator {
+	q, _ := queue.NewLinkedQueue()
+	_ = q.Add(bt.root)
+
+	chd := 0
+	bt.root.hd = chd
+
+	m := make(map[int]interface{})
+	keys, _ := list.NewArrayList()
+
+	for !q.Empty() {
+
+		t, _ := q.Remove()
+
+		if m[t.(*binaryNode).hd] == nil || bottom {
+			_ = keys.Add(t.(*binaryNode).hd)
+			m[t.(*binaryNode).hd] = t.(*binaryNode)
+		}
+
+		if t.(*binaryNode).left != nil {
+			l := t.(*binaryNode).left
+			l.hd = t.(*binaryNode).hd - 1
+			_ = q.Add(l)
+		}
+
+		if t.(*binaryNode).right != nil {
+			l := t.(*binaryNode).right
+			l.hd = t.(*binaryNode).hd + 1
+			_ = q.Add(l)
+		}
+
+	}
+
+	l, _ := list.NewArrayList()
+	keys.Sort(comparator.NewIntegerComparator())
+
+	it := keys.Iterator()
+	s, _ := set.NewHashSet()
+
+	for it.HasNext() {
+		e := it.Next()
+		if !s.Contains(m[e.(int)]) {
+			_ = l.Add(m[e.(int)])
+			_ = s.Add(m[e.(int)])
+		}
+	}
+
+	return l.Iterator()
 }

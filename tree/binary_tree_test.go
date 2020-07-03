@@ -3325,3 +3325,407 @@ func TestBinaryTreePaths(t *testing.T) {
 		})
 	}
 }
+
+func TestBinaryTreeClone(t *testing.T) {
+	testCases := []struct {
+		name           string
+		actualResult   func() Tree
+		expectedResult func() Tree
+	}{
+		{
+			name: "test clone empty tree",
+			actualResult: func() Tree {
+				bt, err := NewBinaryTree()
+				require.NoError(t, err)
+
+				return bt.Clone()
+			},
+			expectedResult: func() Tree {
+				bt, err := NewBinaryTree()
+				require.NoError(t, err)
+
+				return bt
+			},
+		},
+		{
+			name: "test clone tree with one node",
+			actualResult: func() Tree {
+				bt, err := NewBinaryTree(1)
+				require.NoError(t, err)
+
+				return bt.Clone()
+			},
+			expectedResult: func() Tree {
+				bt, err := NewBinaryTree(1)
+				require.NoError(t, err)
+
+				return bt
+			},
+		},
+		{
+			name: "test clone tree with multiple nodes",
+			actualResult: func() Tree {
+				bt, err := NewBinaryTree(1, 2, 3, 4, 5, 6, 7)
+				require.NoError(t, err)
+
+				return bt.Clone()
+			},
+			expectedResult: func() Tree {
+				bt, err := NewBinaryTree(1, 2, 3, 4, 5, 6, 7)
+				require.NoError(t, err)
+
+				return bt
+			},
+		},
+		{
+			name: "test clone tree with multiple nodes two",
+			actualResult: func() Tree {
+				bt, err := NewBinaryTree(10)
+				require.NoError(t, err)
+
+				c := comparator.NewIntegerComparator()
+
+				require.NoError(t, bt.InsertCompare(20, c))
+				require.NoError(t, bt.InsertCompare(15, c))
+				require.NoError(t, bt.InsertCompare(25, c))
+				require.NoError(t, bt.InsertCompare(12, c))
+				require.NoError(t, bt.InsertCompare(17, c))
+				require.NoError(t, bt.InsertCompare(19, c))
+
+				return bt.Clone()
+			},
+			expectedResult: func() Tree {
+				bt, err := NewBinaryTree(10)
+				require.NoError(t, err)
+
+				c := comparator.NewIntegerComparator()
+
+				require.NoError(t, bt.InsertCompare(20, c))
+				require.NoError(t, bt.InsertCompare(15, c))
+				require.NoError(t, bt.InsertCompare(25, c))
+				require.NoError(t, bt.InsertCompare(12, c))
+				require.NoError(t, bt.InsertCompare(17, c))
+				require.NoError(t, bt.InsertCompare(19, c))
+
+				return bt
+			},
+		},
+		{
+			name: "test clone tree with multiple nodes three",
+			actualResult: func() Tree {
+				bt, err := NewBinaryTree(25)
+				require.NoError(t, err)
+
+				c := comparator.NewIntegerComparator()
+
+				require.NoError(t, bt.InsertCompare(17, c))
+				require.NoError(t, bt.InsertCompare(20, c))
+				require.NoError(t, bt.InsertCompare(14, c))
+				require.NoError(t, bt.InsertCompare(10, c))
+				require.NoError(t, bt.InsertCompare(15, c))
+				require.NoError(t, bt.InsertCompare(7, c))
+
+				return bt.Clone()
+			},
+			expectedResult: func() Tree {
+				bt, err := NewBinaryTree(25)
+				require.NoError(t, err)
+
+				c := comparator.NewIntegerComparator()
+
+				require.NoError(t, bt.InsertCompare(17, c))
+				require.NoError(t, bt.InsertCompare(20, c))
+				require.NoError(t, bt.InsertCompare(14, c))
+				require.NoError(t, bt.InsertCompare(10, c))
+				require.NoError(t, bt.InsertCompare(15, c))
+				require.NoError(t, bt.InsertCompare(7, c))
+
+				return bt
+			},
+		},
+	}
+
+	for _, testCase := range testCases {
+		t.Run(testCase.name, func(t *testing.T) {
+			assert.Equal(t, testCase.expectedResult(), testCase.actualResult())
+		})
+	}
+}
+
+func TestBinaryTreeTopViewIterator(t *testing.T) {
+	testCases := []struct {
+		name           string
+		actualResult   func() []interface{}
+		expectedResult []interface{}
+	}{
+		{
+			name: "test top view iterator when tree only contains of one node",
+			actualResult: func() []interface{} {
+				bt, err := NewBinaryTree(1)
+				require.NoError(t, err)
+
+				res := make([]interface{}, 0)
+
+				it := bt.TopViewIterator()
+
+				for it.HasNext() {
+					res = append(res, it.Next())
+				}
+
+				return res
+			},
+			expectedResult: []interface{}{1},
+		},
+		{
+			name: "test top view iterator when tree only contains multiple node",
+			actualResult: func() []interface{} {
+				bt, err := NewBinaryTree(1)
+				require.NoError(t, err)
+
+				require.NoError(t, bt.Insert(2))
+				require.NoError(t, bt.Insert(3))
+				require.NoError(t, bt.Insert(4))
+				require.NoError(t, bt.Insert(5))
+				require.NoError(t, bt.Insert(6))
+				require.NoError(t, bt.Insert(7))
+
+				res := make([]interface{}, 0)
+
+				it := bt.TopViewIterator()
+
+				for it.HasNext() {
+					res = append(res, it.Next())
+				}
+
+				return res
+			},
+			expectedResult: []interface{}{4, 2, 1, 3, 7},
+		},
+		{
+			name: "test top view iterator when tree only contains multiple node with compare",
+			actualResult: func() []interface{} {
+				bt, err := NewBinaryTree(10)
+				require.NoError(t, err)
+
+				c := comparator.NewIntegerComparator()
+
+				require.NoError(t, bt.InsertCompare(7, c))
+				require.NoError(t, bt.InsertCompare(14, c))
+				require.NoError(t, bt.InsertCompare(6, c))
+				require.NoError(t, bt.InsertCompare(12, c))
+				require.NoError(t, bt.InsertCompare(8, c))
+				require.NoError(t, bt.InsertCompare(16, c))
+
+				res := make([]interface{}, 0)
+
+				it := bt.TopViewIterator()
+
+				for it.HasNext() {
+					res = append(res, it.Next())
+				}
+
+				return res
+			},
+			expectedResult: []interface{}{6, 7, 10, 14, 16},
+		},
+		{
+			name: "test top view iterator when tree only contains right node with compare",
+			actualResult: func() []interface{} {
+				bt, err := NewBinaryTree(10)
+				require.NoError(t, err)
+
+				c := comparator.NewIntegerComparator()
+
+				require.NoError(t, bt.InsertCompare(20, c))
+				require.NoError(t, bt.InsertCompare(15, c))
+				require.NoError(t, bt.InsertCompare(25, c))
+				require.NoError(t, bt.InsertCompare(12, c))
+				require.NoError(t, bt.InsertCompare(17, c))
+				require.NoError(t, bt.InsertCompare(19, c))
+
+				res := make([]interface{}, 0)
+
+				it := bt.TopViewIterator()
+
+				for it.HasNext() {
+					res = append(res, it.Next())
+				}
+
+				return res
+			},
+			expectedResult: []interface{}{12, 10, 20, 25},
+		},
+		{
+			name: "test top view iterator when tree only contains left node with compare",
+			actualResult: func() []interface{} {
+				bt, err := NewBinaryTree(25)
+				require.NoError(t, err)
+
+				c := comparator.NewIntegerComparator()
+
+				require.NoError(t, bt.InsertCompare(17, c))
+				require.NoError(t, bt.InsertCompare(20, c))
+				require.NoError(t, bt.InsertCompare(14, c))
+				require.NoError(t, bt.InsertCompare(10, c))
+				require.NoError(t, bt.InsertCompare(15, c))
+				require.NoError(t, bt.InsertCompare(7, c))
+
+				res := make([]interface{}, 0)
+
+				it := bt.TopViewIterator()
+
+				for it.HasNext() {
+					res = append(res, it.Next())
+				}
+
+				return res
+			},
+			expectedResult: []interface{}{7, 10, 14, 17, 25},
+		},
+	}
+
+	for _, testCase := range testCases {
+		t.Run(testCase.name, func(t *testing.T) {
+			assert.Equal(t, testCase.expectedResult, testCase.actualResult())
+		})
+	}
+}
+
+func TestBinaryTreeBottomViewIterator(t *testing.T) {
+	testCases := []struct {
+		name           string
+		actualResult   func() []interface{}
+		expectedResult []interface{}
+	}{
+		{
+			name: "test bottom view iterator when tree only contains of one node",
+			actualResult: func() []interface{} {
+				bt, err := NewBinaryTree(1)
+				require.NoError(t, err)
+
+				res := make([]interface{}, 0)
+
+				it := bt.BottomViewIterator()
+
+				for it.HasNext() {
+					res = append(res, it.Next())
+				}
+
+				return res
+			},
+			expectedResult: []interface{}{1},
+		},
+		{
+			name: "test bottom view iterator when tree only contains multiple node",
+			actualResult: func() []interface{} {
+				bt, err := NewBinaryTree(1)
+				require.NoError(t, err)
+
+				require.NoError(t, bt.Insert(2))
+				require.NoError(t, bt.Insert(3))
+				require.NoError(t, bt.Insert(4))
+				require.NoError(t, bt.Insert(5))
+				require.NoError(t, bt.Insert(6))
+				require.NoError(t, bt.Insert(7))
+
+				res := make([]interface{}, 0)
+
+				it := bt.BottomViewIterator()
+
+				for it.HasNext() {
+					res = append(res, it.Next())
+				}
+
+				return res
+			},
+			expectedResult: []interface{}{4, 2, 6, 3, 7},
+		},
+		{
+			name: "test bottom view iterator when tree only contains multiple node with compare",
+			actualResult: func() []interface{} {
+				bt, err := NewBinaryTree(10)
+				require.NoError(t, err)
+
+				c := comparator.NewIntegerComparator()
+
+				require.NoError(t, bt.InsertCompare(7, c))
+				require.NoError(t, bt.InsertCompare(14, c))
+				require.NoError(t, bt.InsertCompare(6, c))
+				require.NoError(t, bt.InsertCompare(12, c))
+				require.NoError(t, bt.InsertCompare(8, c))
+				require.NoError(t, bt.InsertCompare(16, c))
+
+				res := make([]interface{}, 0)
+
+				it := bt.BottomViewIterator()
+
+				for it.HasNext() {
+					res = append(res, it.Next())
+				}
+
+				return res
+			},
+			expectedResult: []interface{}{6, 7, 12, 14, 16},
+		},
+		{
+			name: "test bottom view iterator when tree only contains right node with compare",
+			actualResult: func() []interface{} {
+				bt, err := NewBinaryTree(10)
+				require.NoError(t, err)
+
+				c := comparator.NewIntegerComparator()
+
+				require.NoError(t, bt.InsertCompare(20, c))
+				require.NoError(t, bt.InsertCompare(15, c))
+				require.NoError(t, bt.InsertCompare(25, c))
+				require.NoError(t, bt.InsertCompare(12, c))
+				require.NoError(t, bt.InsertCompare(17, c))
+				require.NoError(t, bt.InsertCompare(19, c))
+
+				res := make([]interface{}, 0)
+
+				it := bt.BottomViewIterator()
+
+				for it.HasNext() {
+					res = append(res, it.Next())
+				}
+
+				return res
+			},
+			expectedResult: []interface{}{12, 15, 17, 19},
+		},
+		{
+			name: "test bottom view iterator when tree only contains left node with compare",
+			actualResult: func() []interface{} {
+				bt, err := NewBinaryTree(25)
+				require.NoError(t, err)
+
+				c := comparator.NewIntegerComparator()
+
+				require.NoError(t, bt.InsertCompare(17, c))
+				require.NoError(t, bt.InsertCompare(20, c))
+				require.NoError(t, bt.InsertCompare(14, c))
+				require.NoError(t, bt.InsertCompare(10, c))
+				require.NoError(t, bt.InsertCompare(15, c))
+				require.NoError(t, bt.InsertCompare(7, c))
+
+				res := make([]interface{}, 0)
+
+				it := bt.BottomViewIterator()
+
+				for it.HasNext() {
+					res = append(res, it.Next())
+				}
+
+				return res
+			},
+			expectedResult: []interface{}{7, 10, 14, 15, 20},
+		},
+	}
+
+	for _, testCase := range testCases {
+		t.Run(testCase.name, func(t *testing.T) {
+			assert.Equal(t, testCase.expectedResult, testCase.actualResult())
+		})
+	}
+}

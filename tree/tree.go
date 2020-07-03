@@ -16,6 +16,7 @@ type Tree interface {
 	Empty() bool
 
 	Clear()
+	Clone() Tree
 
 	Mirror() (bool, error)
 	MirrorAt(e interface{}) (bool, error)
