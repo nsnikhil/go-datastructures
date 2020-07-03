@@ -18,13 +18,13 @@ type Tree interface {
 	Clear()
 	Clone() Tree
 
-	Mirror() (bool, error)
-	MirrorAt(e interface{}) (bool, error)
-
-	RotateLeft() error
-	RotateRight() error
-	RotateLeftAt(e interface{}) error
-	RotateRightAt(e interface{}) error
+	//Mirror() (bool, error)
+	//MirrorAt(e interface{}) (bool, error)
+	//
+	//RotateLeft() error
+	//RotateRight() error
+	//RotateLeftAt(e interface{}) error
+	//RotateRightAt(e interface{}) error
 
 	IsFull() bool
 	IsBalanced() bool
@@ -36,6 +36,11 @@ type Tree interface {
 	LowestCommonAncestor(a, b interface{}) (interface{}, error)
 
 	Paths() (list.List, error)
+
+	InOrderSuccessor(e interface{}) (interface{}, error)
+	PreOrderSuccessor(e interface{}) (interface{}, error)
+	PostOrderSuccessor(e interface{}) (interface{}, error)
+	LevelOrderSuccessor(e interface{}) (interface{}, error)
 
 	PreOrderIterator() iterator.Iterator
 	PostOrderIterator() iterator.Iterator

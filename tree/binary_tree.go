@@ -51,6 +51,18 @@ func (bn *binaryNode) clone() *binaryNode {
 	}
 }
 
+func (bn *binaryNode) detach() {
+	p := bn.parent
+
+	if p != nil && p.left == bn {
+		p.left = nil
+	} else if p != nil && p.right == bn {
+		p.right = nil
+	}
+
+	bn.parent = nil
+}
+
 func newBinaryNode(data interface{}) *binaryNode {
 	return &binaryNode{data: data}
 }
@@ -482,6 +494,171 @@ func (bt *BinaryTree) Paths() (list.List, error) {
 	}
 
 	return res, nil
+}
+
+func (bt *BinaryTree) PreOrderSuccessor(e interface{}) (interface{}, error) {
+	st, err := stack.NewStack()
+	if err != nil {
+		return nil, err
+	}
+	curr := bt.root
+	var prev *binaryNode
+
+	for !st.Empty() || curr != nil {
+
+		for curr != nil {
+
+			if prev != nil && prev.data == e {
+				return curr.data, nil
+			}
+
+			if curr.right != nil {
+				_ = st.Push(curr.right)
+			}
+
+			prev = curr
+			curr = curr.left
+
+		}
+
+		if !st.Empty() {
+			top, _ := st.Pop()
+			curr = top.(*binaryNode)
+		}
+
+	}
+
+	if prev != nil && prev.data == e {
+		return nil, fmt.Errorf("no pre order successor found for %v", e)
+	}
+
+	return nil, fmt.Errorf("%v not found in the tree", e)
+}
+
+func (bt *BinaryTree) PostOrderSuccessor(e interface{}) (interface{}, error) {
+	st, err := stack.NewStack()
+	if err != nil {
+		return nil, err
+	}
+
+	curr := bt.root
+	var prev *binaryNode
+
+	for !st.Empty() || curr != nil {
+
+		for curr != nil {
+			_ = st.Push(curr)
+			curr = curr.left
+		}
+
+		if !st.Empty() {
+			top, _ := st.Peek()
+			curr = top.(*binaryNode)
+		}
+
+		if curr == nil {
+			break
+		}
+
+		if curr.right != nil && curr.right != prev {
+			curr = curr.right
+		} else {
+
+			if prev != nil && prev.data == e {
+				return curr.data, nil
+			}
+
+			_, _ = st.Pop()
+			prev = curr
+			curr = nil
+		}
+
+	}
+
+	if prev != nil && prev.data == e {
+		return nil, fmt.Errorf("no post order successor found for %v", e)
+	}
+
+	return nil, fmt.Errorf("%v not found in the tree", e)
+}
+
+func (bt *BinaryTree) InOrderSuccessor(e interface{}) (interface{}, error) {
+	st, err := stack.NewStack()
+	if err != nil {
+		return nil, err
+	}
+
+	curr := bt.root
+	var prev *binaryNode
+
+	for !st.Empty() || curr != nil {
+
+		for curr != nil {
+			_ = st.Push(curr)
+			curr = curr.left
+		}
+
+		if !st.Empty() {
+			top, _ := st.Pop()
+			curr = top.(*binaryNode)
+		}
+
+		if curr == nil {
+			break
+		}
+
+		if prev != nil && prev.data == e {
+			return curr.data, nil
+		}
+
+		prev = curr
+		curr = curr.right
+	}
+
+	if prev != nil && prev.data == e {
+		return nil, fmt.Errorf("no in order successor found for %v", e)
+	}
+
+	return nil, fmt.Errorf("%v not found in the tree", e)
+}
+
+func (bt *BinaryTree) LevelOrderSuccessor(e interface{}) (interface{}, error) {
+	q, err := queue.NewLinkedQueue()
+	if err != nil {
+		return nil, err
+	}
+
+	var prev *binaryNode
+	_ = q.Add(bt.root)
+
+	for !q.Empty() {
+
+		sz := q.Count()
+
+		for i := 0; i < sz; i++ {
+			f, _ := q.Remove()
+
+			if prev != nil && prev.data == e {
+				return f.(*binaryNode).data, nil
+			}
+
+			prev = f.(*binaryNode)
+
+			if f.(*binaryNode).left != nil {
+				_ = q.Add(f.(*binaryNode).left)
+			}
+
+			if f.(*binaryNode).right != nil {
+				_ = q.Add(f.(*binaryNode).right)
+			}
+		}
+	}
+
+	if prev != nil && prev.data == e {
+		return nil, fmt.Errorf("no level order successor found for %v", e)
+	}
+
+	return nil, fmt.Errorf("%v not found in the tree", e)
 }
 
 func (bt *BinaryTree) PreOrderIterator() iterator.Iterator {

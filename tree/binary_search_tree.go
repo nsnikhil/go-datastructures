@@ -1,6 +1,9 @@
 package tree
 
-import "github.com/nsnikhil/go-datastructures/functions/comparator"
+import (
+	"errors"
+	"github.com/nsnikhil/go-datastructures/functions/comparator"
+)
 
 type BinarySearchTree struct {
 	c comparator.Comparator
@@ -28,5 +31,9 @@ func NewBinarySearchTree(c comparator.Comparator, e ...interface{}) (*BinarySear
 }
 
 func (bst *BinarySearchTree) Insert(e interface{}) error {
-	return bst.InsertCompare(e, bst.c)
+	return errors.New("NOT IMPLEMENTED")
+}
+
+func (bst *BinarySearchTree) Delete(e interface{}) error {
+	return errors.New("NOT IMPLEMENTED")
 }

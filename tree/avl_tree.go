@@ -30,6 +30,10 @@ func NewAVLTree(c comparator.Comparator, e ...interface{}) (*AVLTree, error) {
 	return at, nil
 }
 
-func Insert(e interface{}) error {
+func (avt *AVLTree) Insert(e interface{}) error {
+	return errors.New("NOT IMPLEMENTED")
+}
+
+func (avt *AVLTree) Delete(e interface{}) error {
 	return errors.New("NOT IMPLEMENTED")
 }

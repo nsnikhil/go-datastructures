@@ -3868,3 +3868,431 @@ func TestBinaryTreeVerticalViewIterator(t *testing.T) {
 		})
 	}
 }
+
+func TestBinaryTreePreOrderSuccessor(t *testing.T) {
+	testCases := []struct {
+		name           string
+		actualResult   func() (interface{}, error)
+		expectedResult interface{}
+		expectedError  error
+	}{
+		{
+			name: "test preorder successor one",
+			actualResult: func() (interface{}, error) {
+				bt, err := NewBinaryTree(1, 2)
+				require.NoError(t, err)
+
+				return bt.PreOrderSuccessor(1)
+			},
+			expectedResult: 2,
+		},
+		{
+			name: "test preorder successor two",
+			actualResult: func() (interface{}, error) {
+				bt, err := NewBinaryTree(1, 2, 3, 4, 5, 6, 7)
+				require.NoError(t, err)
+
+				return bt.PreOrderSuccessor(5)
+			},
+			expectedResult: 3,
+		},
+		{
+			name: "test preorder successor three",
+			actualResult: func() (interface{}, error) {
+				bt, err := NewBinaryTree(1, 2, 3, 4, 5, 6, 7)
+				require.NoError(t, err)
+
+				return bt.PreOrderSuccessor(6)
+			},
+			expectedResult: 7,
+		},
+		{
+			name: "test preorder successor four",
+			actualResult: func() (interface{}, error) {
+				bt, err := NewBinaryTree(10)
+				require.NoError(t, err)
+
+				c := comparator.NewIntegerComparator()
+
+				require.NoError(t, bt.InsertCompare(20, c))
+				require.NoError(t, bt.InsertCompare(15, c))
+				require.NoError(t, bt.InsertCompare(25, c))
+				require.NoError(t, bt.InsertCompare(12, c))
+				require.NoError(t, bt.InsertCompare(17, c))
+				require.NoError(t, bt.InsertCompare(19, c))
+
+				return bt.PreOrderSuccessor(19)
+			},
+			expectedResult: 25,
+		},
+		{
+			name: "test preorder successor five",
+			actualResult: func() (interface{}, error) {
+				bt, err := NewBinaryTree(25)
+				require.NoError(t, err)
+
+				c := comparator.NewIntegerComparator()
+
+				require.NoError(t, bt.InsertCompare(17, c))
+				require.NoError(t, bt.InsertCompare(20, c))
+				require.NoError(t, bt.InsertCompare(14, c))
+				require.NoError(t, bt.InsertCompare(10, c))
+				require.NoError(t, bt.InsertCompare(15, c))
+				require.NoError(t, bt.InsertCompare(7, c))
+
+				return bt.PreOrderSuccessor(15)
+			},
+			expectedResult: 20,
+		},
+		{
+			name: "test level order successor six",
+			actualResult: func() (interface{}, error) {
+				bt, err := NewBinaryTree(1, 2, 3, 4, 5, 6, 7)
+				require.NoError(t, err)
+
+				return bt.PreOrderSuccessor(7)
+			},
+			expectedError: errors.New("no pre order successor found for 7"),
+		},
+		{
+			name: "test preorder successor return error when element is not present",
+			actualResult: func() (interface{}, error) {
+				bt, err := NewBinaryTree(1, 2)
+				require.NoError(t, err)
+
+				return bt.PreOrderSuccessor(3)
+			},
+			expectedError: errors.New("3 not found in the tree"),
+		},
+	}
+
+	for _, testCase := range testCases {
+		t.Run(testCase.name, func(t *testing.T) {
+			res, err := testCase.actualResult()
+
+			assert.Equal(t, testCase.expectedError, err)
+			assert.Equal(t, testCase.expectedResult, res)
+		})
+	}
+}
+
+func TestBinaryTreePostOrderSuccessor(t *testing.T) {
+	testCases := []struct {
+		name           string
+		actualResult   func() (interface{}, error)
+		expectedResult interface{}
+		expectedError  error
+	}{
+		{
+			name: "test post order successor one",
+			actualResult: func() (interface{}, error) {
+				bt, err := NewBinaryTree(1, 2)
+				require.NoError(t, err)
+
+				return bt.PostOrderSuccessor(2)
+			},
+			expectedResult: 1,
+		},
+		{
+			name: "test post order successor two",
+			actualResult: func() (interface{}, error) {
+				bt, err := NewBinaryTree(1, 2, 3, 4, 5, 6, 7)
+				require.NoError(t, err)
+
+				return bt.PostOrderSuccessor(2)
+			},
+			expectedResult: 6,
+		},
+		{
+			name: "test post order successor three",
+			actualResult: func() (interface{}, error) {
+				bt, err := NewBinaryTree(1, 2, 3, 4, 5, 6, 7)
+				require.NoError(t, err)
+
+				return bt.PostOrderSuccessor(3)
+			},
+			expectedResult: 1,
+		},
+		{
+			name: "test post order successor four",
+			actualResult: func() (interface{}, error) {
+				bt, err := NewBinaryTree(10)
+				require.NoError(t, err)
+
+				c := comparator.NewIntegerComparator()
+
+				require.NoError(t, bt.InsertCompare(20, c))
+				require.NoError(t, bt.InsertCompare(15, c))
+				require.NoError(t, bt.InsertCompare(25, c))
+				require.NoError(t, bt.InsertCompare(12, c))
+				require.NoError(t, bt.InsertCompare(17, c))
+				require.NoError(t, bt.InsertCompare(19, c))
+
+				return bt.PostOrderSuccessor(15)
+			},
+			expectedResult: 25,
+		},
+		{
+			name: "test post order successor five",
+			actualResult: func() (interface{}, error) {
+				bt, err := NewBinaryTree(25)
+				require.NoError(t, err)
+
+				c := comparator.NewIntegerComparator()
+
+				require.NoError(t, bt.InsertCompare(17, c))
+				require.NoError(t, bt.InsertCompare(20, c))
+				require.NoError(t, bt.InsertCompare(14, c))
+				require.NoError(t, bt.InsertCompare(10, c))
+				require.NoError(t, bt.InsertCompare(15, c))
+				require.NoError(t, bt.InsertCompare(7, c))
+
+				return bt.PostOrderSuccessor(14)
+			},
+			expectedResult: 20,
+		},
+		{
+			name: "test level order successor six",
+			actualResult: func() (interface{}, error) {
+				bt, err := NewBinaryTree(1, 2, 3, 4, 5, 6, 7)
+				require.NoError(t, err)
+
+				return bt.PostOrderSuccessor(1)
+			},
+			expectedError: errors.New("no post order successor found for 1"),
+		},
+		{
+			name: "test post order successor return error when element is not present",
+			actualResult: func() (interface{}, error) {
+				bt, err := NewBinaryTree(1, 2)
+				require.NoError(t, err)
+
+				return bt.PostOrderSuccessor(3)
+			},
+			expectedError: errors.New("3 not found in the tree"),
+		},
+	}
+
+	for _, testCase := range testCases {
+		t.Run(testCase.name, func(t *testing.T) {
+			res, err := testCase.actualResult()
+
+			assert.Equal(t, testCase.expectedError, err)
+			assert.Equal(t, testCase.expectedResult, res)
+		})
+	}
+}
+
+func TestBinaryTreeInOrderSuccessor(t *testing.T) {
+	testCases := []struct {
+		name           string
+		actualResult   func() (interface{}, error)
+		expectedResult interface{}
+		expectedError  error
+	}{
+		{
+			name: "test in order successor one",
+			actualResult: func() (interface{}, error) {
+				bt, err := NewBinaryTree(1, 2)
+				require.NoError(t, err)
+
+				return bt.InOrderSuccessor(2)
+			},
+			expectedResult: 1,
+		},
+		{
+			name: "test in order successor two",
+			actualResult: func() (interface{}, error) {
+				bt, err := NewBinaryTree(1, 2, 3, 4, 5, 6, 7)
+				require.NoError(t, err)
+
+				return bt.InOrderSuccessor(5)
+			},
+			expectedResult: 1,
+		},
+		{
+			name: "test in order successor three",
+			actualResult: func() (interface{}, error) {
+				bt, err := NewBinaryTree(1, 2, 3, 4, 5, 6, 7)
+				require.NoError(t, err)
+
+				return bt.InOrderSuccessor(4)
+			},
+			expectedResult: 2,
+		},
+		{
+			name: "test in order successor four",
+			actualResult: func() (interface{}, error) {
+				bt, err := NewBinaryTree(10)
+				require.NoError(t, err)
+
+				c := comparator.NewIntegerComparator()
+
+				require.NoError(t, bt.InsertCompare(20, c))
+				require.NoError(t, bt.InsertCompare(15, c))
+				require.NoError(t, bt.InsertCompare(25, c))
+				require.NoError(t, bt.InsertCompare(12, c))
+				require.NoError(t, bt.InsertCompare(17, c))
+				require.NoError(t, bt.InsertCompare(19, c))
+
+				return bt.InOrderSuccessor(19)
+			},
+			expectedResult: 20,
+		},
+		{
+			name: "test in order successor five",
+			actualResult: func() (interface{}, error) {
+				bt, err := NewBinaryTree(25)
+				require.NoError(t, err)
+
+				c := comparator.NewIntegerComparator()
+
+				require.NoError(t, bt.InsertCompare(17, c))
+				require.NoError(t, bt.InsertCompare(20, c))
+				require.NoError(t, bt.InsertCompare(14, c))
+				require.NoError(t, bt.InsertCompare(10, c))
+				require.NoError(t, bt.InsertCompare(15, c))
+				require.NoError(t, bt.InsertCompare(7, c))
+
+				return bt.InOrderSuccessor(20)
+			},
+			expectedResult: 25,
+		},
+		{
+			name: "test level order successor six",
+			actualResult: func() (interface{}, error) {
+				bt, err := NewBinaryTree(1, 2, 3, 4, 5, 6, 7)
+				require.NoError(t, err)
+
+				return bt.InOrderSuccessor(7)
+			},
+			expectedError: errors.New("no in order successor found for 7"),
+		},
+		{
+			name: "test in order successor return error when element is not present",
+			actualResult: func() (interface{}, error) {
+				bt, err := NewBinaryTree(1, 2)
+				require.NoError(t, err)
+
+				return bt.InOrderSuccessor(3)
+			},
+			expectedError: errors.New("3 not found in the tree"),
+		},
+	}
+
+	for _, testCase := range testCases {
+		t.Run(testCase.name, func(t *testing.T) {
+			res, err := testCase.actualResult()
+
+			assert.Equal(t, testCase.expectedError, err)
+			assert.Equal(t, testCase.expectedResult, res)
+		})
+	}
+}
+
+func TestBinaryTreeLevelOrderSuccessor(t *testing.T) {
+	testCases := []struct {
+		name           string
+		actualResult   func() (interface{}, error)
+		expectedResult interface{}
+		expectedError  error
+	}{
+		{
+			name: "test level order successor one",
+			actualResult: func() (interface{}, error) {
+				bt, err := NewBinaryTree(1, 2)
+				require.NoError(t, err)
+
+				return bt.LevelOrderSuccessor(1)
+			},
+			expectedResult: 2,
+		},
+		{
+			name: "test level order successor two",
+			actualResult: func() (interface{}, error) {
+				bt, err := NewBinaryTree(1, 2, 3, 4, 5, 6, 7)
+				require.NoError(t, err)
+
+				return bt.LevelOrderSuccessor(5)
+			},
+			expectedResult: 6,
+		},
+		{
+			name: "test level order successor three",
+			actualResult: func() (interface{}, error) {
+				bt, err := NewBinaryTree(1, 2, 3, 4, 5, 6, 7)
+				require.NoError(t, err)
+
+				return bt.LevelOrderSuccessor(3)
+			},
+			expectedResult: 4,
+		},
+		{
+			name: "test level order successor four",
+			actualResult: func() (interface{}, error) {
+				bt, err := NewBinaryTree(10)
+				require.NoError(t, err)
+
+				c := comparator.NewIntegerComparator()
+
+				require.NoError(t, bt.InsertCompare(20, c))
+				require.NoError(t, bt.InsertCompare(15, c))
+				require.NoError(t, bt.InsertCompare(25, c))
+				require.NoError(t, bt.InsertCompare(12, c))
+				require.NoError(t, bt.InsertCompare(17, c))
+				require.NoError(t, bt.InsertCompare(19, c))
+
+				return bt.LevelOrderSuccessor(17)
+			},
+			expectedResult: 19,
+		},
+		{
+			name: "test level order successor five",
+			actualResult: func() (interface{}, error) {
+				bt, err := NewBinaryTree(25)
+				require.NoError(t, err)
+
+				c := comparator.NewIntegerComparator()
+
+				require.NoError(t, bt.InsertCompare(17, c))
+				require.NoError(t, bt.InsertCompare(20, c))
+				require.NoError(t, bt.InsertCompare(14, c))
+				require.NoError(t, bt.InsertCompare(10, c))
+				require.NoError(t, bt.InsertCompare(15, c))
+				require.NoError(t, bt.InsertCompare(7, c))
+
+				return bt.LevelOrderSuccessor(20)
+			},
+			expectedResult: 10,
+		},
+		{
+			name: "test level order successor six",
+			actualResult: func() (interface{}, error) {
+				bt, err := NewBinaryTree(1, 2, 3, 4, 5, 6, 7)
+				require.NoError(t, err)
+
+				return bt.LevelOrderSuccessor(7)
+			},
+			expectedError: errors.New("no level order successor found for 7"),
+		},
+		{
+			name: "test level order successor return error when element is not present",
+			actualResult: func() (interface{}, error) {
+				bt, err := NewBinaryTree(1, 2)
+				require.NoError(t, err)
+
+				return bt.LevelOrderSuccessor(3)
+			},
+			expectedError: errors.New("3 not found in the tree"),
+		},
+	}
+
+	for _, testCase := range testCases {
+		t.Run(testCase.name, func(t *testing.T) {
+			res, err := testCase.actualResult()
+
+			assert.Equal(t, testCase.expectedError, err)
+			assert.Equal(t, testCase.expectedResult, res)
+		})
+	}
+}
