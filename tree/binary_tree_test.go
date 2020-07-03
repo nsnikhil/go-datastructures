@@ -3729,3 +3729,142 @@ func TestBinaryTreeBottomViewIterator(t *testing.T) {
 		})
 	}
 }
+
+func TestBinaryTreeVerticalViewIterator(t *testing.T) {
+	testCases := []struct {
+		name           string
+		actualResult   func() []interface{}
+		expectedResult []interface{}
+	}{
+		{
+			name: "test vertical view iterator when tree only contains of one node",
+			actualResult: func() []interface{} {
+				bt, err := NewBinaryTree(1)
+				require.NoError(t, err)
+
+				res := make([]interface{}, 0)
+
+				it := bt.VerticalViewIterator()
+
+				for it.HasNext() {
+					res = append(res, it.Next())
+				}
+
+				return res
+			},
+			expectedResult: []interface{}{1},
+		},
+		{
+			name: "test vertical view iterator when tree only contains multiple node",
+			actualResult: func() []interface{} {
+				bt, err := NewBinaryTree(1)
+				require.NoError(t, err)
+
+				require.NoError(t, bt.Insert(2))
+				require.NoError(t, bt.Insert(3))
+				require.NoError(t, bt.Insert(4))
+				require.NoError(t, bt.Insert(5))
+				require.NoError(t, bt.Insert(6))
+				require.NoError(t, bt.Insert(7))
+
+				res := make([]interface{}, 0)
+
+				it := bt.VerticalViewIterator()
+
+				for it.HasNext() {
+					res = append(res, it.Next())
+				}
+
+				return res
+			},
+			expectedResult: []interface{}{4, 2, 1, 5, 6, 3, 7},
+		},
+		{
+			name: "test vertical view iterator when tree only contains multiple node with compare",
+			actualResult: func() []interface{} {
+				bt, err := NewBinaryTree(10)
+				require.NoError(t, err)
+
+				c := comparator.NewIntegerComparator()
+
+				require.NoError(t, bt.InsertCompare(7, c))
+				require.NoError(t, bt.InsertCompare(14, c))
+				require.NoError(t, bt.InsertCompare(6, c))
+				require.NoError(t, bt.InsertCompare(12, c))
+				require.NoError(t, bt.InsertCompare(8, c))
+				require.NoError(t, bt.InsertCompare(16, c))
+
+				res := make([]interface{}, 0)
+
+				it := bt.VerticalViewIterator()
+
+				for it.HasNext() {
+					res = append(res, it.Next())
+				}
+
+				return res
+			},
+			expectedResult: []interface{}{6, 7, 10, 8, 12, 14, 16},
+		},
+		{
+			name: "test vertical view iterator when tree only contains right node with compare",
+			actualResult: func() []interface{} {
+				bt, err := NewBinaryTree(10)
+				require.NoError(t, err)
+
+				c := comparator.NewIntegerComparator()
+
+				require.NoError(t, bt.InsertCompare(20, c))
+				require.NoError(t, bt.InsertCompare(15, c))
+				require.NoError(t, bt.InsertCompare(25, c))
+				require.NoError(t, bt.InsertCompare(12, c))
+				require.NoError(t, bt.InsertCompare(17, c))
+				require.NoError(t, bt.InsertCompare(19, c))
+
+				res := make([]interface{}, 0)
+
+				it := bt.VerticalViewIterator()
+
+				for it.HasNext() {
+					res = append(res, it.Next())
+				}
+
+				return res
+			},
+			expectedResult: []interface{}{12, 10, 15, 20, 17, 25, 19},
+		},
+		{
+			name: "test vertical view iterator when tree only contains left node with compare",
+			actualResult: func() []interface{} {
+				bt, err := NewBinaryTree(25)
+				require.NoError(t, err)
+
+				c := comparator.NewIntegerComparator()
+
+				require.NoError(t, bt.InsertCompare(17, c))
+				require.NoError(t, bt.InsertCompare(20, c))
+				require.NoError(t, bt.InsertCompare(14, c))
+				require.NoError(t, bt.InsertCompare(10, c))
+				require.NoError(t, bt.InsertCompare(15, c))
+				require.NoError(t, bt.InsertCompare(7, c))
+
+				res := make([]interface{}, 0)
+
+				it := bt.VerticalViewIterator()
+
+				for it.HasNext() {
+					res = append(res, it.Next())
+				}
+
+				return res
+			},
+			expectedResult: []interface{}{7, 10, 14, 17, 15, 25, 20},
+		},
+	}
+
+	for _, testCase := range testCases {
+		t.Run(testCase.name, func(t *testing.T) {
+			assert.Equal(t, testCase.expectedResult, testCase.actualResult())
+		})
+	}
+}

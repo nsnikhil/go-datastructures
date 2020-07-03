@@ -698,8 +698,32 @@ func (blv *btLvOrderIterator) Next() interface{} {
 	return curr.(*binaryNode).data
 }
 
+//TODO FIX EXPENSIVE IMPLEMENTATION
 func (bt *BinaryTree) VerticalViewIterator() iterator.Iterator {
-	return nil
+	return newBtVerticalVOrderIterator(bt)
+}
+
+type btVerticalVOrderIterator struct {
+	it iterator.Iterator
+	v  bool
+}
+
+func newBtVerticalVOrderIterator(bt *BinaryTree) iterator.Iterator {
+	return &btVerticalVOrderIterator{
+		it: horizontalIterator(bt, 2),
+	}
+}
+
+func (btv *btVerticalVOrderIterator) HasNext() bool {
+	return btv.it.HasNext()
+}
+
+func (btv *btVerticalVOrderIterator) Next() interface{} {
+	if btv.v {
+		return btv.it.Next()
+	}
+
+	return btv.it.Next().(*binaryNode).data
 }
 
 func (bt *BinaryTree) LeftViewIterator() iterator.Iterator {
@@ -807,6 +831,7 @@ func (brv *btRightVOrderIterator) Next() interface{} {
 	return res.data
 }
 
+//TODO FIX EXPENSIVE IMPLEMENTATION
 func (bt *BinaryTree) TopViewIterator() iterator.Iterator {
 	return newBtTopVOrderIterator(bt.Clone().(*BinaryTree))
 }
@@ -818,7 +843,7 @@ type btTopVOrderIterator struct {
 
 func newBtTopVOrderIterator(bt *BinaryTree) iterator.Iterator {
 	return &btTopVOrderIterator{
-		it: horizontalIterator(bt, false),
+		it: horizontalIterator(bt, 0),
 	}
 }
 
@@ -834,6 +859,7 @@ func (btv *btTopVOrderIterator) Next() interface{} {
 	return btv.it.Next().(*binaryNode).data
 }
 
+//TODO FIX EXPENSIVE IMPLEMENTATION
 func (bt *BinaryTree) BottomViewIterator() iterator.Iterator {
 	return newBtBottomVOrderIterator(bt.Clone().(*BinaryTree))
 }
@@ -845,7 +871,7 @@ type btBottomVOrderIterator struct {
 
 func newBtBottomVOrderIterator(bt *BinaryTree) iterator.Iterator {
 	return &btBottomVOrderIterator{
-		it: horizontalIterator(bt, true),
+		it: horizontalIterator(bt, 1),
 	}
 }
 
@@ -1136,23 +1162,34 @@ func cloneNodes(n *binaryNode, p *binaryNode) *binaryNode {
 	return bn
 }
 
-func horizontalIterator(bt *BinaryTree, bottom bool) iterator.Iterator {
+//TODO FIX EXPENSIVE IMPLEMENTATION
+func horizontalIterator(bt *BinaryTree, kind int) iterator.Iterator {
 	q, _ := queue.NewLinkedQueue()
 	_ = q.Add(bt.root)
 
 	chd := 0
 	bt.root.hd = chd
 
-	m := make(map[int]interface{})
+	m := make(map[int][]interface{})
 	keys, _ := list.NewArrayList()
 
 	for !q.Empty() {
 
 		t, _ := q.Remove()
 
-		if m[t.(*binaryNode).hd] == nil || bottom {
+		if m[t.(*binaryNode).hd] == nil {
 			_ = keys.Add(t.(*binaryNode).hd)
-			m[t.(*binaryNode).hd] = t.(*binaryNode)
+			m[t.(*binaryNode).hd] = append(m[t.(*binaryNode).hd], t.(*binaryNode))
+		} else {
+
+			if kind == 1 {
+				_ = keys.Add(t.(*binaryNode).hd)
+				m[t.(*binaryNode).hd] = []interface{}{t.(*binaryNode)}
+			} else if kind == 2 {
+				_ = keys.Add(t.(*binaryNode).hd)
+				m[t.(*binaryNode).hd] = append(m[t.(*binaryNode).hd], t.(*binaryNode))
+			}
+
 		}
 
 		if t.(*binaryNode).left != nil {
@@ -1177,9 +1214,14 @@ func horizontalIterator(bt *BinaryTree, bottom bool) iterator.Iterator {
 
 	for it.HasNext() {
 		e := it.Next()
-		if !s.Contains(m[e.(int)]) {
-			_ = l.Add(m[e.(int)])
-			_ = s.Add(m[e.(int)])
+
+		ele := m[e.(int)]
+
+		for _, le := range ele {
+			if !s.Contains(le) {
+				_ = l.Add(le)
+				_ = s.Add(le)
+			}
 		}
 	}
 
