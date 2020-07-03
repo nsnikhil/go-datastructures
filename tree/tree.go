@@ -2,6 +2,7 @@ package tree
 
 import (
 	"github.com/nsnikhil/go-datastructures/functions/iterator"
+	"github.com/nsnikhil/go-datastructures/list"
 )
 
 type Tree interface {
@@ -32,6 +33,8 @@ type Tree interface {
 	//Balance() error
 
 	LowestCommonAncestor(a, b interface{}) (interface{}, error)
+
+	Paths() (list.List, error)
 
 	PreOrderIterator() iterator.Iterator
 	PostOrderIterator() iterator.Iterator

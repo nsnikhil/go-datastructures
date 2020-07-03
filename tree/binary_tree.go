@@ -6,6 +6,7 @@ import (
 	"github.com/nsnikhil/go-datastructures/functions/comparator"
 	"github.com/nsnikhil/go-datastructures/functions/iterator"
 	"github.com/nsnikhil/go-datastructures/liberror"
+	"github.com/nsnikhil/go-datastructures/list"
 	"github.com/nsnikhil/go-datastructures/queue"
 	"github.com/nsnikhil/go-datastructures/stack"
 	"github.com/nsnikhil/go-datastructures/utils"
@@ -439,6 +440,28 @@ func (bt *BinaryTree) LowestCommonAncestor(a, b interface{}) (interface{}, error
 	}
 
 	return lowestCommonAncestor(an, bn, bt.root).data, nil
+}
+
+func (bt *BinaryTree) Paths() (list.List, error) {
+	if bt.Empty() {
+		return nil, errors.New("tree is empty")
+	}
+
+	temp, err := list.NewLinkedList()
+	if err != nil {
+		return nil, err
+	}
+
+	res, err := list.NewArrayList()
+	if err != nil {
+		return nil, err
+	}
+
+	if err := paths(bt.root, temp, res); err != nil {
+		return nil, err
+	}
+
+	return res, nil
 }
 
 func (bt *BinaryTree) PreOrderIterator() iterator.Iterator {
@@ -995,4 +1018,40 @@ func lowestCommonAncestor(a, b, r *binaryNode) *binaryNode {
 	}
 
 	return rt
+}
+
+func paths(n *binaryNode, temp *list.LinkedList, res list.List) error {
+	if n == nil {
+		return nil
+	}
+
+	if err := temp.AddLast(n.data); err != nil {
+		return err
+	}
+
+	if n.left == nil && n.right == nil {
+		if err := res.Add(temp.ToArrayList()); err != nil {
+			return err
+		}
+
+		if _, err := temp.RemoveLast(); err != nil {
+			return err
+		}
+
+		return nil
+	}
+
+	if err := paths(n.left, temp, res); err != nil {
+		return err
+	}
+
+	if err := paths(n.right, temp, res); err != nil {
+		return err
+	}
+
+	if _, err := temp.RemoveLast(); err != nil {
+		return err
+	}
+
+	return nil
 }

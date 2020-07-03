@@ -4,6 +4,7 @@ import (
 	"errors"
 	"github.com/nsnikhil/go-datastructures/functions/comparator"
 	"github.com/nsnikhil/go-datastructures/liberror"
+	"github.com/nsnikhil/go-datastructures/list"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"testing"
@@ -3191,6 +3192,136 @@ func TestBinaryTreeRightViewIterator(t *testing.T) {
 	for _, testCase := range testCases {
 		t.Run(testCase.name, func(t *testing.T) {
 			assert.Equal(t, testCase.expectedResult, testCase.actualResult())
+		})
+	}
+}
+
+func TestBinaryTreePaths(t *testing.T) {
+	testCases := []struct {
+		name           string
+		actualResult   func() (list.List, error)
+		expectedResult func() list.List
+		expectedError  error
+	}{
+		{
+			name: "test get paths of tree with one node",
+			actualResult: func() (list.List, error) {
+				bt, err := NewBinaryTree(1)
+				require.NoError(t, err)
+
+				return bt.Paths()
+			},
+			expectedResult: func() list.List {
+				l, err := list.NewArrayList()
+				require.NoError(t, err)
+
+				a, err := list.NewArrayList(1)
+
+				require.NoError(t, l.AddAll(a))
+
+				return l
+			},
+		},
+		{
+			name: "test get paths of tree with multiple node",
+			actualResult: func() (list.List, error) {
+				bt, err := NewBinaryTree(1, 2, 3, 4, 5, 6, 7)
+				require.NoError(t, err)
+
+				return bt.Paths()
+			},
+			expectedResult: func() list.List {
+				l, err := list.NewArrayList()
+				require.NoError(t, err)
+
+				a, err := list.NewArrayList(1, 2, 4)
+				require.NoError(t, err)
+				b, err := list.NewArrayList(1, 2, 5)
+				require.NoError(t, err)
+				c, err := list.NewArrayList(1, 3, 6)
+				require.NoError(t, err)
+				d, err := list.NewArrayList(1, 3, 7)
+				require.NoError(t, err)
+
+				require.NoError(t, l.AddAll(a, b, c, d))
+
+				return l
+			},
+		},
+		{
+			name: "test get paths of tree with multiple node two",
+			actualResult: func() (list.List, error) {
+				bt, err := NewBinaryTree(25)
+				require.NoError(t, err)
+
+				c := comparator.NewIntegerComparator()
+
+				require.NoError(t, bt.InsertCompare(17, c))
+				require.NoError(t, bt.InsertCompare(20, c))
+				require.NoError(t, bt.InsertCompare(14, c))
+				require.NoError(t, bt.InsertCompare(10, c))
+				require.NoError(t, bt.InsertCompare(15, c))
+				require.NoError(t, bt.InsertCompare(7, c))
+
+				return bt.Paths()
+			},
+			expectedResult: func() list.List {
+				l, err := list.NewArrayList()
+				require.NoError(t, err)
+
+				a, err := list.NewArrayList(25, 17, 14, 10, 7)
+				require.NoError(t, err)
+				b, err := list.NewArrayList(25, 17, 14, 15)
+				require.NoError(t, err)
+				c, err := list.NewArrayList(25, 17, 20)
+				require.NoError(t, err)
+
+				require.NoError(t, l.AddAll(a, b, c))
+
+				return l
+			},
+		},
+		{
+			name: "test get paths of tree with multiple node three",
+			actualResult: func() (list.List, error) {
+				bt, err := NewBinaryTree(10)
+				require.NoError(t, err)
+
+				c := comparator.NewIntegerComparator()
+
+				require.NoError(t, bt.InsertCompare(20, c))
+				require.NoError(t, bt.InsertCompare(15, c))
+				require.NoError(t, bt.InsertCompare(25, c))
+				require.NoError(t, bt.InsertCompare(12, c))
+				require.NoError(t, bt.InsertCompare(17, c))
+				require.NoError(t, bt.InsertCompare(19, c))
+
+				return bt.Paths()
+			},
+			expectedResult: func() list.List {
+				l, err := list.NewArrayList()
+				require.NoError(t, err)
+
+				a, err := list.NewArrayList(10, 20, 15, 12)
+				require.NoError(t, err)
+				b, err := list.NewArrayList(10, 20, 15, 17, 19)
+				require.NoError(t, err)
+				c, err := list.NewArrayList(10, 20, 25)
+				require.NoError(t, err)
+
+				require.NoError(t, l.AddAll(a, b, c))
+
+				return l
+			},
+		},
+	}
+
+	for _, testCase := range testCases {
+		t.Run(testCase.name, func(t *testing.T) {
+			res, err := testCase.actualResult()
+
+			assert.Equal(t, testCase.expectedError, err)
+			assert.Equal(t, testCase.expectedResult(), res)
 		})
 	}
 }
