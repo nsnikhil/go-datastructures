@@ -289,12 +289,13 @@ func (bt *BinaryTree) Count() int {
 }
 
 func (bt *BinaryTree) Height() int {
-	return calculateHeight(bt.root)
+	return calculateHeight(bt.root, nil)
 }
 
 func (bt *BinaryTree) Diameter() int {
-	h := utils.Naught
-	return calculateDiameter(bt.root, &h)
+	d := utils.Naught
+	calculateHeight(bt.root, &d)
+	return d
 }
 
 func (bt *BinaryTree) Empty() bool {
@@ -494,6 +495,121 @@ func (bt *BinaryTree) Paths() (list.List, error) {
 	}
 
 	return res, nil
+}
+
+func (bt *BinaryTree) Mode() (list.List, error) {
+	if bt.Empty() {
+		return nil, errors.New("tree is empty")
+	}
+
+	res, err := list.NewArrayList()
+	if err != nil {
+		return nil, err
+	}
+
+	cm := 0
+	m := 0
+	var p interface{}
+
+	var mode func(n *binaryNode, l list.List, cm, m *int, p *interface{}) error
+	mode = func(n *binaryNode, l list.List, cm, m *int, p *interface{}) error {
+		if n == nil {
+			return nil
+		}
+
+		if err := mode(n.left, l, cm, m, p); err != nil {
+			return err
+		}
+
+		if n.data == p {
+			*cm += 1
+		} else {
+			*cm = 1
+		}
+
+		if *cm > *m {
+			l.Clear()
+		}
+
+		if *cm >= *m {
+			if err := l.Add(n.data); err != nil {
+				return err
+			}
+		}
+
+		*p = n.data
+		*m = max(*m, *cm)
+
+		if err := mode(n.right, l, cm, m, p); err != nil {
+			return err
+		}
+
+		return nil
+	}
+
+	if err := mode(bt.root, res, &cm, &m, &p); err != nil {
+		return nil, err
+	}
+
+	return res, nil
+}
+
+func (bt *BinaryTree) Equal(t Tree) (bool, error) {
+	_, ok := t.(*BinaryTree)
+	if !ok {
+		return false, errors.New("TODO")
+	}
+
+	var equal func(a, b *binaryNode) bool
+
+	equal = func(a, b *binaryNode) bool {
+		if a == nil && b == nil {
+			return true
+		}
+		if a == nil || b == nil || a.data != b.data {
+			return false
+		}
+		return equal(a.left, b.left) && equal(a.right, b.right)
+	}
+
+	return equal(bt.root, t.(*BinaryTree).root), nil
+}
+
+func (bt *BinaryTree) Symmetric() bool {
+	var symmetric func(a, b *binaryNode) bool
+
+	symmetric = func(a, b *binaryNode) bool {
+		if a == nil && b == nil {
+			return true
+		}
+
+		if a == nil || b == nil || a.data != b.data {
+			return false
+		}
+
+		return symmetric(a.left, b.right) && symmetric(a.left, b.right)
+	}
+
+	return symmetric(bt.root.left, bt.root.right)
+}
+
+func (bt *BinaryTree) Invert() {
+	var inverter func(n *binaryNode) *binaryNode
+
+	inverter = func(n *binaryNode) *binaryNode {
+		if n == nil {
+			return nil
+		}
+
+		l := inverter(n.right)
+		r := inverter(n.left)
+		n.right = l
+		n.left = r
+
+		return n
+	}
+
+	bt.root = inverter(bt.root)
 }
 
 func (bt *BinaryTree) PreOrderSuccessor(e interface{}) (interface{}, error) {
@@ -1130,26 +1246,19 @@ func max(a, b int) int {
 	return b
 }
 
-func calculateHeight(n *binaryNode) int {
-	if n == nil {
-		return 0
-	}
-	return 1 + max(calculateHeight(n.left), calculateHeight(n.right))
-}
-
-func calculateDiameter(n *binaryNode, h *int) int {
+func calculateHeight(n *binaryNode, diameter *int) int {
 	if n == nil {
 		return 0
 	}
 
-	var lh, rh int
+	lh := calculateHeight(n.left, diameter)
+	rh := calculateHeight(n.right, diameter)
 
-	ld := calculateDiameter(n.left, &lh)
-	rd := calculateDiameter(n.right, &rh)
+	if diameter != nil {
+		*diameter = max(*diameter, 1+lh+rh)
+	}
 
-	*h = 1 + max(lh, rh)
-
-	return max(1+lh+rh, max(ld, rd))
+	return 1 + max(lh, rh)
 }
 
 func absDiff(a, b int) int {
@@ -1165,7 +1274,7 @@ func isBalancedAt(n *binaryNode) bool {
 	if n == nil {
 		return true
 	}
-	return absDiff(calculateHeight(n.left), calculateHeight(n.right)) <= 1 && isBalancedAt(n.left) && isBalancedAt(n.right)
+	return absDiff(calculateHeight(n.left, nil), calculateHeight(n.right, nil)) <= 1 && isBalancedAt(n.left) && isBalancedAt(n.right)
 }
 
 func search(e interface{}, curr *binaryNode) (*binaryNode, error) {

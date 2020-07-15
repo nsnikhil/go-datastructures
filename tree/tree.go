@@ -37,6 +37,12 @@ type Tree interface {
 
 	Paths() (list.List, error)
 
+	// TEMPORARY
+	Mode() (list.List, error)
+	Equal(t Tree) (bool, error)
+	//Symmetric() bool
+	//Invert()
+
 	InOrderSuccessor(e interface{}) (interface{}, error)
 	PreOrderSuccessor(e interface{}) (interface{}, error)
 	PostOrderSuccessor(e interface{}) (interface{}, error)

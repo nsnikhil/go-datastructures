@@ -10,13 +10,25 @@ import (
 	"github.com/nsnikhil/go-datastructures/functions/operator"
 	"github.com/nsnikhil/go-datastructures/functions/predicate"
 	"github.com/nsnikhil/go-datastructures/functions/supplier"
+	"github.com/nsnikhil/go-datastructures/queue"
 	"github.com/nsnikhil/go-datastructures/utils"
 )
 
-type LazyStream struct{}
+type LazyStream struct {
+	operations queue.Queue
+}
 
-func NewLazyStream() Stream {
-	return &LazyStream{}
+func NewLazyStream() (Stream, error) {
+	q, err := queue.NewDeque()
+	if err != nil {
+		return nil, err
+	}
+
+	ls := &LazyStream{
+		operations: q,
+	}
+
+	return ls, nil
 }
 
 func (ls *LazyStream) AllMatch(p predicate.Predicate) bool {
