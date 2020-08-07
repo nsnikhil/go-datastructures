@@ -11,8 +11,7 @@ func TestCreateNewAVLTree(t *testing.T) {
 		expectedResult func() Tree
 		expectedError  error
 	}{
-		{
-		},
+		{},
 	}
 
 	for _, testCase := range testCases {

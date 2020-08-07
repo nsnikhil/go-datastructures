@@ -451,7 +451,7 @@ func filterArrayList(al *ArrayList, inverse bool, l ...interface{}) (bool, error
 		}
 	}
 
-	idx := make(map[int]bool, 0)
+	idx := make(map[int]bool)
 	for _, e := range l {
 		i, _ := al.IndexOf(e)
 

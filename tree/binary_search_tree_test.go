@@ -4,7 +4,7 @@ import (
 	"testing"
 )
 
-func TestCreateNewBinarySearchTree(t *testing.T)  {
+func TestCreateNewBinarySearchTree(t *testing.T) {
 	testCases := []struct {
 		name           string
 		actualResult   func() (Tree, error)
@@ -24,10 +24,10 @@ func TestCreateNewBinarySearchTree(t *testing.T)  {
 	}
 }
 
-func TestBinarySearchTreeInsert(t *testing.T)  {
+func TestBinarySearchTreeInsert(t *testing.T) {
 
 }
 
-func TestBinarySearchTreeDelete(t *testing.T)  {
+func TestBinarySearchTreeDelete(t *testing.T) {
 
 }

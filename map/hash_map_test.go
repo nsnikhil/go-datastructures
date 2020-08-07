@@ -642,7 +642,7 @@ func TestHashMapPutAll(t *testing.T) {
 		{
 			name: "return error when argument is empty",
 			actualResult: func() (error, Map) {
-				hm, err := NewHashMap(NewPair(1,'a'))
+				hm, err := NewHashMap(NewPair(1, 'a'))
 				require.NoError(t, err)
 
 				return hm.PutAll(), hm

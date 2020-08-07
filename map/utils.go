@@ -24,7 +24,11 @@ func hashCode(h *hash.Hash, e interface{}) (uint32, error) {
 		return math.MaxInt32, err
 	}
 
-	(*h).Write(b)
+	_, err = (*h).Write(b)
+	if err != nil {
+		return math.MaxInt32, err
+	}
+
 	res := (*h).Sum(nil)
 	(*h).Reset()
 

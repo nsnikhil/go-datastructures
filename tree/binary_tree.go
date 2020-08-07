@@ -587,7 +587,7 @@ func (bt *BinaryTree) Symmetric() bool {
 			return false
 		}
 
-		return symmetric(a.left, b.right) && symmetric(a.left, b.right)
+		return symmetric(a.left, b.right) && symmetric(a.right, b.left)
 	}
 
 	return symmetric(bt.root.left, bt.root.right)

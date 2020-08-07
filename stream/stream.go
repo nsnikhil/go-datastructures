@@ -13,7 +13,6 @@ import (
 )
 
 type Stream interface {
-
 	AllMatch(p predicate.Predicate) bool
 
 	AnyMatch(p predicate.Predicate) bool
@@ -25,8 +24,8 @@ type Stream interface {
 	Distinct() Stream
 
 	DropWhile(p predicate.Predicate) Stream
-	
-	TakeWhile (p predicate.Predicate) Stream
+
+	TakeWhile(p predicate.Predicate) Stream
 
 	Empty() bool
 
@@ -55,5 +54,4 @@ type Stream interface {
 	Skip(n int) Stream
 
 	Sorted(c comparator.Comparator) Stream
-
 }
