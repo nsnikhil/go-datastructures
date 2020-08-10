@@ -6,5 +6,12 @@ func GetTypeName(e interface{}) string {
 	if e == nil {
 		return NA
 	}
-	return reflect.TypeOf(e).Name()
+
+	t := reflect.TypeOf(e)
+
+	if res := t.Name(); len(res) != 0 {
+		return res
+	}
+
+	return t.Elem().Name()
 }

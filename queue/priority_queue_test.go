@@ -389,6 +389,220 @@ func TestPriorityQueueRemove(t *testing.T) {
 	}
 }
 
+func TestPriorityQueueUpdate(t *testing.T) {
+	testCases := []struct {
+		name           string
+		actualResult   func() (error, Queue)
+		expectedResult func() Queue
+		expectedError  error
+	}{
+		{
+			name: "test decrease value in max priority queue",
+			actualResult: func() (error, Queue) {
+				q, err := NewPriorityQueue(true, comparator.NewIntegerComparator())
+				require.NoError(t, err)
+
+				require.NoError(t, q.Add(6))
+				require.NoError(t, q.Add(2))
+				require.NoError(t, q.Add(4))
+				require.NoError(t, q.Add(1))
+
+				return q.Update(2, 0), q
+			},
+			expectedResult: func() Queue {
+				h, err := heap.NewMaxHeap(comparator.NewIntegerComparator(), 6, 1, 4, 0)
+				require.NoError(t, err)
+
+				return &PriorityQueue{h: h}
+			},
+		},
+		{
+			name: "test increase value in max priority queue",
+			actualResult: func() (error, Queue) {
+				q, err := NewPriorityQueue(true, comparator.NewIntegerComparator())
+				require.NoError(t, err)
+
+				require.NoError(t, q.Add(6))
+				require.NoError(t, q.Add(2))
+				require.NoError(t, q.Add(4))
+				require.NoError(t, q.Add(1))
+
+				return q.Update(2, 7), q
+			},
+			expectedResult: func() Queue {
+				h, err := heap.NewMaxHeap(comparator.NewIntegerComparator(), 7, 6, 4, 1)
+				require.NoError(t, err)
+
+				return &PriorityQueue{h: h}
+			},
+		},
+		{
+			name: "test decrease value in min priority queue",
+			actualResult: func() (error, Queue) {
+				q, err := NewPriorityQueue(false, comparator.NewIntegerComparator())
+				require.NoError(t, err)
+
+				require.NoError(t, q.Add(1))
+				require.NoError(t, q.Add(2))
+				require.NoError(t, q.Add(4))
+				require.NoError(t, q.Add(6))
+
+				return q.Update(2, 0), q
+			},
+			expectedResult: func() Queue {
+				h, err := heap.NewMinHeap(comparator.NewIntegerComparator(), 0, 1, 4, 6)
+				require.NoError(t, err)
+
+				return &PriorityQueue{h: h}
+			},
+		},
+		{
+			name: "test increase value in min priority queue",
+			actualResult: func() (error, Queue) {
+				q, err := NewPriorityQueue(false, comparator.NewIntegerComparator())
+				require.NoError(t, err)
+
+				require.NoError(t, q.Add(1))
+				require.NoError(t, q.Add(2))
+				require.NoError(t, q.Add(4))
+				require.NoError(t, q.Add(6))
+
+				return q.Update(2, 7), q
+			},
+			expectedResult: func() Queue {
+				h, err := heap.NewMinHeap(comparator.NewIntegerComparator(), 1, 6, 4, 7)
+				require.NoError(t, err)
+
+				return &PriorityQueue{h: h}
+			},
+		},
+	}
+
+	for _, testCase := range testCases {
+		t.Run(testCase.name, func(t *testing.T) {
+			err, res := testCase.actualResult()
+
+			assert.Equal(t, testCase.expectedError, err)
+			assert.Equal(t, testCase.expectedResult(), res)
+		})
+	}
+}
+
+func TestPriorityQueueUpdateFunc(t *testing.T) {
+	testCases := []struct {
+		name           string
+		actualResult   func() (error, Queue)
+		expectedResult func() Queue
+		expectedError  error
+	}{
+		{
+			name: "test decrease value in max priority queue",
+			actualResult: func() (error, Queue) {
+				q, err := NewPriorityQueue(true, comparator.NewIntegerComparator())
+				require.NoError(t, err)
+
+				require.NoError(t, q.Add(6))
+				require.NoError(t, q.Add(2))
+				require.NoError(t, q.Add(4))
+				require.NoError(t, q.Add(1))
+
+				up := func(interface{}) interface{} {
+					return 0
+				}
+
+				return q.UpdateFunc(2, up), q
+			},
+			expectedResult: func() Queue {
+				h, err := heap.NewMaxHeap(comparator.NewIntegerComparator(), 6, 1, 4, 0)
+				require.NoError(t, err)
+
+				return &PriorityQueue{h: h}
+			},
+		},
+		{
+			name: "test increase value in max priority queue",
+			actualResult: func() (error, Queue) {
+				q, err := NewPriorityQueue(true, comparator.NewIntegerComparator())
+				require.NoError(t, err)
+
+				require.NoError(t, q.Add(6))
+				require.NoError(t, q.Add(2))
+				require.NoError(t, q.Add(4))
+				require.NoError(t, q.Add(1))
+
+				up := func(interface{}) interface{} {
+					return 7
+				}
+
+				return q.UpdateFunc(2, up), q
+			},
+			expectedResult: func() Queue {
+				h, err := heap.NewMaxHeap(comparator.NewIntegerComparator(), 7, 6, 4, 1)
+				require.NoError(t, err)
+
+				return &PriorityQueue{h: h}
+			},
+		},
+		{
+			name: "test decrease value in min priority queue",
+			actualResult: func() (error, Queue) {
+				q, err := NewPriorityQueue(false, comparator.NewIntegerComparator())
+				require.NoError(t, err)
+
+				require.NoError(t, q.Add(1))
+				require.NoError(t, q.Add(2))
+				require.NoError(t, q.Add(4))
+				require.NoError(t, q.Add(6))
+
+				up := func(interface{}) interface{} {
+					return 0
+				}
+
+				return q.UpdateFunc(2, up), q
+			},
+			expectedResult: func() Queue {
+				h, err := heap.NewMinHeap(comparator.NewIntegerComparator(), 0, 1, 4, 6)
+				require.NoError(t, err)
+
+				return &PriorityQueue{h: h}
+			},
+		},
+		{
+			name: "test increase value in min priority queue",
+			actualResult: func() (error, Queue) {
+				q, err := NewPriorityQueue(false, comparator.NewIntegerComparator())
+				require.NoError(t, err)
+
+				require.NoError(t, q.Add(1))
+				require.NoError(t, q.Add(2))
+				require.NoError(t, q.Add(4))
+				require.NoError(t, q.Add(6))
+
+				up := func(interface{}) interface{} {
+					return 7
+				}
+
+				return q.UpdateFunc(2, up), q
+			},
+			expectedResult: func() Queue {
+				h, err := heap.NewMinHeap(comparator.NewIntegerComparator(), 1, 6, 4, 7)
+				require.NoError(t, err)
+
+				return &PriorityQueue{h: h}
+			},
+		},
+	}
+
+	for _, testCase := range testCases {
+		t.Run(testCase.name, func(t *testing.T) {
+			err, res := testCase.actualResult()
+
+			assert.Equal(t, testCase.expectedError, err)
+			assert.Equal(t, testCase.expectedResult(), res)
+		})
+	}
+}
+
 func TestPriorityQueuePeek(t *testing.T) {
 	testCases := []struct {
 		name            string

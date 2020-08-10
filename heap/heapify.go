@@ -4,18 +4,18 @@ import (
 	"github.com/nsnikhil/go-datastructures/functions/comparator"
 )
 
-func heapify(curr int, c comparator.Comparator, maxHeapify bool, data []interface{}) error {
-	return heapUtil(curr, c, maxHeapify, data)
+func heapify(curr int, c comparator.Comparator, maxHeapify bool, data []interface{}, indexes map[interface{}]int) error {
+	return heapUtil(curr, c, maxHeapify, data, indexes)
 }
 
-func heapUtil(curr int, c comparator.Comparator, maxHeapify bool, data []interface{}) error {
+func heapUtil(curr int, c comparator.Comparator, maxHeapify bool, data []interface{}, indexes map[interface{}]int) error {
 	if curr == len(data)-1 {
-		return shiftUp(curr, c, maxHeapify, data)
+		return shiftUp(curr, c, maxHeapify, data, indexes)
 	}
-	return shiftDown(curr, c, maxHeapify, data)
+	return shiftDown(curr, c, maxHeapify, data, indexes)
 }
 
-func shiftUp(curr int, c comparator.Comparator, maxHeapify bool, data []interface{}) error {
+func shiftUp(curr int, c comparator.Comparator, maxHeapify bool, data []interface{}, indexes map[interface{}]int) error {
 	if curr == 0 {
 		return nil
 	}
@@ -27,6 +27,8 @@ func shiftUp(curr int, c comparator.Comparator, maxHeapify bool, data []interfac
 
 	for curr > 0 && shouldSwap {
 		data[curr], data[parent] = data[parent], data[curr]
+		indexes[data[curr]], indexes[data[parent]] = indexes[data[parent]], indexes[data[curr]]
+
 		curr = parent
 
 		if curr <= 0 {
@@ -42,7 +44,7 @@ func shiftUp(curr int, c comparator.Comparator, maxHeapify bool, data []interfac
 	return nil
 }
 
-func shiftDown(curr int, c comparator.Comparator, maxHeapify bool, data []interface{}) error {
+func shiftDown(curr int, c comparator.Comparator, maxHeapify bool, data []interface{}, indexes map[interface{}]int) error {
 	if curr >= len(data)/2 {
 		return nil
 	}
@@ -54,6 +56,8 @@ func shiftDown(curr int, c comparator.Comparator, maxHeapify bool, data []interf
 
 	for curr < len(data)/2 && shouldSwap {
 		data[curr], data[child] = data[child], data[curr]
+		indexes[data[curr]], indexes[data[child]] = indexes[data[child]], indexes[data[curr]]
+
 		curr = child
 
 		if curr >= len(data)/2 {

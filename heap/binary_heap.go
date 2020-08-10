@@ -1,6 +1,7 @@
 package heap
 
 import (
+	"errors"
 	"fmt"
 	"github.com/nsnikhil/go-datastructures/functions/comparator"
 	"github.com/nsnikhil/go-datastructures/functions/iterator"
@@ -12,6 +13,7 @@ type binaryHeap struct {
 	typeURL   string
 	c         comparator.Comparator
 	isMaxHeap bool
+	indexes   map[interface{}]int
 	data      []interface{}
 }
 
@@ -47,6 +49,7 @@ func newBinaryHeap(c comparator.Comparator, isMaxHeap bool, data ...interface{})
 			c:         c,
 			typeURL:   na,
 			isMaxHeap: isMaxHeap,
+			indexes:   make(map[interface{}]int),
 		}, nil
 	}
 
@@ -58,7 +61,8 @@ func newBinaryHeap(c comparator.Comparator, isMaxHeap bool, data ...interface{})
 		}
 	}
 
-	if err := buildHeap(c, isMaxHeap, data); err != nil {
+	indexes := make(map[interface{}]int)
+	if err := buildHeap(c, isMaxHeap, data, indexes); err != nil {
 		return nil, err
 	}
 
@@ -67,6 +71,7 @@ func newBinaryHeap(c comparator.Comparator, isMaxHeap bool, data ...interface{})
 		typeURL:   typeURL,
 		isMaxHeap: isMaxHeap,
 		data:      data,
+		indexes:   indexes,
 	}, nil
 }
 
@@ -91,8 +96,9 @@ func (bh *binaryHeap) Add(data ...interface{}) error {
 
 	for _, d := range data {
 		bh.data = append(bh.data, d)
+		bh.indexes[d] = len(bh.data) - 1
 
-		if err := heapify(len(bh.data)-1, bh.c, bh.isMaxHeap, bh.data); err != nil {
+		if err := heapify(len(bh.data)-1, bh.c, bh.isMaxHeap, bh.data, bh.indexes); err != nil {
 			return err
 		}
 	}
@@ -101,19 +107,104 @@ func (bh *binaryHeap) Add(data ...interface{}) error {
 
 func (bh *binaryHeap) Extract() (interface{}, error) {
 	if bh.IsEmpty() {
-		return nil, fmt.Errorf("heap is empty")
+		return nil, errors.New("heap is empty")
 	}
 
 	ele := bh.data[0]
 
 	bh.data[0] = bh.data[bh.Size()-1]
-	bh.data = bh.data[:bh.Size()-1]
+	bh.indexes[bh.data[bh.Size()-1]] = 0
 
-	if err := heapify(0, bh.c, bh.isMaxHeap, bh.data); err != nil {
+	bh.data = bh.data[:bh.Size()-1]
+	delete(bh.indexes, ele)
+
+	if err := heapify(0, bh.c, bh.isMaxHeap, bh.data, bh.indexes); err != nil {
 		return nil, err
 	}
 
 	return ele, nil
+}
+
+func (bh *binaryHeap) Update(prev, new interface{}) error {
+	if bh.IsEmpty() {
+		return errors.New("heap is empty")
+	}
+
+	pt := utils.GetTypeName(prev)
+	if pt != bh.typeURL {
+		return liberror.NewTypeMismatchError(bh.typeURL, pt)
+	}
+
+	nt := utils.GetTypeName(new)
+	if nt != bh.typeURL {
+		return liberror.NewTypeMismatchError(bh.typeURL, nt)
+	}
+
+	idx, ok := bh.indexes[prev]
+	if !ok {
+		return fmt.Errorf("%v not found in heap", prev)
+	}
+
+	if prev == new {
+		return fmt.Errorf("%v and %v are same", prev, new)
+	}
+
+	res, err := bh.c.Compare(prev, new)
+	if err != nil {
+		return err
+	}
+
+	if res == 0 {
+		return fmt.Errorf("comparator returned same for %v and %v", prev, new)
+	}
+
+	delete(bh.indexes, prev)
+
+	bh.data[idx] = new
+	bh.indexes[new] = idx
+
+	if bh.isMaxHeap && res > 0 || !bh.isMaxHeap && res < 0 {
+		return shiftDown(idx, bh.c, bh.isMaxHeap, bh.data, bh.indexes)
+	}
+
+	return shiftUp(idx, bh.c, bh.isMaxHeap, bh.data, bh.indexes)
+}
+
+func (bh *binaryHeap) UpdateFunc(prev interface{}, op func(interface{}) interface{}) error {
+	if bh.IsEmpty() {
+		return errors.New("heap is empty")
+	}
+
+	pt := utils.GetTypeName(prev)
+	if pt != bh.typeURL {
+		return liberror.NewTypeMismatchError(bh.typeURL, pt)
+	}
+
+	idx, ok := bh.indexes[prev]
+	if !ok {
+		return fmt.Errorf("%v not found in heap", prev)
+	}
+
+	updated := op(prev)
+	nt := utils.GetTypeName(updated)
+	if nt != bh.typeURL {
+		return liberror.NewTypeMismatchError(bh.typeURL, nt)
+	}
+
+	delete(bh.indexes, prev)
+
+	bh.data[idx] = updated
+	bh.indexes[updated] = idx
+
+	if bh.Size() == 1 {
+		return nil
+	}
+
+	if err := shiftDown(idx, bh.c, bh.isMaxHeap, bh.data, bh.indexes); err != nil {
+		return err
+	}
+
+	return shiftUp(idx, bh.c, bh.isMaxHeap, bh.data, bh.indexes)
 }
 
 func (bh *binaryHeap) Delete() error {

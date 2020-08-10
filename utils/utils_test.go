@@ -34,6 +34,14 @@ func TestGetTypeName(t *testing.T) {
 			expectedResult: "someObj",
 		},
 		{
+			name: "return type name as someObj pointer",
+			actualResult: func() string {
+				type someObj struct{}
+				return GetTypeName(&someObj{})
+			},
+			expectedResult: "someObj",
+		},
+		{
 			name: "return type name as na for interface",
 			actualResult: func() string {
 				var e interface{}

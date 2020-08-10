@@ -36,6 +36,14 @@ func (pq *PriorityQueue) Remove() (interface{}, error) {
 	return pq.h.Extract()
 }
 
+func (pq *PriorityQueue) Update(prev, new interface{}) error {
+	return pq.h.Update(prev, new)
+}
+
+func (pq *PriorityQueue) UpdateFunc(prev interface{}, op func(interface{}) interface{}) error {
+	return pq.h.UpdateFunc(prev, op)
+}
+
 func (pq *PriorityQueue) Peek() (interface{}, error) {
 	return pq.h.Iterator().Next(), nil
 }

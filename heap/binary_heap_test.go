@@ -2,10 +2,12 @@ package heap
 
 import (
 	"errors"
+	"fmt"
 	"github.com/nsnikhil/go-datastructures/functions/comparator"
 	"github.com/nsnikhil/go-datastructures/liberror"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"reflect"
 	"testing"
 )
 
@@ -25,6 +27,7 @@ func TestCreateMaxHeap(t *testing.T) {
 				isMaxHeap: true,
 				typeURL:   "na",
 				c:         comparator.NewIntegerComparator(),
+				indexes:   make(map[interface{}]int),
 			}},
 		},
 		{
@@ -37,6 +40,7 @@ func TestCreateMaxHeap(t *testing.T) {
 				isMaxHeap: true,
 				c:         comparator.NewIntegerComparator(),
 				data:      []interface{}{1},
+				indexes:   map[interface{}]int{1: 0},
 			}},
 		},
 		{
@@ -49,6 +53,7 @@ func TestCreateMaxHeap(t *testing.T) {
 				isMaxHeap: true,
 				c:         comparator.NewIntegerComparator(),
 				data:      []interface{}{4, 2, 3, 1},
+				indexes:   map[interface{}]int{4: 0, 2: 1, 3: 2, 1: 3},
 			}},
 		},
 		{
@@ -96,6 +101,7 @@ func TestCreateMinHeap(t *testing.T) {
 			expectedResult: &MinHeap{&binaryHeap{
 				typeURL: "na",
 				c:       comparator.NewIntegerComparator(),
+				indexes: make(map[interface{}]int),
 			}},
 		},
 		{
@@ -107,6 +113,7 @@ func TestCreateMinHeap(t *testing.T) {
 				typeURL: "int",
 				c:       comparator.NewIntegerComparator(),
 				data:    []interface{}{1},
+				indexes: map[interface{}]int{1: 0},
 			}},
 		},
 		{
@@ -118,6 +125,7 @@ func TestCreateMinHeap(t *testing.T) {
 				typeURL: "int",
 				c:       comparator.NewIntegerComparator(),
 				data:    []interface{}{1, 3, 2, 4},
+				indexes: map[interface{}]int{1: 0, 3: 1, 2: 2, 4: 3},
 			}},
 		},
 		{
@@ -171,6 +179,7 @@ func TestMaxHeapAdd(t *testing.T) {
 				isMaxHeap: true,
 				c:         comparator.NewIntegerComparator(),
 				data:      []interface{}{10},
+				indexes:   map[interface{}]int{10: 0},
 			}},
 		},
 		{
@@ -187,6 +196,7 @@ func TestMaxHeapAdd(t *testing.T) {
 				isMaxHeap: true,
 				c:         comparator.NewIntegerComparator(),
 				data:      []interface{}{100, 80, 60, 40},
+				indexes:   map[interface{}]int{100: 0, 80: 1, 60: 2, 40: 3},
 			}},
 		},
 		{
@@ -203,6 +213,7 @@ func TestMaxHeapAdd(t *testing.T) {
 				isMaxHeap: true,
 				c:         comparator.NewIntegerComparator(),
 				data:      []interface{}{120, 100, 60, 40},
+				indexes:   map[interface{}]int{120: 0, 100: 1, 60: 2, 40: 3},
 			}},
 		},
 		{
@@ -219,6 +230,7 @@ func TestMaxHeapAdd(t *testing.T) {
 				isMaxHeap: true,
 				c:         comparator.NewIntegerComparator(),
 				data:      []interface{}{120, 100, 110},
+				indexes:   map[interface{}]int{120: 0, 100: 1, 110: 2},
 			}},
 		},
 		{
@@ -235,6 +247,7 @@ func TestMaxHeapAdd(t *testing.T) {
 				isMaxHeap: true,
 				c:         comparator.NewIntegerComparator(),
 				data:      []interface{}{9, 8, 5, 6, 7, 1, 4, 0, 3, 2},
+				indexes:   map[interface{}]int{9: 0, 8: 1, 5: 2, 6: 3, 7: 4, 1: 5, 4: 6, 0: 7, 3: 8, 2: 9},
 			}},
 		},
 		{
@@ -250,6 +263,7 @@ func TestMaxHeapAdd(t *testing.T) {
 				isMaxHeap: true,
 				c:         comparator.NewIntegerComparator(),
 				data:      []interface{}(nil),
+				indexes:   make(map[interface{}]int),
 			}},
 			expectedError: liberror.NewTypeMismatchError("int", "string"),
 		},
@@ -268,6 +282,7 @@ func TestMaxHeapAdd(t *testing.T) {
 				isMaxHeap: true,
 				c:         comparator.NewIntegerComparator(),
 				data:      []interface{}(nil),
+				indexes:   map[interface{}]int{2: 0, 1: 1},
 			}},
 			expectedError: liberror.NewTypeMismatchError("int", "string"),
 		},
@@ -284,6 +299,7 @@ func TestMaxHeapAdd(t *testing.T) {
 				isMaxHeap: true,
 				c:         comparator.NewStringComparator(),
 				data:      []interface{}{1, 2},
+				indexes:   map[interface{}]int{1: 0, 2: 1},
 			}},
 			expectedError: liberror.NewTypeMismatchError("string", "int"),
 		},
@@ -322,6 +338,7 @@ func TestMinHeapAdd(t *testing.T) {
 				typeURL: "int",
 				c:       comparator.NewIntegerComparator(),
 				data:    []interface{}{10},
+				indexes: map[interface{}]int{10: 0},
 			}},
 		},
 		{
@@ -337,6 +354,7 @@ func TestMinHeapAdd(t *testing.T) {
 				typeURL: "int",
 				c:       comparator.NewIntegerComparator(),
 				data:    []interface{}{10, 20, 60, 40},
+				indexes: map[interface{}]int{10: 0, 20: 1, 60: 2, 40: 3},
 			}},
 		},
 		{
@@ -352,6 +370,7 @@ func TestMinHeapAdd(t *testing.T) {
 				typeURL: "int",
 				c:       comparator.NewIntegerComparator(),
 				data:    []interface{}{10, 20, 60, 40},
+				indexes: map[interface{}]int{10: 0, 20: 1, 60: 2, 40: 3},
 			}},
 		},
 		{
@@ -367,6 +386,7 @@ func TestMinHeapAdd(t *testing.T) {
 				typeURL: "int",
 				c:       comparator.NewIntegerComparator(),
 				data:    []interface{}{10, 30, 20},
+				indexes: map[interface{}]int{10: 0, 30: 1, 20: 2},
 			}},
 		},
 		{
@@ -382,6 +402,7 @@ func TestMinHeapAdd(t *testing.T) {
 				typeURL: "int",
 				c:       comparator.NewIntegerComparator(),
 				data:    []interface{}{0, 1, 4, 3, 2, 8, 5, 9, 6, 7},
+				indexes: map[interface{}]int{0: 0, 1: 1, 4: 2, 3: 3, 2: 4, 8: 5, 5: 6, 9: 7, 6: 8, 7: 9},
 			}},
 		},
 		{
@@ -396,6 +417,7 @@ func TestMinHeapAdd(t *testing.T) {
 				typeURL: "na",
 				c:       comparator.NewIntegerComparator(),
 				data:    []interface{}(nil),
+				indexes: make(map[interface{}]int),
 			}},
 			expectedError: liberror.NewTypeMismatchError("int", "string"),
 		},
@@ -413,6 +435,7 @@ func TestMinHeapAdd(t *testing.T) {
 				typeURL: "int",
 				c:       comparator.NewIntegerComparator(),
 				data:    []interface{}(nil),
+				indexes: map[interface{}]int{1: 0, 2: 1},
 			}},
 			expectedError: liberror.NewTypeMismatchError("int", "string"),
 		},
@@ -428,6 +451,7 @@ func TestMinHeapAdd(t *testing.T) {
 				typeURL: "int",
 				c:       comparator.NewStringComparator(),
 				data:    []interface{}{1, 2},
+				indexes: map[interface{}]int{1: 0, 2: 1},
 			}},
 			expectedError: liberror.NewTypeMismatchError("string", "int"),
 		},
@@ -683,6 +707,7 @@ func TestMaxHeapExtract(t *testing.T) {
 				isMaxHeap: true,
 				c:         comparator.NewIntegerComparator(),
 				data:      []interface{}{1},
+				indexes:   map[interface{}]int{1: 0},
 			}},
 		},
 		{
@@ -700,6 +725,7 @@ func TestMaxHeapExtract(t *testing.T) {
 				isMaxHeap: true,
 				c:         comparator.NewIntegerComparator(),
 				data:      []interface{}{9, 7, 8},
+				indexes:   map[interface{}]int{9: 0, 7: 1, 8: 2},
 			}},
 		},
 		{
@@ -717,6 +743,7 @@ func TestMaxHeapExtract(t *testing.T) {
 				isMaxHeap: true,
 				c:         comparator.NewIntegerComparator(),
 				data:      []interface{}{8, 7, 5, 6, 2, 1, 4, 0, 3},
+				indexes:   map[interface{}]int{8: 0, 7: 1, 5: 2, 6: 3, 2: 4, 1: 5, 4: 6, 0: 7, 3: 8},
 			}},
 		},
 		{
@@ -733,6 +760,7 @@ func TestMaxHeapExtract(t *testing.T) {
 				isMaxHeap: true,
 				c:         comparator.NewIntegerComparator(),
 				data:      []interface{}(nil),
+				indexes:   make(map[interface{}]int),
 			}},
 			expectedError: errors.New("heap is empty"),
 		},
@@ -774,6 +802,7 @@ func TestMinHeapExtract(t *testing.T) {
 				typeURL: "int",
 				c:       comparator.NewIntegerComparator(),
 				data:    []interface{}{2},
+				indexes: map[interface{}]int{2: 0},
 			}},
 		},
 		{
@@ -790,6 +819,7 @@ func TestMinHeapExtract(t *testing.T) {
 				typeURL: "int",
 				c:       comparator.NewIntegerComparator(),
 				data:    []interface{}{8, 9, 10},
+				indexes: map[interface{}]int{8: 0, 9: 1, 10: 2},
 			}},
 		},
 		{
@@ -806,6 +836,7 @@ func TestMinHeapExtract(t *testing.T) {
 				typeURL: "int",
 				c:       comparator.NewIntegerComparator(),
 				data:    []interface{}{1, 2, 4, 3, 7, 8, 5, 9, 6},
+				indexes: map[interface{}]int{1: 0, 2: 1, 4: 2, 3: 3, 7: 4, 8: 5, 5: 6, 9: 7, 6: 8},
 			}},
 		},
 		{
@@ -821,6 +852,7 @@ func TestMinHeapExtract(t *testing.T) {
 				typeURL: "na",
 				c:       comparator.NewIntegerComparator(),
 				data:    []interface{}(nil),
+				indexes: make(map[interface{}]int),
 			}},
 			expectedError: errors.New("heap is empty"),
 		},
@@ -836,6 +868,437 @@ func TestMinHeapExtract(t *testing.T) {
 			if res != nil {
 				assert.Equal(t, testCase.expectedResult.binaryHeap, res.binaryHeap)
 			}
+		})
+	}
+}
+
+func TestMaxHeapUpdate(t *testing.T) {
+	testCases := []struct {
+		name           string
+		actualResult   func() (error, Heap)
+		expectedResult Heap
+		expectedError  error
+	}{
+		{
+			name: "test decrease value in max heap",
+			actualResult: func() (error, Heap) {
+				h, err := NewMaxHeap(comparator.NewIntegerComparator(), 6, 4, 2, 1)
+				require.NoError(t, err)
+
+				return h.Update(4, 0), h
+			},
+			expectedResult: &MaxHeap{&binaryHeap{
+				typeURL:   "int",
+				isMaxHeap: true,
+				c:         comparator.NewIntegerComparator(),
+				data:      []interface{}{6, 1, 2, 0},
+				indexes:   map[interface{}]int{6: 0, 1: 1, 2: 2, 0: 3},
+			}},
+		},
+		{
+			name: "test increase value in max heap",
+			actualResult: func() (error, Heap) {
+				h, err := NewMaxHeap(comparator.NewIntegerComparator(), 6, 4, 2, 1)
+				require.NoError(t, err)
+
+				return h.Update(4, 7), h
+			},
+			expectedResult: &MaxHeap{&binaryHeap{
+				typeURL:   "int",
+				isMaxHeap: true,
+				c:         comparator.NewIntegerComparator(),
+				data:      []interface{}{7, 6, 2, 1},
+				indexes:   map[interface{}]int{7: 0, 6: 1, 2: 2, 1: 3},
+			}},
+		},
+		{
+			name: "test decrease value in min heap",
+			actualResult: func() (error, Heap) {
+				h, err := NewMinHeap(comparator.NewIntegerComparator(), 1, 2, 4, 6)
+				require.NoError(t, err)
+
+				return h.Update(2, 0), h
+			},
+			expectedResult: &MinHeap{&binaryHeap{
+				typeURL:   "int",
+				isMaxHeap: false,
+				c:         comparator.NewIntegerComparator(),
+				data:      []interface{}{0, 1, 4, 6},
+				indexes:   map[interface{}]int{0: 0, 1: 1, 4: 2, 6: 3},
+			}},
+		},
+		{
+			name: "test increase value in min heap",
+			actualResult: func() (error, Heap) {
+				h, err := NewMinHeap(comparator.NewIntegerComparator(), 1, 2, 4, 6)
+				require.NoError(t, err)
+
+				return h.Update(2, 7), h
+			},
+			expectedResult: &MinHeap{&binaryHeap{
+				typeURL:   "int",
+				isMaxHeap: false,
+				c:         comparator.NewIntegerComparator(),
+				data:      []interface{}{1, 6, 4, 7},
+				indexes:   map[interface{}]int{1: 0, 6: 1, 4: 2, 7: 3},
+			}},
+		},
+		{
+			name: "test return error when heap is empty",
+			actualResult: func() (error, Heap) {
+				h, err := NewMinHeap(comparator.NewIntegerComparator())
+				require.NoError(t, err)
+
+				return h.Update(2, 1), h
+			},
+			expectedResult: &MinHeap{&binaryHeap{
+				typeURL:   "na",
+				isMaxHeap: false,
+				c:         comparator.NewIntegerComparator(),
+				data:      []interface{}(nil),
+				indexes:   make(map[interface{}]int),
+			}},
+			expectedError: errors.New("heap is empty"),
+		},
+		{
+			name: "test return error when prev type is different",
+			actualResult: func() (error, Heap) {
+				h, err := NewMinHeap(comparator.NewIntegerComparator(), 1)
+				require.NoError(t, err)
+
+				return h.Update('a', 2), h
+			},
+			expectedResult: &MinHeap{&binaryHeap{
+				typeURL:   "int",
+				isMaxHeap: false,
+				c:         comparator.NewIntegerComparator(),
+				data:      []interface{}{1},
+				indexes:   map[interface{}]int{1: 0},
+			}},
+			expectedError: liberror.NewTypeMismatchError("int", "int32"),
+		},
+		{
+			name: "test return error when new type is different",
+			actualResult: func() (error, Heap) {
+				h, err := NewMinHeap(comparator.NewIntegerComparator(), 1)
+				require.NoError(t, err)
+
+				return h.Update(1, 'a'), h
+			},
+			expectedResult: &MinHeap{&binaryHeap{
+				typeURL:   "int",
+				isMaxHeap: false,
+				c:         comparator.NewIntegerComparator(),
+				data:      []interface{}{1},
+				indexes:   map[interface{}]int{1: 0},
+			}},
+			expectedError: liberror.NewTypeMismatchError("int", "int32"),
+		},
+		{
+			name: "test return error when prev is not present in heap",
+			actualResult: func() (error, Heap) {
+				h, err := NewMinHeap(comparator.NewIntegerComparator(), 1)
+				require.NoError(t, err)
+
+				return h.Update(2, 3), h
+			},
+			expectedResult: &MinHeap{&binaryHeap{
+				typeURL:   "int",
+				isMaxHeap: false,
+				c:         comparator.NewIntegerComparator(),
+				data:      []interface{}{1},
+				indexes:   map[interface{}]int{1: 0},
+			}},
+			expectedError: errors.New("2 not found in heap"),
+		},
+	}
+
+	for _, testCase := range testCases {
+		t.Run(testCase.name, func(t *testing.T) {
+			err, res := testCase.actualResult()
+
+			assert.Equal(t, testCase.expectedError, err)
+			assert.Equal(t, testCase.expectedResult, res)
+		})
+	}
+}
+
+type value struct{ val int }
+
+func newValue(v int) *value { return &value{val: v} }
+
+func (v *value) String() string {
+	return fmt.Sprintf("%d", v.val)
+}
+
+type pointerValueComparator struct{}
+
+func (vc *pointerValueComparator) Compare(one interface{}, two interface{}) (int, error) {
+	return one.(*value).val - two.(*value).val, nil
+}
+
+type valueComparator struct{}
+
+func (vc valueComparator) Compare(one interface{}, two interface{}) (int, error) {
+	return one.(value).val - two.(value).val, nil
+}
+
+func TestMaxHeapUpdateFunc(t *testing.T) {
+	testCases := []struct {
+		name           string
+		actualResult   func() (error, Heap)
+		expectedResult Heap
+		expectedError  error
+	}{
+		{
+			name: "test decrease value in max heap",
+			actualResult: func() (error, Heap) {
+				h, err := NewMaxHeap(comparator.NewIntegerComparator(), 6, 4, 2, 1)
+				require.NoError(t, err)
+
+				uf := func(e interface{}) interface{} {
+					return 0
+				}
+
+				return h.UpdateFunc(4, uf), h
+			},
+			expectedResult: &MaxHeap{&binaryHeap{
+				typeURL:   "int",
+				isMaxHeap: true,
+				c:         comparator.NewIntegerComparator(),
+				data:      []interface{}{6, 1, 2, 0},
+				indexes:   map[interface{}]int{6: 0, 1: 1, 2: 2, 0: 3},
+			}},
+		},
+		{
+			name: "test decrease pointer reference value in max heap",
+			actualResult: func() (error, Heap) {
+				f := &value{4}
+				h, err := NewMaxHeap(&pointerValueComparator{}, &value{6}, f, &value{2}, &value{1})
+				require.NoError(t, err)
+
+				uf := func(e interface{}) interface{} {
+					e.(*value).val = 0
+					return e
+				}
+
+				return h.UpdateFunc(f, uf), h
+			},
+			expectedResult: &MaxHeap{&binaryHeap{
+				typeURL:   "value",
+				isMaxHeap: true,
+				c:         &pointerValueComparator{},
+				data:      []interface{}{&value{6}, &value{1}, &value{2}, &value{0}},
+				indexes: map[interface{}]int{
+					&value{1}: 1,
+					&value{6}: 0,
+					&value{0}: 3,
+					&value{2}: 2,
+				},
+			}},
+		},
+		{
+			name: "test decrease reference value in max heap",
+			actualResult: func() (error, Heap) {
+				f := value{4}
+				h, err := NewMaxHeap(valueComparator{}, value{6}, f, value{2}, value{1})
+				require.NoError(t, err)
+
+				uf := func(e interface{}) interface{} {
+					return value{0}
+				}
+
+				return h.UpdateFunc(f, uf), h
+			},
+			expectedResult: &MaxHeap{&binaryHeap{
+				typeURL:   "value",
+				isMaxHeap: true,
+				c:         valueComparator{},
+				data:      []interface{}{value{6}, value{1}, value{2}, value{0}},
+				indexes: map[interface{}]int{
+					value{1}: 1,
+					value{6}: 0,
+					value{0}: 3,
+					value{2}: 2,
+				},
+			}},
+		},
+		{
+			name: "test increase value in max heap",
+			actualResult: func() (error, Heap) {
+				h, err := NewMaxHeap(comparator.NewIntegerComparator(), 6, 4, 2, 1)
+				require.NoError(t, err)
+
+				uf := func(e interface{}) interface{} {
+					return 7
+				}
+
+				return h.UpdateFunc(4, uf), h
+			},
+			expectedResult: &MaxHeap{&binaryHeap{
+				typeURL:   "int",
+				isMaxHeap: true,
+				c:         comparator.NewIntegerComparator(),
+				data:      []interface{}{7, 6, 2, 1},
+				indexes:   map[interface{}]int{7: 0, 6: 1, 2: 2, 1: 3},
+			}},
+		},
+		{
+			name: "test decrease value in min heap",
+			actualResult: func() (error, Heap) {
+				h, err := NewMinHeap(comparator.NewIntegerComparator(), 1, 2, 4, 6)
+				require.NoError(t, err)
+
+				uf := func(e interface{}) interface{} {
+					return 0
+				}
+
+				return h.UpdateFunc(2, uf), h
+			},
+			expectedResult: &MinHeap{&binaryHeap{
+				typeURL:   "int",
+				isMaxHeap: false,
+				c:         comparator.NewIntegerComparator(),
+				data:      []interface{}{0, 1, 4, 6},
+				indexes:   map[interface{}]int{0: 0, 1: 1, 4: 2, 6: 3},
+			}},
+		},
+		{
+			name: "test increase value in min heap",
+			actualResult: func() (error, Heap) {
+				h, err := NewMinHeap(comparator.NewIntegerComparator(), 1, 2, 4, 6)
+				require.NoError(t, err)
+
+				uf := func(e interface{}) interface{} {
+					return 7
+				}
+
+				return h.UpdateFunc(2, uf), h
+			},
+			expectedResult: &MinHeap{&binaryHeap{
+				typeURL:   "int",
+				isMaxHeap: false,
+				c:         comparator.NewIntegerComparator(),
+				data:      []interface{}{1, 6, 4, 7},
+				indexes:   map[interface{}]int{1: 0, 6: 1, 4: 2, 7: 3},
+			}},
+		},
+		{
+			name: "test return error when heap is empty",
+			actualResult: func() (error, Heap) {
+				h, err := NewMinHeap(comparator.NewIntegerComparator())
+				require.NoError(t, err)
+
+				uf := func(e interface{}) interface{} {
+					return 1
+				}
+
+				return h.UpdateFunc(2, uf), h
+			},
+			expectedResult: &MinHeap{&binaryHeap{
+				typeURL:   "na",
+				isMaxHeap: false,
+				c:         comparator.NewIntegerComparator(),
+				data:      []interface{}(nil),
+				indexes:   make(map[interface{}]int),
+			}},
+			expectedError: errors.New("heap is empty"),
+		},
+		{
+			name: "test return error when prev type is different",
+			actualResult: func() (error, Heap) {
+				h, err := NewMinHeap(comparator.NewIntegerComparator(), 1)
+				require.NoError(t, err)
+
+				uf := func(e interface{}) interface{} {
+					return 2
+				}
+
+				return h.UpdateFunc('a', uf), h
+			},
+			expectedResult: &MinHeap{&binaryHeap{
+				typeURL:   "int",
+				isMaxHeap: false,
+				c:         comparator.NewIntegerComparator(),
+				data:      []interface{}{1},
+				indexes:   map[interface{}]int{1: 0},
+			}},
+			expectedError: liberror.NewTypeMismatchError("int", "int32"),
+		},
+		{
+			name: "test return error when new type is different",
+			actualResult: func() (error, Heap) {
+				h, err := NewMinHeap(comparator.NewIntegerComparator(), 1)
+				require.NoError(t, err)
+
+				uf := func(e interface{}) interface{} {
+					return 'a'
+				}
+
+				return h.UpdateFunc(1, uf), h
+			},
+			expectedResult: &MinHeap{&binaryHeap{
+				typeURL:   "int",
+				isMaxHeap: false,
+				c:         comparator.NewIntegerComparator(),
+				data:      []interface{}{1},
+				indexes:   map[interface{}]int{1: 0},
+			}},
+			expectedError: liberror.NewTypeMismatchError("int", "int32"),
+		},
+		{
+			name: "test return error when prev is not present in heap",
+			actualResult: func() (error, Heap) {
+				h, err := NewMinHeap(comparator.NewIntegerComparator(), 1)
+				require.NoError(t, err)
+
+				uf := func(e interface{}) interface{} {
+					return 3
+				}
+
+				return h.UpdateFunc(2, uf), h
+			},
+			expectedResult: &MinHeap{&binaryHeap{
+				typeURL:   "int",
+				isMaxHeap: false,
+				c:         comparator.NewIntegerComparator(),
+				data:      []interface{}{1},
+				indexes:   map[interface{}]int{1: 0},
+			}},
+			expectedError: errors.New("2 not found in heap"),
+		},
+	}
+
+	for _, testCase := range testCases {
+		t.Run(testCase.name, func(t *testing.T) {
+			err, res := testCase.actualResult()
+
+			assert.Equal(t, testCase.expectedError, err)
+
+			if reflect.TypeOf(res).String() == "*heap.MaxHeap" {
+				assert.Equal(t, testCase.expectedResult.(*MaxHeap).data, res.(*MaxHeap).data)
+				assert.Equal(t, testCase.expectedResult.(*MaxHeap).isMaxHeap, res.(*MaxHeap).isMaxHeap)
+				assert.Equal(t, testCase.expectedResult.(*MaxHeap).c, res.(*MaxHeap).c)
+				assert.Equal(t, testCase.expectedResult.(*MaxHeap).typeURL, res.(*MaxHeap).typeURL)
+				em := testCase.expectedResult.(*MaxHeap).indexes
+				am := testCase.expectedResult.(*MaxHeap).indexes
+				for k := range em {
+					assert.Equal(t, em[k], am[k])
+				}
+
+			} else {
+				assert.Equal(t, testCase.expectedResult.(*MinHeap).data, res.(*MinHeap).data)
+				assert.Equal(t, testCase.expectedResult.(*MinHeap).isMaxHeap, res.(*MinHeap).isMaxHeap)
+				assert.Equal(t, testCase.expectedResult.(*MinHeap).c, res.(*MinHeap).c)
+				assert.Equal(t, testCase.expectedResult.(*MinHeap).typeURL, res.(*MinHeap).typeURL)
+
+				em := testCase.expectedResult.(*MinHeap).indexes
+				am := testCase.expectedResult.(*MinHeap).indexes
+				for k := range em {
+					assert.Equal(t, em[k], am[k])
+				}
+			}
+
 		})
 	}
 }
@@ -861,6 +1324,7 @@ func TestMaxHeapDelete(t *testing.T) {
 				isMaxHeap: true,
 				c:         comparator.NewIntegerComparator(),
 				data:      []interface{}{1},
+				indexes:   map[interface{}]int{1: 0},
 			}},
 		},
 		{
@@ -877,6 +1341,7 @@ func TestMaxHeapDelete(t *testing.T) {
 				isMaxHeap: true,
 				c:         comparator.NewIntegerComparator(),
 				data:      []interface{}{9, 7, 8},
+				indexes:   map[interface{}]int{9: 0, 7: 1, 8: 2},
 			}},
 		},
 		{
@@ -893,6 +1358,7 @@ func TestMaxHeapDelete(t *testing.T) {
 				isMaxHeap: true,
 				c:         comparator.NewIntegerComparator(),
 				data:      []interface{}{8, 7, 5, 6, 2, 1, 4, 0, 3},
+				indexes:   map[interface{}]int{8: 0, 7: 1, 5: 2, 6: 3, 2: 4, 1: 5, 4: 6, 0: 7, 3: 8},
 			}},
 		},
 		{
@@ -909,6 +1375,7 @@ func TestMaxHeapDelete(t *testing.T) {
 				isMaxHeap: true,
 				c:         comparator.NewIntegerComparator(),
 				data:      []interface{}(nil),
+				indexes:   make(map[interface{}]int),
 			}},
 			expectedError: errors.New("heap is empty"),
 		},
@@ -947,6 +1414,7 @@ func TestMinHeapDelete(t *testing.T) {
 				typeURL: "int",
 				c:       comparator.NewIntegerComparator(),
 				data:    []interface{}{2},
+				indexes: map[interface{}]int{2: 0},
 			}},
 		},
 		{
@@ -962,6 +1430,7 @@ func TestMinHeapDelete(t *testing.T) {
 				typeURL: "int",
 				c:       comparator.NewIntegerComparator(),
 				data:    []interface{}{8, 9, 10},
+				indexes: map[interface{}]int{8: 0, 9: 1, 10: 2},
 			}},
 		},
 		{
@@ -977,6 +1446,7 @@ func TestMinHeapDelete(t *testing.T) {
 				typeURL: "int",
 				c:       comparator.NewIntegerComparator(),
 				data:    []interface{}{1, 2, 4, 3, 7, 8, 5, 9, 6},
+				indexes: map[interface{}]int{1: 0, 2: 1, 4: 2, 3: 3, 7: 4, 8: 5, 5: 6, 9: 7, 6: 8},
 			}},
 		},
 		{
@@ -992,6 +1462,7 @@ func TestMinHeapDelete(t *testing.T) {
 				typeURL: "na",
 				c:       comparator.NewIntegerComparator(),
 				data:    []interface{}(nil),
+				indexes: make(map[interface{}]int),
 			}},
 			expectedError: errors.New("heap is empty"),
 		},

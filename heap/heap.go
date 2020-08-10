@@ -16,6 +16,16 @@ type Heap interface {
 	/*
 
 	 */
+	Update(prev, new interface{}) error
+
+	/*
+
+	 */
+	UpdateFunc(prev interface{}, op func(interface{}) interface{}) error
+
+	/*
+
+	 */
 	Clear()
 
 	/*
