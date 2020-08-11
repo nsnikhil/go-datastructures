@@ -2,8 +2,8 @@ package tree
 
 import (
 	"errors"
-	"fmt"
 	"github.com/nsnikhil/go-datastructures/functions/comparator"
+	"github.com/nsnikhil/go-datastructures/utils"
 )
 
 type BinarySearchTree struct {
@@ -22,6 +22,20 @@ func NewBinarySearchTree(c comparator.Comparator, e ...interface{}) (*BinarySear
 		BinaryTree: bt,
 	}
 
+	sz := len(e)
+
+	if sz == 0 {
+		return bst, nil
+	}
+
+	et := utils.GetTypeName(e[0])
+
+	for i := 1; i < sz; i++ {
+		if et != utils.GetTypeName(e[i]) {
+			return nil, errors.New("all elements must be of same type")
+		}
+	}
+
 	for _, k := range e {
 		if err := bst.InsertCompare(k, c); err != nil {
 			return nil, err
@@ -36,56 +50,9 @@ func (bst *BinarySearchTree) Insert(e interface{}) error {
 }
 
 func (bst *BinarySearchTree) Delete(e interface{}) error {
-	if bst.Empty() {
-		return errors.New("tree is empty")
-	}
-
-	return deleteNode(e, bst.c, bst.root)
+	return bst.DeleteCompare(e, bst.c)
 }
 
-func deleteNode(e interface{}, c comparator.Comparator, n *binaryNode) error {
-	if n == nil {
-		return fmt.Errorf("%v not found in the tree", e)
-	}
-
-	i, _ := c.Compare(n.data, e)
-
-	if i > 0 {
-		if err := deleteNode(e, c, n.left); err != nil {
-			return err
-		}
-	} else if i < 0 {
-		if err := deleteNode(e, c, n.right); err != nil {
-			return err
-		}
-	} else {
-
-		if n.isLeaf() {
-			n.detach()
-			return nil
-		} else if n.left == nil {
-			n.data = n.right.data
-			n.right.detach()
-			return nil
-		} else if n.right == nil {
-			n.data = n.left.data
-			n.left.detach()
-			return nil
-		} else {
-			sn := inOrderSuccessor(n.right)
-			n.data = sn.data
-			sn.detach()
-		}
-
-	}
-
-	return nil
-}
-
-func inOrderSuccessor(n *binaryNode) *binaryNode {
-	c := n
-	for c != nil && c.left != nil {
-		c = c.left
-	}
-	return c
+func (bst *BinarySearchTree) Search(e interface{}) (bool, error) {
+	return bst.SearchCompare(e, bst.c)
 }

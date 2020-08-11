@@ -8,7 +8,6 @@ import (
 	"github.com/nsnikhil/go-datastructures/liberror"
 	"github.com/nsnikhil/go-datastructures/list"
 	"github.com/nsnikhil/go-datastructures/queue"
-	"github.com/nsnikhil/go-datastructures/set"
 	"github.com/nsnikhil/go-datastructures/stack"
 	"github.com/nsnikhil/go-datastructures/utils"
 )
@@ -54,9 +53,13 @@ func (bn *binaryNode) clone() *binaryNode {
 func (bn *binaryNode) detach() {
 	p := bn.parent
 
-	if p != nil && p.left == bn {
+	if p == nil {
+		return
+	}
+
+	if p.left == bn {
 		p.left = nil
-	} else if p != nil && p.right == bn {
+	} else if p.right == bn {
 		p.right = nil
 	}
 
@@ -266,6 +269,59 @@ func (bt *BinaryTree) Delete(e interface{}) error {
 	return nil
 }
 
+func (bt *BinaryTree) DeleteCompare(e interface{}, c comparator.Comparator) error {
+	var deleteNode func(e interface{}, c comparator.Comparator, n *binaryNode) error
+
+	deleteNode = func(e interface{}, c comparator.Comparator, n *binaryNode) error {
+		if n == nil {
+			return fmt.Errorf("%v not found in the tree", e)
+		}
+
+		i, _ := c.Compare(n.data, e)
+
+		if i > 0 {
+			return deleteNode(e, c, n.left)
+		} else if i < 0 {
+			return deleteNode(e, c, n.right)
+		} else {
+
+			if n.isLeaf() {
+				n.detach()
+			} else if n.left == nil {
+				n.data = n.right.data
+				n.right.detach()
+			} else if n.right == nil {
+				n.data = n.left.data
+				n.left.detach()
+			} else {
+				sn := inOrderSuccessor(n.right)
+				n.data = sn.data
+				sn.detach()
+			}
+		}
+
+		return nil
+	}
+
+	if bt.Empty() {
+		return errors.New("tree is empty")
+	}
+
+	curr := bt.root
+	if curr.data == e && curr.isLeaf() {
+		bt.Clear()
+		return nil
+	}
+
+	err := deleteNode(e, c, curr)
+	if err != nil {
+		return err
+	}
+
+	bt.count--
+	return nil
+}
+
 func (bt *BinaryTree) Search(e interface{}) (bool, error) {
 	if bt.Empty() {
 		return false, errors.New("tree is empty")
@@ -282,6 +338,38 @@ func (bt *BinaryTree) Search(e interface{}) (bool, error) {
 	}
 
 	return true, nil
+}
+
+func (bt *BinaryTree) SearchCompare(e interface{}, c comparator.Comparator) (bool, error) {
+	if bt.Empty() {
+		return false, errors.New("tree is empty")
+	}
+
+	et := utils.GetTypeName(e)
+	if et != bt.typeURL {
+		return false, liberror.NewTypeMismatchError(bt.typeURL, et)
+	}
+
+	curr := bt.root
+
+	for curr != nil {
+		if curr.data == e {
+			return true, nil
+		}
+
+		res, err := c.Compare(curr.data, e)
+		if err != nil {
+			return false, err
+		}
+
+		if res > 0 {
+			curr = curr.left
+		} else if res < 0 {
+			curr = curr.right
+		}
+	}
+
+	return false, fmt.Errorf("%v not found in the tree", e)
 }
 
 func (bt *BinaryTree) Count() int {
@@ -1496,7 +1584,7 @@ func horizontalIterator(bt *BinaryTree, kind int) iterator.Iterator {
 	keys.Sort(comparator.NewIntegerComparator())
 
 	it := keys.Iterator()
-	s, _ := set.NewHashSet()
+	s := make(map[interface{}]bool)
 
 	for it.HasNext() {
 		e := it.Next()
@@ -1504,12 +1592,20 @@ func horizontalIterator(bt *BinaryTree, kind int) iterator.Iterator {
 		ele := m[e.(int)]
 
 		for _, le := range ele {
-			if !s.Contains(le) {
+			if !s[le] {
 				_ = l.Add(le)
-				_ = s.Add(le)
+				s[le] = true
 			}
 		}
 	}
 
 	return l.Iterator()
+}
+
+func inOrderSuccessor(n *binaryNode) *binaryNode {
+	c := n
+	for c != nil && c.left != nil {
+		c = c.left
+	}
+	return c
 }

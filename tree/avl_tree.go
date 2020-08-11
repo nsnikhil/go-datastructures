@@ -1,7 +1,6 @@
 package tree
 
 import (
-	"errors"
 	"github.com/nsnikhil/go-datastructures/functions/comparator"
 )
 
@@ -11,29 +10,17 @@ type AVLTree struct {
 }
 
 func NewAVLTree(c comparator.Comparator, e ...interface{}) (*AVLTree, error) {
-	bst, err := NewBinarySearchTree(c)
-	if err != nil {
-		return nil, err
-	}
-
-	at := &AVLTree{
-		c:                c,
-		BinarySearchTree: bst,
-	}
-
-	for _, k := range e {
-		if err := at.Insert(k); err != nil {
-			return nil, err
-		}
-	}
-
-	return at, nil
+	return nil, nil
 }
 
 func (avt *AVLTree) Insert(e interface{}) error {
-	return errors.New("NOT IMPLEMENTED")
+	return nil
 }
 
 func (avt *AVLTree) Delete(e interface{}) error {
-	return errors.New("NOT IMPLEMENTED")
+	return nil
+}
+
+func (avt *AVLTree) Search(e interface{}) error {
+	return nil
 }

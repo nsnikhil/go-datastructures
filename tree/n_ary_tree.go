@@ -1,170 +1,19 @@
 package tree
 
 import (
-	"errors"
 	"github.com/nsnikhil/go-datastructures/functions/iterator"
-	"github.com/nsnikhil/go-datastructures/liberror"
 	"github.com/nsnikhil/go-datastructures/list"
-	"github.com/nsnikhil/go-datastructures/queue"
-	"github.com/nsnikhil/go-datastructures/set"
 	"github.com/nsnikhil/go-datastructures/utils"
 )
 
-type node struct {
-	data interface{}
-	//level  int
-	hd     int
-	parent *node
-	links  set.Set
-}
-
-func (n *node) childCount() int {
-	if n.links == nil {
-		return utils.Naught
-	}
-
-	return n.links.Size()
-}
-
-func (n *node) detach() error {
-	if n == nil || n.parent == nil {
-		return nil
-	}
-
-	if err := n.parent.links.Remove(n); err != nil {
-		return err
-	}
-
-	n.parent = nil
-	return nil
-}
-
-func (n *node) add(c *node) error {
-	if n.links == nil {
-		hs, err := set.NewHashSet()
-		if err != nil {
-			return err
-		}
-
-		n.links = hs
-	}
-
-	return n.links.Add(c)
-}
-
-func newNode(e interface{}) *node {
-	return &node{data: e}
-}
-
 type NAryTree struct {
-	maxChildren int
-	typeURL     string
-	count       int
-	root        *node
 }
 
-func NewNAryTree(maxChildren int, e ...interface{}) (*NAryTree, error) {
-	if maxChildren <= utils.Naught {
-		return nil, errors.New("max child count cannot be below 1")
-	}
-
-	nt := &NAryTree{
-		typeURL:     utils.NA,
-		count:       utils.Naught,
-		maxChildren: maxChildren,
-	}
-
-	sz := len(e)
-
-	if sz == 0 {
-		return nt, nil
-	}
-
-	et := utils.GetTypeName(e[0])
-
-	for i := 1; i < sz; i++ {
-		if et != utils.GetTypeName(e[i]) {
-			return nil, errors.New("all elements must be of same type")
-		}
-	}
-
-	for i := 0; i < sz; i++ {
-		if err := nt.Insert(e[i]); err != nil {
-			return nil, err
-		}
-	}
-
-	return nt, nil
+func NewNAryTree(e ...interface{}) (*NAryTree, error) {
+	return nil, nil
 }
 
 func (nt *NAryTree) Insert(e interface{}) error {
-	et := utils.GetTypeName(e)
-
-	if nt.typeURL == utils.NA {
-		nt.typeURL = et
-	}
-
-	if nt.typeURL != et {
-		return liberror.NewTypeMismatchError(nt.typeURL, et)
-	}
-
-	t := newNode(e)
-
-	if nt.root == nil {
-		nt.root = t
-		nt.count++
-		return nil
-	}
-
-	q, err := queue.NewLinkedQueue()
-	if err != nil {
-		return err
-	}
-
-	if err = q.Add(nt.root); err != nil {
-		return err
-	}
-
-	err = func() error {
-		for !q.Empty() {
-			sz := q.Count()
-
-			for i := 0; i < sz; i++ {
-				f, err := q.Remove()
-				if err != nil {
-					return err
-				}
-
-				if f.(*node).childCount() < nt.maxChildren {
-					if err := f.(*node).add(t); err != nil {
-						return err
-					}
-
-					t.parent = f.(*node)
-					return nil
-				}
-
-				if f.(*node).links == nil {
-					continue
-				}
-
-				it := f.(*node).links.Iterator()
-				for it.HasNext() {
-					if err = q.Add(it.Next()); err != nil {
-						return err
-					}
-				}
-			}
-		}
-
-		return nil
-	}()
-
-	if err != nil {
-		return err
-	}
-
-	nt.count++
 	return nil
 }
 
@@ -177,7 +26,7 @@ func (nt *NAryTree) Search(e interface{}) (bool, error) {
 }
 
 func (nt *NAryTree) Count() int {
-	return nt.count
+	return utils.InvalidIndex
 }
 
 func (nt *NAryTree) Height() int {
