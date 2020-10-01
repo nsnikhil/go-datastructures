@@ -1,31 +1,54 @@
 package main
 
+import "fmt"
+
+func toGraph(vs [][]int32) map[int32][]int32 {
+	graph := make(map[int32][]int32)
+
+	for _, v := range vs {
+		graph[v[1]] = append(graph[v[1]], v[0])
+	}
+
+	return graph
+}
+
+func sort(nd []int32, g map[int32][]int32) []int32 {
+	var dfs func(c int32, g map[int32][]int32, vs map[int32]bool)
+
+	dfs = func(c int32, g map[int32][]int32, vs map[int32]bool) {
+		vs[c] = true
+
+		if g[c] == nil || len(g[c]) == 0 {
+			fmt.Printf("%c ", c)
+			return
+		}
+
+		for _, e := range g[c] {
+			if !vs[e] {
+				dfs(e, g, vs)
+			}
+		}
+
+		fmt.Printf("%c ", c)
+	}
+
+	vs := make(map[int32]bool)
+
+	for _, n := range nd {
+		if !vs[n] {
+			dfs(n, g, vs)
+		}
+	}
+
+	return nil
+}
+
 func main() {
-	// FIVE
-	//               4
-	//            0 --> 1
-	//         2 /      | 5
-	//          v       v
-	//    4 <-- 3  -->  2
-	//  5 |  4     6
-	//    v
-	//    5
-	//
+	n := []int32{'a', 'b', 'c', 'd', 'e', 'f'}
 
-	zero := newNode(0)
-	one := newNode(1)
-	two := newNode(2)
-	three := newNode(3)
-	four := newNode(4)
-	five := newNode(5)
+	vs := [][]int32{{'a', 'd'}, {'f', 'b'}, {'b', 'd'}, {'f', 'a'}, {'d', 'c'}}
 
-	g := newListGraph()
-	g.createWeightedDiEdge(zero, one, 4)
-	g.createWeightedDiEdge(zero, three, 2)
-	g.createWeightedDiEdge(one, two, 5)
-	g.createWeightedDiEdge(three, two, 6)
-	g.createWeightedDiEdge(three, four, 4)
-	g.createWeightedDiEdge(four, five, 5)
+	g := toGraph(vs)
 
-	dagShortestPath(g.(*listGraph))
+	sort(n, g)
 }

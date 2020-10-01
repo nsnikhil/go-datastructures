@@ -16,13 +16,15 @@ type graph interface {
 	bfs()
 
 	//hasLoop() bool
-	//hasCycle() bool
+	hasCycle() bool
 	//areAdjacent(a, b *node) bool
 	//degreeOfNode(a *node) int
 	//hasBridge() bool
 
 	reverse()
 	clone() graph
+
+	hasRoute(source, target *node) bool
 
 	//isDirected() bool
 

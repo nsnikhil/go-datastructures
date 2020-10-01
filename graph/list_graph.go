@@ -151,9 +151,131 @@ func (lg *listGraph) reverse() {
 	}
 }
 
+func (lg *listGraph) hasCycle() bool {
+	var check func(curr *node, pd map[*node]bool, dn map[*node]bool) bool
+	check = func(curr *node, pd map[*node]bool, dn map[*node]bool) bool {
+		pd[curr] = true
+
+		if len(curr.getEdges()) == 0 {
+			pd[curr] = false
+			dn[curr] = true
+			return false
+		}
+
+		for e := range curr.getEdges() {
+			nx := e.getNext()
+
+			if dn[nx] {
+				continue
+			}
+
+			if pd[nx] {
+				return true
+			}
+
+			if check(nx, pd, dn) {
+				return true
+			}
+		}
+
+		pd[curr] = false
+		dn[curr] = true
+		return false
+	}
+
+	pd := make(map[*node]bool)
+	dn := make(map[*node]bool)
+
+	for n := range lg.nodes {
+		if dn[n] {
+			continue
+		}
+
+		if pd[n] {
+			return true
+		}
+
+		if check(n, pd, dn) {
+			return true
+		}
+	}
+
+	return false
+}
+
 func (lg *listGraph) clone() graph {
-	fmt.Println("UN IMPLEMENTED")
-	return nil
+	var cl func(curr *node, cache map[*node]*node) *node
+	cl = func(curr *node, cache map[*node]*node) *node {
+		if cache[curr] != nil {
+			return cache[curr]
+		}
+
+		n := newNode(curr.getData())
+		cache[curr] = n
+
+		for e := range curr.getEdges() {
+			nx := e.getNext()
+			var ne *edge
+
+			if cache[nx] != nil {
+				ne = newDiEdge(cache[nx])
+			} else {
+				ne = newDiEdge(cl(nx, cache))
+			}
+
+			ne.weight = e.getWeight()
+			n.addEdge(ne)
+		}
+
+		return n
+	}
+
+	cache := make(map[*node]*node)
+	nodes := make(map[*node]bool, 0)
+
+	for n := range lg.nodes {
+		t := cache[n]
+		if cache[n] == nil {
+			nodes[cl(n, cache)] = true
+		} else {
+			nodes[t] = true
+		}
+	}
+
+	return &listGraph{
+		nodes: nodes,
+	}
+}
+
+func (lg *listGraph) hasRoute(source, target *node) bool {
+	var visit func(curr, target *node, visited map[*node]bool) bool
+	visit = func(curr, target *node, visited map[*node]bool) bool {
+		visited[curr] = true
+
+		if curr == target {
+			return true
+		}
+
+		found := false
+		for e := range curr.getEdges() {
+			nx := e.getNext()
+
+			if nx == target {
+				found = true
+				break
+			}
+
+			if !visited[nx] && visit(nx, target, visited) {
+				found = true
+				break
+			}
+		}
+
+		return found
+	}
+
+	visited := make(map[*node]bool)
+	return visit(source, target, visited)
 }
 
 func (lg *listGraph) getConnectedComponents() [][]*node {
