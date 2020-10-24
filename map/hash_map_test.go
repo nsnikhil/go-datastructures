@@ -3,7 +3,7 @@ package gmap
 import (
 	"errors"
 	"fmt"
-	"github.com/nsnikhil/go-datastructures/liberror"
+	"github.com/nsnikhil/go-datastructures/liberr"
 	"github.com/nsnikhil/go-datastructures/list"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -191,7 +191,7 @@ func TestCreateNewHashMap(t *testing.T) {
 			actualResult: func() (Map, error) {
 				return NewHashMap(NewPair(1, 'a'), NewPair('b', 'c'))
 			},
-			expectedError: liberror.NewTypeMismatchError("int", "int32"),
+			expectedError: liberr.TypeMismatchError("int", "int32"),
 			expectedResult: func() Map {
 				return nil
 			},
@@ -356,7 +356,7 @@ func TestHashMapPut(t *testing.T) {
 					data:    d,
 				}
 			},
-			expectedError: liberror.NewTypeMismatchError("int", "int32"),
+			expectedError: liberr.TypeMismatchError("int", "int32"),
 		},
 		{
 			name: "test return error when value type is different",
@@ -393,7 +393,7 @@ func TestHashMapPut(t *testing.T) {
 					data:    d,
 				}
 			},
-			expectedError: liberror.NewTypeMismatchError("int32", "int"),
+			expectedError: liberr.TypeMismatchError("int32", "int"),
 		},
 	}
 
@@ -544,7 +544,7 @@ func TestHashMapPutAll(t *testing.T) {
 					data:    make([]*list.LinkedList, 16),
 				}
 			},
-			expectedError: liberror.NewTypeMismatchError("int", "int32"),
+			expectedError: liberr.TypeMismatchError("int", "int32"),
 		},
 		{
 			name: "return error when value type mismatch",
@@ -563,7 +563,7 @@ func TestHashMapPutAll(t *testing.T) {
 					data:    make([]*list.LinkedList, 16),
 				}
 			},
-			expectedError: liberror.NewTypeMismatchError("int32", "int"),
+			expectedError: liberr.TypeMismatchError("int32", "int"),
 		},
 		{
 			name: "return error when key type mismatch with key present",
@@ -600,7 +600,7 @@ func TestHashMapPutAll(t *testing.T) {
 					data:    d,
 				}
 			},
-			expectedError: liberror.NewTypeMismatchError("int", "int32"),
+			expectedError: liberr.TypeMismatchError("int", "int32"),
 		},
 		{
 			name: "return error when value type mismatch with value present",
@@ -637,7 +637,7 @@ func TestHashMapPutAll(t *testing.T) {
 					data:    d,
 				}
 			},
-			expectedError: liberror.NewTypeMismatchError("int32", "int"),
+			expectedError: liberr.TypeMismatchError("int32", "int"),
 		},
 		{
 			name: "return error when argument is empty",
@@ -835,7 +835,7 @@ func TestHashMapGet(t *testing.T) {
 
 				return hm.Get(1)
 			},
-			expectedError: liberror.NewTypeMismatchError("int32", "int"),
+			expectedError: liberr.TypeMismatchError("int32", "int"),
 		},
 		{
 			name: "test return error indexOf has bucket but element is not present",
@@ -1382,7 +1382,7 @@ func TestHashMapReplaceAll(t *testing.T) {
 
 				return hm
 			},
-			expectedError: liberror.NewTypeMismatchError("int", "string"),
+			expectedError: liberr.TypeMismatchError("int", "string"),
 		},
 	}
 
@@ -1502,7 +1502,7 @@ func TestHashMapCompute(t *testing.T) {
 
 				return hm
 			},
-			expectedError: liberror.NewTypeMismatchError("int", "string"),
+			expectedError: liberr.TypeMismatchError("int", "string"),
 		},
 	}
 

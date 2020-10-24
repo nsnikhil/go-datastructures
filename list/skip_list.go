@@ -1,7 +1,7 @@
 package list
 
 import (
-	"github.com/nsnikhil/go-datastructures/liberror"
+	"github.com/nsnikhil/go-datastructures/liberr"
 	"github.com/nsnikhil/go-datastructures/utils"
 	"math/rand"
 	"time"
@@ -49,7 +49,7 @@ func insert(e interface{}, sl *skipList) error {
 	}
 
 	if et != sl.typeURL {
-		return liberror.NewTypeMismatchError(sl.typeURL, et)
+		return liberr.TypeMismatchError(sl.typeURL, et)
 	}
 
 	temp := newSkipNode(e)

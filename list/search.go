@@ -2,7 +2,7 @@ package list
 
 import (
 	"fmt"
-	"github.com/nsnikhil/go-datastructures/liberror"
+	"github.com/nsnikhil/go-datastructures/liberr"
 	"github.com/nsnikhil/go-datastructures/utils"
 )
 
@@ -56,8 +56,11 @@ func (lf linearFinder) search(l List, e interface{}) (int, error) {
 		return -1, fmt.Errorf("list is empty")
 	}
 
-	if utils.GetTypeName(l.Get(0)) != utils.GetTypeName(e) {
-		return -1, liberror.NewTypeMismatchError(utils.GetTypeName(l.Get(0)), utils.GetTypeName(e))
+	ft := utils.GetTypeName(l.Get(0))
+	ct := utils.GetTypeName(e)
+
+	if ft != ct {
+		return -1, liberr.TypeMismatchError(ft, ct)
 	}
 
 	it := l.Iterator()
@@ -137,8 +140,11 @@ func (cf concurrentFinder) search(l List, e interface{}) (int, error) {
 		return -1, fmt.Errorf("list is empty")
 	}
 
-	if utils.GetTypeName(l.Get(0)) != utils.GetTypeName(e) {
-		return -1, liberror.NewTypeMismatchError(utils.GetTypeName(l.Get(0)), utils.GetTypeName(e))
+	ft := utils.GetTypeName(l.Get(0))
+	ct := utils.GetTypeName(e)
+
+	if ft != ct {
+		return -1, liberr.TypeMismatchError(ft, ct)
 	}
 
 	if sz < cf.searchFactor {
@@ -176,8 +182,11 @@ func (df doublyFinder) search(l List, e interface{}) (int, error) {
 		return -1, fmt.Errorf("list is empty")
 	}
 
-	if utils.GetTypeName(l.Get(0)) != utils.GetTypeName(e) {
-		return -1, liberror.NewTypeMismatchError(utils.GetTypeName(l.Get(0)), utils.GetTypeName(e))
+	ft := utils.GetTypeName(l.Get(0))
+	ct := utils.GetTypeName(e)
+
+	if ft != ct {
+		return -1, liberr.TypeMismatchError(ft, ct)
 	}
 
 	it := l.Iterator()

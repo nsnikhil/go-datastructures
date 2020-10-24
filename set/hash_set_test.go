@@ -2,7 +2,7 @@ package set
 
 import (
 	"errors"
-	"github.com/nsnikhil/go-datastructures/liberror"
+	"github.com/nsnikhil/go-datastructures/liberr"
 	gmap "github.com/nsnikhil/go-datastructures/map"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -60,7 +60,7 @@ func TestCreateNewHashSet(t *testing.T) {
 			expectedResult: func() Set {
 				return nil
 			},
-			expectedError: liberror.NewTypeMismatchError("int", "int32"),
+			expectedError: liberr.TypeMismatchError("int", "int32"),
 		},
 	}
 
@@ -125,7 +125,7 @@ func TestHashSetAdd(t *testing.T) {
 
 				return hs
 			},
-			expectedError: liberror.NewTypeMismatchError("int", "int32"),
+			expectedError: liberr.TypeMismatchError("int", "int32"),
 		},
 	}
 
@@ -190,7 +190,7 @@ func TestHashSetAddAll(t *testing.T) {
 
 				return hs
 			},
-			expectedError: liberror.NewTypeMismatchError("int", "int32"),
+			expectedError: liberr.TypeMismatchError("int", "int32"),
 		},
 		{
 			name: "test return error when arguments types different from existing",
@@ -206,7 +206,7 @@ func TestHashSetAddAll(t *testing.T) {
 
 				return hs
 			},
-			expectedError: liberror.NewTypeMismatchError("int", "int32"),
+			expectedError: liberr.TypeMismatchError("int", "int32"),
 		},
 		{
 			name: "test return error when argument list is empty",
@@ -569,7 +569,7 @@ func TestHashSetRemove(t *testing.T) {
 
 				return hs
 			},
-			expectedError: liberror.NewTypeMismatchError("int", "int32"),
+			expectedError: liberr.TypeMismatchError("int", "int32"),
 		},
 	}
 
@@ -699,7 +699,7 @@ func TestHashSetRemoveAll(t *testing.T) {
 
 				return hs
 			},
-			expectedError: liberror.NewTypeMismatchError("int", "int32"),
+			expectedError: liberr.TypeMismatchError("int", "int32"),
 		},
 		{
 			name: "test hash remove all returns error when type is different",
@@ -715,7 +715,7 @@ func TestHashSetRemoveAll(t *testing.T) {
 
 				return hs
 			},
-			expectedError: liberror.NewTypeMismatchError("int", "int32"),
+			expectedError: liberr.TypeMismatchError("int", "int32"),
 		},
 	}
 
@@ -845,7 +845,7 @@ func TestHashSetRetainAll(t *testing.T) {
 
 				return hs
 			},
-			expectedError: liberror.NewTypeMismatchError("int", "int32"),
+			expectedError: liberr.TypeMismatchError("int", "int32"),
 		},
 	}
 
@@ -1001,7 +1001,7 @@ func TestHashSetUnion(t *testing.T) {
 			expectedResult: func() Set {
 				return nil
 			},
-			expectedError: liberror.NewTypeMismatchError("int", "int32"),
+			expectedError: liberr.TypeMismatchError("int", "int32"),
 		},
 	}
 
@@ -1090,7 +1090,7 @@ func TestHashSetIntersection(t *testing.T) {
 			expectedResult: func() Set {
 				return nil
 			},
-			expectedError: liberror.NewTypeMismatchError("int", "int32"),
+			expectedError: liberr.TypeMismatchError("int", "int32"),
 		},
 	}
 

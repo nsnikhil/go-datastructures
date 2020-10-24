@@ -52,7 +52,7 @@ func (pq *PriorityQueue) Empty() bool {
 	return pq.h.IsEmpty()
 }
 
-func (pq *PriorityQueue) Count() int {
+func (pq *PriorityQueue) Size() int {
 	return pq.h.Size()
 }
 

@@ -8,6 +8,6 @@ type Queue interface {
 	Peek() (interface{}, error)
 
 	Empty() bool
-	Count() int
+	Size() int
 	Clear()
 }

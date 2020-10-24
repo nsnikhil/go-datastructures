@@ -7,7 +7,7 @@ import (
 	"github.com/nsnikhil/go-datastructures/functions/iterator"
 	"github.com/nsnikhil/go-datastructures/functions/operator"
 	"github.com/nsnikhil/go-datastructures/functions/predicate"
-	"github.com/nsnikhil/go-datastructures/liberror"
+	"github.com/nsnikhil/go-datastructures/liberr"
 	"github.com/nsnikhil/go-datastructures/utils"
 )
 
@@ -96,7 +96,7 @@ func addAll(al *ArrayList, l ...interface{}) error {
 	if al.typeURL == utils.NA {
 		al.typeURL = eleType
 	} else if al.typeURL != eleType {
-		return liberror.NewTypeMismatchError(al.typeURL, eleType)
+		return liberr.TypeMismatchError(al.typeURL, eleType)
 	}
 
 	for _, e := range l {
@@ -112,7 +112,7 @@ func add(al *ArrayList, e interface{}) error {
 	checkIncreaseCapacity(al)
 
 	if al.typeURL != utils.GetTypeName(e) {
-		return liberror.NewTypeMismatchError(al.typeURL, utils.GetTypeName(e))
+		return liberr.TypeMismatchError(al.typeURL, utils.GetTypeName(e))
 	}
 
 	al.data[al.size] = e
@@ -279,7 +279,7 @@ func (al *ArrayList) RemoveRange(from, to int) (bool, error) {
 	}
 
 	if to < 0 || to > al.Size() {
-		return false, liberror.NewIndexOutOfBoundError(to)
+		return false, liberr.IndexOutOfBoundError(to)
 	}
 
 	idx := to
@@ -308,11 +308,11 @@ func (al *ArrayList) Replace(old, new interface{}) error {
 	newType := utils.GetTypeName(new)
 
 	if al.typeURL != oldType {
-		return liberror.NewTypeMismatchError(al.typeURL, oldType)
+		return liberr.TypeMismatchError(al.typeURL, oldType)
 	}
 
 	if al.typeURL != newType {
-		return liberror.NewTypeMismatchError(al.typeURL, newType)
+		return liberr.TypeMismatchError(al.typeURL, newType)
 	}
 
 	id, err := al.IndexOf(old)
@@ -382,7 +382,7 @@ func (al *ArrayList) SubList(s int, e int) (List, error) {
 	}
 
 	if e < 0 || e > al.Size() {
-		return nil, liberror.NewIndexOutOfBoundError(e)
+		return nil, liberr.IndexOutOfBoundError(e)
 	}
 
 	tempList, err := NewArrayList()
@@ -428,14 +428,14 @@ func (ali *arrayListIterator) Next() interface{} {
 
 func (al *ArrayList) isValidIndex(i int) error {
 	if i < 0 || i >= al.Size() {
-		return liberror.NewIndexOutOfBoundError(i)
+		return liberr.IndexOutOfBoundError(i)
 	}
 	return nil
 }
 
 func (al *ArrayList) isValidType(e interface{}) error {
 	if utils.GetTypeName(e) != al.typeURL {
-		return liberror.NewTypeMismatchError(al.typeURL, utils.GetTypeName(e))
+		return liberr.TypeMismatchError(al.typeURL, utils.GetTypeName(e))
 	}
 	return nil
 }

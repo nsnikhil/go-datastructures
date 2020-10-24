@@ -4,7 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/nsnikhil/go-datastructures/functions/comparator"
-	"github.com/nsnikhil/go-datastructures/liberror"
+	"github.com/nsnikhil/go-datastructures/liberr"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"strings"
@@ -190,7 +190,7 @@ func TestArrayListAdd(t *testing.T) {
 				return al.Size(), err, al
 			},
 			expectedSize:  1,
-			expectedError: liberror.NewTypeMismatchError("int", "string"),
+			expectedError: liberr.TypeMismatchError("int", "string"),
 			expectedResult: func() List {
 				al, err := NewArrayList(1)
 				require.NoError(t, err)
@@ -448,7 +448,7 @@ func TestArrayListSet(t *testing.T) {
 
 				return al.Set(5, 3)
 			},
-			expectedError: liberror.NewIndexOutOfBoundError(5),
+			expectedError: liberr.IndexOutOfBoundError(5),
 		},
 		{
 			name: "test set fails when list is empty",
@@ -468,7 +468,7 @@ func TestArrayListSet(t *testing.T) {
 
 				return al.Set(0, "a")
 			},
-			expectedError: liberror.NewTypeMismatchError("int", "string"),
+			expectedError: liberr.TypeMismatchError("int", "string"),
 		},
 	}
 
@@ -636,7 +636,7 @@ func TestArrayListAddAt(t *testing.T) {
 				return al
 			},
 			expectedSize:  4,
-			expectedError: liberror.NewIndexOutOfBoundError(4),
+			expectedError: liberr.IndexOutOfBoundError(4),
 		},
 		{
 			name: "test return error when adding element of invalid type",
@@ -653,7 +653,7 @@ func TestArrayListAddAt(t *testing.T) {
 				return al
 			},
 			expectedSize:  4,
-			expectedError: liberror.NewTypeMismatchError("int", "string"),
+			expectedError: liberr.TypeMismatchError("int", "string"),
 		},
 	}
 	for _, testCase := range testCases {
@@ -801,7 +801,7 @@ func TestArrayListAddAll(t *testing.T) {
 				return al
 			},
 			expectedSize:  0,
-			expectedError: liberror.NewTypeMismatchError("int", "string"),
+			expectedError: liberr.TypeMismatchError("int", "string"),
 		},
 		{
 			name: "test add all when list is empty and type was set",
@@ -973,7 +973,7 @@ func TestArrayListContains(t *testing.T) {
 				return al.Contains("a")
 			},
 			expectedResult: false,
-			expectedError:  liberror.NewTypeMismatchError("int", "string"),
+			expectedError:  liberr.TypeMismatchError("int", "string"),
 		},
 	}
 
@@ -1023,7 +1023,7 @@ func TestArrayListContainsAll(t *testing.T) {
 				return al.ContainsAll(6, 1, "a")
 			},
 			expectedResult: false,
-			expectedError:  liberror.NewTypeMismatchError("int", "string"),
+			expectedError:  liberr.TypeMismatchError("int", "string"),
 		},
 	}
 
@@ -1084,7 +1084,7 @@ func TestArrayListIndexOf(t *testing.T) {
 				return al.IndexOf("a")
 			},
 			expectedResult: -1,
-			expectedError:  liberror.NewTypeMismatchError("int", "string"),
+			expectedError:  liberr.TypeMismatchError("int", "string"),
 		},
 	}
 	for _, testCase := range testCases {
@@ -1179,7 +1179,7 @@ func TestArrayListLastIndexOf(t *testing.T) {
 				return al.LastIndexOf("a")
 			},
 			expectedResult: -1,
-			expectedError:  liberror.NewTypeMismatchError("int", "string"),
+			expectedError:  liberr.TypeMismatchError("int", "string"),
 		},
 	}
 
@@ -1278,7 +1278,7 @@ func TestArrayListRemoveElement(t *testing.T) {
 				return al
 			},
 			expectedSize:  4,
-			expectedError: liberror.NewTypeMismatchError("int", "string"),
+			expectedError: liberr.TypeMismatchError("int", "string"),
 		},
 	}
 
@@ -1357,7 +1357,7 @@ func TestArrayListRemoveAt(t *testing.T) {
 				return al
 			},
 			expectedSize:  4,
-			expectedError: liberror.NewIndexOutOfBoundError(4),
+			expectedError: liberr.IndexOutOfBoundError(4),
 		},
 	}
 
@@ -1446,7 +1446,7 @@ func TestArrayListRemoveAll(t *testing.T) {
 				return al
 			},
 			expectedSize:  4,
-			expectedError: liberror.NewTypeMismatchError("int", "string"),
+			expectedError: liberr.TypeMismatchError("int", "string"),
 		},
 	}
 
@@ -1674,7 +1674,7 @@ func TestArrayListRemoveRange(t *testing.T) {
 				return al
 			},
 			expectedSize:  4,
-			expectedError: liberror.NewIndexOutOfBoundError(-1),
+			expectedError: liberr.IndexOutOfBoundError(-1),
 		},
 		{
 			name: "test return error when to is an invalid index",
@@ -1694,7 +1694,7 @@ func TestArrayListRemoveRange(t *testing.T) {
 				return al
 			},
 			expectedSize:  4,
-			expectedError: liberror.NewIndexOutOfBoundError(10),
+			expectedError: liberr.IndexOutOfBoundError(10),
 		},
 	}
 
@@ -1792,7 +1792,7 @@ func TestArrayListReplace(t *testing.T) {
 
 				return al
 			},
-			expectedError: liberror.NewTypeMismatchError("int", "int32"),
+			expectedError: liberr.TypeMismatchError("int", "int32"),
 		},
 		{
 			name: "test return error when new item has different type",
@@ -1808,7 +1808,7 @@ func TestArrayListReplace(t *testing.T) {
 
 				return al
 			},
-			expectedError: liberror.NewTypeMismatchError("int", "int32"),
+			expectedError: liberr.TypeMismatchError("int", "int32"),
 		},
 		{
 			name: "test return error when old and new item has different type",
@@ -1824,7 +1824,7 @@ func TestArrayListReplace(t *testing.T) {
 
 				return al
 			},
-			expectedError: liberror.NewTypeMismatchError("int", "int32"),
+			expectedError: liberr.TypeMismatchError("int", "int32"),
 		},
 		{
 			name: "test return error when list is empty",
@@ -1905,7 +1905,7 @@ func TestArrayListReplaceAll(t *testing.T) {
 
 				return al
 			},
-			expectedError: liberror.NewTypeMismatchError("int", "string"),
+			expectedError: liberr.TypeMismatchError("int", "string"),
 		},
 	}
 
@@ -2012,7 +2012,7 @@ func TestArrayListRetainAll(t *testing.T) {
 				return al
 			},
 			expectedSize:  4,
-			expectedError: liberror.NewTypeMismatchError("int", "string"),
+			expectedError: liberr.TypeMismatchError("int", "string"),
 		},
 	}
 
@@ -2105,7 +2105,7 @@ func TestArrayListSubList(t *testing.T) {
 			expectedResult: func() List {
 				return nil
 			},
-			expectedError: liberror.NewIndexOutOfBoundError(-1),
+			expectedError: liberr.IndexOutOfBoundError(-1),
 		},
 		{
 			name: "test get sublist return error for invalid end index",
@@ -2118,7 +2118,7 @@ func TestArrayListSubList(t *testing.T) {
 			expectedResult: func() List {
 				return nil
 			},
-			expectedError: liberror.NewIndexOutOfBoundError(10),
+			expectedError: liberr.IndexOutOfBoundError(10),
 		},
 		{
 			name: "test get sublist return error when end is less than start",

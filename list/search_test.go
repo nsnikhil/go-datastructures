@@ -3,7 +3,7 @@ package list
 import (
 	"errors"
 	"fmt"
-	"github.com/nsnikhil/go-datastructures/liberror"
+	"github.com/nsnikhil/go-datastructures/liberr"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"math"
@@ -110,7 +110,7 @@ func TestFinderLinearSearch(t *testing.T) {
 				return newLinearFinder().search(al, "a")
 			},
 			expectedResult: -1,
-			expectedError:  liberror.NewTypeMismatchError("int", "string"),
+			expectedError:  liberr.TypeMismatchError("int", "string"),
 		},
 	}
 
@@ -181,7 +181,7 @@ func TestFinderConcurrentSearch(t *testing.T) {
 				return newConcurrentFinder().search(al, "a")
 			},
 			expectedResult: -1,
-			expectedError:  liberror.NewTypeMismatchError("int", "string"),
+			expectedError:  liberr.TypeMismatchError("int", "string"),
 		},
 	}
 
@@ -243,7 +243,7 @@ func TestFinderDoublySearch(t *testing.T) {
 				return newDoublyFinder().search(al, "a")
 			},
 			expectedResult: -1,
-			expectedError:  liberror.NewTypeMismatchError("int", "string"),
+			expectedError:  liberr.TypeMismatchError("int", "string"),
 		},
 	}
 

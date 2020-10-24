@@ -4,7 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/nsnikhil/go-datastructures/functions/iterator"
-	"github.com/nsnikhil/go-datastructures/liberror"
+	"github.com/nsnikhil/go-datastructures/liberr"
 	gmap "github.com/nsnikhil/go-datastructures/map"
 	"github.com/nsnikhil/go-datastructures/utils"
 )
@@ -111,7 +111,7 @@ func (hs *HashSet) RetainAll(e ...interface{}) error {
 		if !validated {
 			ct := utils.GetTypeName(e)
 			if kt != utils.NA && kt != ct {
-				return liberror.NewTypeMismatchError(ct, kt)
+				return liberr.TypeMismatchError(ct, kt)
 			}
 			validated = true
 		}
@@ -175,7 +175,7 @@ func (hs *HashSet) Intersection(s Set) (Set, error) {
 			ct := utils.GetTypeName(e)
 
 			if kt != ct {
-				return nil, liberror.NewTypeMismatchError(kt, ct)
+				return nil, liberr.TypeMismatchError(kt, ct)
 			}
 		}
 
@@ -235,7 +235,7 @@ func remove(hs *HashSet, ignore bool, e ...interface{}) error {
 	for i := 1; i < sz; i++ {
 		ct := utils.GetTypeName(e[i])
 		if kt != ct {
-			return liberror.NewTypeMismatchError(kt, ct)
+			return liberr.TypeMismatchError(kt, ct)
 		}
 	}
 

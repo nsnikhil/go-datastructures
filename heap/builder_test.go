@@ -2,7 +2,7 @@ package heap
 
 import (
 	"github.com/nsnikhil/go-datastructures/functions/comparator"
-	"github.com/nsnikhil/go-datastructures/liberror"
+	"github.com/nsnikhil/go-datastructures/liberr"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )
@@ -64,7 +64,7 @@ func TestHeapBuilder(t *testing.T) {
 			},
 			expectedResult:  []interface{}{30, 20, 10},
 			expectedIndexes: map[interface{}]int{},
-			expectedError:   liberror.NewTypeMismatchError("string", "int"),
+			expectedError:   liberr.TypeMismatchError("string", "int"),
 		},
 		{
 			name: "test build min heap from one element",
@@ -114,7 +114,7 @@ func TestHeapBuilder(t *testing.T) {
 				return buildHeap(comparator.NewStringComparator(), false, data, indexes), data, indexes
 			},
 			expectedResult:  []interface{}{10, 20, 30},
-			expectedError:   liberror.NewTypeMismatchError("string", "int"),
+			expectedError:   liberr.TypeMismatchError("string", "int"),
 			expectedIndexes: map[interface{}]int{},
 		},
 	}

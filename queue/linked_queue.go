@@ -37,7 +37,7 @@ func (lq *LinkedQueue) Empty() bool {
 	return lq.ll.IsEmpty()
 }
 
-func (lq *LinkedQueue) Count() int {
+func (lq *LinkedQueue) Size() int {
 	return lq.ll.Size()
 }
 

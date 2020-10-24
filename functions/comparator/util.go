@@ -1,10 +1,9 @@
 package comparator
 
 import (
-	"github.com/nsnikhil/go-datastructures/liberror"
+	"github.com/nsnikhil/go-datastructures/liberr"
 	"github.com/nsnikhil/go-datastructures/utils"
 	"math"
-	"reflect"
 	"strings"
 )
 
@@ -15,12 +14,12 @@ func NewIntegerComparator() IntegerComparator {
 }
 
 func (ic IntegerComparator) Compare(one interface{}, two interface{}) (int, error) {
-	if reflect.TypeOf(one).Name() != reflect.TypeOf(0).Name() {
-		return math.MinInt32, liberror.NewTypeMismatchError("int", utils.GetTypeName(one))
+	if utils.GetTypeName(one) != utils.GetTypeName(0) {
+		return math.MinInt32, liberr.TypeMismatchError("int", utils.GetTypeName(one))
 	}
 
-	if reflect.TypeOf(two).Name() != reflect.TypeOf(0).Name() {
-		return math.MinInt32, liberror.NewTypeMismatchError("int", utils.GetTypeName(two))
+	if utils.GetTypeName(two) != utils.GetTypeName(0) {
+		return math.MinInt32, liberr.TypeMismatchError("int", utils.GetTypeName(two))
 	}
 
 	return one.(int) - two.(int), nil
@@ -33,12 +32,12 @@ func NewStringComparator() StringComparator {
 }
 
 func (tc StringComparator) Compare(one interface{}, two interface{}) (int, error) {
-	if reflect.TypeOf(one).Name() != reflect.TypeOf("").Name() {
-		return math.MinInt32, liberror.NewTypeMismatchError("string", utils.GetTypeName(one))
+	if utils.GetTypeName(one) != utils.GetTypeName("") {
+		return math.MinInt32, liberr.TypeMismatchError("string", utils.GetTypeName(one))
 	}
 
-	if reflect.TypeOf(two).Name() != reflect.TypeOf("").Name() {
-		return math.MinInt32, liberror.NewTypeMismatchError("string", utils.GetTypeName(two))
+	if utils.GetTypeName(two) != utils.GetTypeName("") {
+		return math.MinInt32, liberr.TypeMismatchError("string", utils.GetTypeName(two))
 	}
 
 	return strings.Compare(one.(string), two.(string)), nil

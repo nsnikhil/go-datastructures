@@ -1,7 +1,7 @@
 package comparator
 
 import (
-	"github.com/nsnikhil/go-datastructures/liberror"
+	"github.com/nsnikhil/go-datastructures/liberr"
 	"github.com/stretchr/testify/assert"
 	"math"
 	"testing"
@@ -53,7 +53,7 @@ func TestPrebuiltComparator(t *testing.T) {
 			expectedResult: func(res int) bool {
 				return res == math.MinInt32
 			},
-			expectedError: liberror.NewTypeMismatchError("int", "string"),
+			expectedError: liberr.TypeMismatchError("int", "string"),
 		},
 		{
 			name: "test integer comparator return error for type mismatch of second argument",
@@ -64,7 +64,7 @@ func TestPrebuiltComparator(t *testing.T) {
 			expectedResult: func(res int) bool {
 				return res == math.MinInt32
 			},
-			expectedError: liberror.NewTypeMismatchError("int", "string"),
+			expectedError: liberr.TypeMismatchError("int", "string"),
 		},
 		{
 			name: "test string comparator for greater",
@@ -105,7 +105,7 @@ func TestPrebuiltComparator(t *testing.T) {
 			expectedResult: func(res int) bool {
 				return res == math.MinInt32
 			},
-			expectedError: liberror.NewTypeMismatchError("string", "int"),
+			expectedError: liberr.TypeMismatchError("string", "int"),
 		},
 		{
 			name: "test string comparator return error for type for second mismatch",
@@ -116,7 +116,7 @@ func TestPrebuiltComparator(t *testing.T) {
 			expectedResult: func(res int) bool {
 				return res == math.MinInt32
 			},
-			expectedError: liberror.NewTypeMismatchError("string", "int"),
+			expectedError: liberr.TypeMismatchError("string", "int"),
 		},
 	}
 

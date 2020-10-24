@@ -1,7 +1,7 @@
 package stack
 
 import (
-	"github.com/nsnikhil/go-datastructures/liberror"
+	"github.com/nsnikhil/go-datastructures/liberr"
 	"github.com/nsnikhil/go-datastructures/list"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -74,7 +74,7 @@ func TestStackPush(t *testing.T) {
 
 				return s.Push("a"), s
 			},
-			expectedError: liberror.NewTypeMismatchError("int", "string"),
+			expectedError: liberr.TypeMismatchError("int", "string"),
 		},
 	}
 
@@ -340,7 +340,7 @@ func TestStackCount(t *testing.T) {
 		expectedResult int
 	}{
 		{
-			name: "return Count 0 when Stack is Empty",
+			name: "return Size 0 when Stack is Empty",
 			actualResult: func() int {
 				s, err := NewStack()
 				require.NoError(t, err)
@@ -352,7 +352,7 @@ func TestStackCount(t *testing.T) {
 			expectedResult: 1,
 		},
 		{
-			name: "return Count 1 when Stack has 1 element",
+			name: "return Size 1 when Stack has 1 element",
 			actualResult: func() int {
 				s, err := NewStack()
 				require.NoError(t, err)
@@ -365,7 +365,7 @@ func TestStackCount(t *testing.T) {
 			expectedResult: 2,
 		},
 		{
-			name: "return Count 1 when Stack has 2 elements",
+			name: "return Size 1 when Stack has 2 elements",
 			actualResult: func() int {
 				s, err := NewStack()
 				require.NoError(t, err)

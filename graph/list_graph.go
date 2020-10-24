@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	"github.com/nsnikhil/go-datastructures/liberror"
+	"github.com/nsnikhil/go-datastructures/liberr"
 	"github.com/nsnikhil/go-datastructures/queue"
 	"github.com/nsnikhil/go-datastructures/set"
 	"github.com/nsnikhil/go-datastructures/stack"
@@ -97,7 +97,7 @@ func (lg *listGraph) bfs() {
 		visited[curr] = true
 
 		for !q.Empty() {
-			sz := q.Count()
+			sz := q.Size()
 
 			for i := 0; i < sz; i++ {
 				n, _ := q.Remove()
@@ -358,7 +358,7 @@ func nonWeightedShortestPath(source, target *node, lg *listGraph) {
 	q.Add(source)
 
 	for !q.Empty() {
-		sz := q.Count()
+		sz := q.Size()
 
 		found := false
 		for i := 0; i < sz; i++ {
@@ -451,7 +451,7 @@ func (nc *nodeComparator) Compare(one interface{}, two interface{}) (int, error)
 	tt := utils.GetTypeName(two)
 
 	if ot != tt {
-		return -1, liberror.NewTypeMismatchError(ot, tt)
+		return -1, liberr.TypeMismatchError(ot, tt)
 	}
 
 	return one.(*node).costToReach - two.(*node).costToReach, nil

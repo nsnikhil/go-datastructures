@@ -1,6 +1,9 @@
 package utils
 
-import "reflect"
+import (
+	"github.com/nsnikhil/go-datastructures/liberr"
+	"reflect"
+)
 
 func GetTypeName(e interface{}) string {
 	if e == nil {
@@ -14,4 +17,18 @@ func GetTypeName(e interface{}) string {
 	}
 
 	return t.Elem().Name()
+}
+
+//TODO: RENAME
+func AreAllSameType(data ...interface{}) error {
+	typeURL := GetTypeName(data[0])
+	sz := len(data)
+
+	for i := 1; i < sz; i++ {
+		if et := GetTypeName(data[i]); et != typeURL {
+			return liberr.TypeMismatchError(typeURL, et)
+		}
+	}
+
+	return nil
 }

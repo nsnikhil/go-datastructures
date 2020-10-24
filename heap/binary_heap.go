@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"github.com/nsnikhil/go-datastructures/functions/comparator"
 	"github.com/nsnikhil/go-datastructures/functions/iterator"
-	"github.com/nsnikhil/go-datastructures/liberror"
+	"github.com/nsnikhil/go-datastructures/liberr"
 	"github.com/nsnikhil/go-datastructures/utils"
 )
 
@@ -56,8 +56,8 @@ func newBinaryHeap(c comparator.Comparator, isMaxHeap bool, data ...interface{})
 	typeURL := utils.GetTypeName(data[0])
 
 	for i := 1; i < len(data); i++ {
-		if utils.GetTypeName(data[i]) != typeURL {
-			return nil, liberror.NewTypeMismatchError(typeURL, utils.GetTypeName(data[i]))
+		if et := utils.GetTypeName(data[i]); et != typeURL {
+			return nil, liberr.TypeMismatchError(typeURL, et)
 		}
 	}
 
@@ -85,8 +85,8 @@ func (bh *binaryHeap) Add(data ...interface{}) error {
 	}
 
 	for i := s; i < len(data); i++ {
-		if utils.GetTypeName(data[i]) != typeURL {
-			return liberror.NewTypeMismatchError(typeURL, utils.GetTypeName(data[i]))
+		if et := utils.GetTypeName(data[i]); et != typeURL {
+			return liberr.TypeMismatchError(typeURL, et)
 		}
 	}
 
@@ -132,12 +132,12 @@ func (bh *binaryHeap) Update(prev, new interface{}) error {
 
 	pt := utils.GetTypeName(prev)
 	if pt != bh.typeURL {
-		return liberror.NewTypeMismatchError(bh.typeURL, pt)
+		return liberr.TypeMismatchError(bh.typeURL, pt)
 	}
 
 	nt := utils.GetTypeName(new)
 	if nt != bh.typeURL {
-		return liberror.NewTypeMismatchError(bh.typeURL, nt)
+		return liberr.TypeMismatchError(bh.typeURL, nt)
 	}
 
 	idx, ok := bh.indexes[prev]
@@ -177,7 +177,7 @@ func (bh *binaryHeap) UpdateFunc(prev interface{}, op func(interface{}) interfac
 
 	pt := utils.GetTypeName(prev)
 	if pt != bh.typeURL {
-		return liberror.NewTypeMismatchError(bh.typeURL, pt)
+		return liberr.TypeMismatchError(bh.typeURL, pt)
 	}
 
 	idx, ok := bh.indexes[prev]
@@ -188,7 +188,7 @@ func (bh *binaryHeap) UpdateFunc(prev interface{}, op func(interface{}) interfac
 	updated := op(prev)
 	nt := utils.GetTypeName(updated)
 	if nt != bh.typeURL {
-		return liberror.NewTypeMismatchError(bh.typeURL, nt)
+		return liberr.TypeMismatchError(bh.typeURL, nt)
 	}
 
 	delete(bh.indexes, prev)

@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"github.com/nsnikhil/go-datastructures/functions/comparator"
 	"github.com/nsnikhil/go-datastructures/functions/iterator"
-	"github.com/nsnikhil/go-datastructures/liberror"
+	"github.com/nsnikhil/go-datastructures/liberr"
 	"github.com/nsnikhil/go-datastructures/list"
 	"github.com/nsnikhil/go-datastructures/queue"
 	"github.com/nsnikhil/go-datastructures/stack"
@@ -113,7 +113,7 @@ func (bt *BinaryTree) Insert(e interface{}) error {
 	}
 
 	if bt.typeURL != et {
-		return liberror.NewTypeMismatchError(bt.typeURL, et)
+		return liberr.TypeMismatchError(bt.typeURL, et)
 	}
 
 	t := newBinaryNode(e)
@@ -137,7 +137,7 @@ func (bt *BinaryTree) Insert(e interface{}) error {
 
 	err = func() error {
 		for !q.Empty() {
-			sz := q.Count()
+			sz := q.Size()
 
 			for i := 0; i < sz; i++ {
 				f, _ := q.Remove()
@@ -184,7 +184,7 @@ func (bt *BinaryTree) InsertCompare(e interface{}, c comparator.Comparator) erro
 	}
 
 	if bt.typeURL != et {
-		return liberror.NewTypeMismatchError(bt.typeURL, et)
+		return liberr.TypeMismatchError(bt.typeURL, et)
 	}
 
 	t := newBinaryNode(e)
@@ -329,7 +329,7 @@ func (bt *BinaryTree) Search(e interface{}) (bool, error) {
 
 	et := utils.GetTypeName(e)
 	if bt.typeURL != et {
-		return false, liberror.NewTypeMismatchError(bt.typeURL, et)
+		return false, liberr.TypeMismatchError(bt.typeURL, et)
 	}
 
 	_, err := search(e, bt.root)
@@ -347,7 +347,7 @@ func (bt *BinaryTree) SearchCompare(e interface{}, c comparator.Comparator) (boo
 
 	et := utils.GetTypeName(e)
 	if et != bt.typeURL {
-		return false, liberror.NewTypeMismatchError(bt.typeURL, et)
+		return false, liberr.TypeMismatchError(bt.typeURL, et)
 	}
 
 	curr := bt.root
@@ -418,7 +418,7 @@ func (bt *BinaryTree) MirrorAt(e interface{}) (bool, error) {
 
 	et := utils.GetTypeName(e)
 	if bt.typeURL != et {
-		return false, liberror.NewTypeMismatchError(bt.typeURL, et)
+		return false, liberr.TypeMismatchError(bt.typeURL, et)
 	}
 
 	curr, err := search(e, bt.root)
@@ -458,7 +458,7 @@ func (bt *BinaryTree) RotateLeftAt(e interface{}) error {
 
 	et := utils.GetTypeName(e)
 	if bt.typeURL != et {
-		return liberror.NewTypeMismatchError(bt.typeURL, et)
+		return liberr.TypeMismatchError(bt.typeURL, et)
 	}
 
 	curr, err := search(e, bt.root)
@@ -477,7 +477,7 @@ func (bt *BinaryTree) RotateRightAt(e interface{}) error {
 
 	et := utils.GetTypeName(e)
 	if bt.typeURL != et {
-		return liberror.NewTypeMismatchError(bt.typeURL, et)
+		return liberr.TypeMismatchError(bt.typeURL, et)
 	}
 
 	curr, err := search(e, bt.root)
@@ -514,7 +514,7 @@ func (bt *BinaryTree) IsPerfect() bool {
 	fl := -1
 
 	for !q.Empty() {
-		sz := q.Count()
+		sz := q.Size()
 
 		for i := 0; i < sz; i++ {
 			e, _ := q.Remove()
@@ -837,7 +837,7 @@ func (bt *BinaryTree) LevelOrderSuccessor(e interface{}) (interface{}, error) {
 
 	for !q.Empty() {
 
-		sz := q.Count()
+		sz := q.Size()
 
 		for i := 0; i < sz; i++ {
 			f, _ := q.Remove()
@@ -1132,7 +1132,7 @@ func (bfv *btLeftVOrderIterator) HasNext() bool {
 }
 
 func (bfv *btLeftVOrderIterator) Next() interface{} {
-	sz := bfv.q.Count()
+	sz := bfv.q.Size()
 
 	var res *binaryNode = nil
 
@@ -1185,7 +1185,7 @@ func (brv *btRightVOrderIterator) HasNext() bool {
 }
 
 func (brv *btRightVOrderIterator) Next() interface{} {
-	sz := brv.q.Count()
+	sz := brv.q.Size()
 
 	var res *binaryNode = nil
 

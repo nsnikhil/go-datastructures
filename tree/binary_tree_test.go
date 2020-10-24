@@ -3,7 +3,7 @@ package tree
 import (
 	"errors"
 	"github.com/nsnikhil/go-datastructures/functions/comparator"
-	"github.com/nsnikhil/go-datastructures/liberror"
+	"github.com/nsnikhil/go-datastructures/liberr"
 	"github.com/nsnikhil/go-datastructures/list"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -147,7 +147,7 @@ func TestBinaryTreeInsert(t *testing.T) {
 				bt.root = newBinaryNode(1)
 				return bt
 			},
-			expectedError: liberror.NewTypeMismatchError("int", "int32"),
+			expectedError: liberr.TypeMismatchError("int", "int32"),
 		},
 	}
 
@@ -237,7 +237,7 @@ func TestBinaryTreeInsertCompare(t *testing.T) {
 				bt.root = newBinaryNode(1)
 				return bt
 			},
-			expectedError: liberror.NewTypeMismatchError("int", "int32"),
+			expectedError: liberr.TypeMismatchError("int", "int32"),
 		},
 		{
 			name: "test insert compare return error when comparator type is different",
@@ -259,7 +259,7 @@ func TestBinaryTreeInsertCompare(t *testing.T) {
 				bt.root = newBinaryNode(1)
 				return bt
 			},
-			expectedError: liberror.NewTypeMismatchError("string", "int"),
+			expectedError: liberr.TypeMismatchError("string", "int"),
 		},
 	}
 

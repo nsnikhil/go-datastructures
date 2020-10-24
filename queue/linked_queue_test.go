@@ -1,7 +1,7 @@
 package queue
 
 import (
-	"github.com/nsnikhil/go-datastructures/liberror"
+	"github.com/nsnikhil/go-datastructures/liberr"
 	"github.com/nsnikhil/go-datastructures/list"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -90,7 +90,7 @@ func TestLinkedQueueAdd(t *testing.T) {
 
 				return &LinkedQueue{ll: ll}
 			},
-			expectedError: liberror.NewTypeMismatchError("int", "string"),
+			expectedError: liberr.TypeMismatchError("int", "string"),
 		},
 	}
 
@@ -348,7 +348,7 @@ func TestLinkedQueueCount(t *testing.T) {
 				q, err := NewLinkedQueue()
 				require.NoError(t, err)
 
-				return q.Count()
+				return q.Size()
 			},
 			expectedResult: 0,
 		},
@@ -361,7 +361,7 @@ func TestLinkedQueueCount(t *testing.T) {
 				require.NoError(t, q.Add(1))
 				require.NoError(t, q.Add(2))
 
-				return q.Count()
+				return q.Size()
 			},
 			expectedResult: 2,
 		},

@@ -4,7 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/nsnikhil/go-datastructures/functions/comparator"
-	"github.com/nsnikhil/go-datastructures/liberror"
+	"github.com/nsnikhil/go-datastructures/liberr"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"reflect"
@@ -62,7 +62,7 @@ func TestCreateMaxHeap(t *testing.T) {
 				return NewMaxHeap(comparator.NewIntegerComparator(), 1, "a")
 			},
 			expectedResult: (*MaxHeap)(nil),
-			expectedError:  liberror.NewTypeMismatchError("int", "string"),
+			expectedError:  liberr.TypeMismatchError("int", "string"),
 		},
 		{
 			name: "test create return error when comparator return error",
@@ -70,7 +70,7 @@ func TestCreateMaxHeap(t *testing.T) {
 				return NewMaxHeap(comparator.NewStringComparator(), 1, 2)
 			},
 			expectedResult: (*MaxHeap)(nil),
-			expectedError:  liberror.NewTypeMismatchError("string", "int"),
+			expectedError:  liberr.TypeMismatchError("string", "int"),
 		},
 	}
 
@@ -134,7 +134,7 @@ func TestCreateMinHeap(t *testing.T) {
 				return NewMinHeap(comparator.NewIntegerComparator(), 1, "a")
 			},
 			expectedResult: (*MinHeap)(nil),
-			expectedError:  liberror.NewTypeMismatchError("int", "string"),
+			expectedError:  liberr.TypeMismatchError("int", "string"),
 		},
 		{
 			name: "test create return error when when comparator return error",
@@ -142,7 +142,7 @@ func TestCreateMinHeap(t *testing.T) {
 				return NewMinHeap(comparator.NewStringComparator(), 1, 2)
 			},
 			expectedResult: (*MinHeap)(nil),
-			expectedError:  liberror.NewTypeMismatchError("string", "int"),
+			expectedError:  liberr.TypeMismatchError("string", "int"),
 		},
 	}
 
@@ -265,7 +265,7 @@ func TestMaxHeapAdd(t *testing.T) {
 				data:      []interface{}(nil),
 				indexes:   make(map[interface{}]int),
 			}},
-			expectedError: liberror.NewTypeMismatchError("int", "string"),
+			expectedError: liberr.TypeMismatchError("int", "string"),
 		},
 		{
 			name: "test add return error when adding different type element to cleared list",
@@ -284,7 +284,7 @@ func TestMaxHeapAdd(t *testing.T) {
 				data:      []interface{}(nil),
 				indexes:   map[interface{}]int{2: 0, 1: 1},
 			}},
-			expectedError: liberror.NewTypeMismatchError("int", "string"),
+			expectedError: liberr.TypeMismatchError("int", "string"),
 		},
 		{
 			name: "test add return error when comparator returns error",
@@ -301,7 +301,7 @@ func TestMaxHeapAdd(t *testing.T) {
 				data:      []interface{}{1, 2},
 				indexes:   map[interface{}]int{1: 0, 2: 1},
 			}},
-			expectedError: liberror.NewTypeMismatchError("string", "int"),
+			expectedError: liberr.TypeMismatchError("string", "int"),
 		},
 	}
 
@@ -419,7 +419,7 @@ func TestMinHeapAdd(t *testing.T) {
 				data:    []interface{}(nil),
 				indexes: make(map[interface{}]int),
 			}},
-			expectedError: liberror.NewTypeMismatchError("int", "string"),
+			expectedError: liberr.TypeMismatchError("int", "string"),
 		},
 		{
 			name: "test add return error when adding different type element to cleared list",
@@ -437,7 +437,7 @@ func TestMinHeapAdd(t *testing.T) {
 				data:    []interface{}(nil),
 				indexes: map[interface{}]int{1: 0, 2: 1},
 			}},
-			expectedError: liberror.NewTypeMismatchError("int", "string"),
+			expectedError: liberr.TypeMismatchError("int", "string"),
 		},
 		{
 			name: "test add return error when comparator returns error",
@@ -453,7 +453,7 @@ func TestMinHeapAdd(t *testing.T) {
 				data:    []interface{}{1, 2},
 				indexes: map[interface{}]int{1: 0, 2: 1},
 			}},
-			expectedError: liberror.NewTypeMismatchError("string", "int"),
+			expectedError: liberr.TypeMismatchError("string", "int"),
 		},
 	}
 
@@ -975,7 +975,7 @@ func TestMaxHeapUpdate(t *testing.T) {
 				data:      []interface{}{1},
 				indexes:   map[interface{}]int{1: 0},
 			}},
-			expectedError: liberror.NewTypeMismatchError("int", "int32"),
+			expectedError: liberr.TypeMismatchError("int", "int32"),
 		},
 		{
 			name: "test return error when new type is different",
@@ -992,7 +992,7 @@ func TestMaxHeapUpdate(t *testing.T) {
 				data:      []interface{}{1},
 				indexes:   map[interface{}]int{1: 0},
 			}},
-			expectedError: liberror.NewTypeMismatchError("int", "int32"),
+			expectedError: liberr.TypeMismatchError("int", "int32"),
 		},
 		{
 			name: "test return error when prev is not present in heap",
@@ -1223,7 +1223,7 @@ func TestMaxHeapUpdateFunc(t *testing.T) {
 				data:      []interface{}{1},
 				indexes:   map[interface{}]int{1: 0},
 			}},
-			expectedError: liberror.NewTypeMismatchError("int", "int32"),
+			expectedError: liberr.TypeMismatchError("int", "int32"),
 		},
 		{
 			name: "test return error when new type is different",
@@ -1244,7 +1244,7 @@ func TestMaxHeapUpdateFunc(t *testing.T) {
 				data:      []interface{}{1},
 				indexes:   map[interface{}]int{1: 0},
 			}},
-			expectedError: liberror.NewTypeMismatchError("int", "int32"),
+			expectedError: liberr.TypeMismatchError("int", "int32"),
 		},
 		{
 			name: "test return error when prev is not present in heap",

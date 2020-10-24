@@ -3,7 +3,7 @@ package queue
 import (
 	"github.com/nsnikhil/go-datastructures/functions/comparator"
 	"github.com/nsnikhil/go-datastructures/heap"
-	"github.com/nsnikhil/go-datastructures/liberror"
+	"github.com/nsnikhil/go-datastructures/liberr"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"testing"
@@ -163,7 +163,7 @@ func TestPriorityQueueAdd(t *testing.T) {
 
 				return &PriorityQueue{h: h}
 			},
-			expectedError: liberror.NewTypeMismatchError("int", "string"),
+			expectedError: liberr.TypeMismatchError("int", "string"),
 		},
 		{
 			name: "test add to min priority queue return error when type is different",
@@ -183,7 +183,7 @@ func TestPriorityQueueAdd(t *testing.T) {
 
 				return &PriorityQueue{h: h}
 			},
-			expectedError: liberror.NewTypeMismatchError("int", "string"),
+			expectedError: liberr.TypeMismatchError("int", "string"),
 		},
 	}
 
@@ -820,7 +820,7 @@ func TestPriorityQueueCount(t *testing.T) {
 				q, err := NewPriorityQueue(true, comparator.NewIntegerComparator())
 				require.NoError(t, err)
 
-				return q.Count()
+				return q.Size()
 			},
 			expectedResult: 0,
 		},
@@ -830,7 +830,7 @@ func TestPriorityQueueCount(t *testing.T) {
 				q, err := NewPriorityQueue(false, comparator.NewIntegerComparator())
 				require.NoError(t, err)
 
-				return q.Count()
+				return q.Size()
 			},
 			expectedResult: 0,
 		},
@@ -843,7 +843,7 @@ func TestPriorityQueueCount(t *testing.T) {
 				require.NoError(t, q.Add(1))
 				require.NoError(t, q.Add(2))
 
-				return q.Count()
+				return q.Size()
 			},
 			expectedResult: 2,
 		},
@@ -856,7 +856,7 @@ func TestPriorityQueueCount(t *testing.T) {
 				require.NoError(t, q.Add(1))
 				require.NoError(t, q.Add(2))
 
-				return q.Count()
+				return q.Size()
 			},
 			expectedResult: 2,
 		},

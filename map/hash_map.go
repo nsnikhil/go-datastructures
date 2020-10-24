@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"github.com/nsnikhil/go-datastructures/functions/function"
 	"github.com/nsnikhil/go-datastructures/functions/iterator"
-	"github.com/nsnikhil/go-datastructures/liberror"
+	"github.com/nsnikhil/go-datastructures/liberr"
 	"github.com/nsnikhil/go-datastructures/list"
 	"github.com/nsnikhil/go-datastructures/utils"
 	"golang.org/x/crypto/sha3"
@@ -83,7 +83,7 @@ func (hm *HashMap) Get(k interface{}) (interface{}, error) {
 
 	kt := utils.GetTypeName(k)
 	if hm.keyTypeURL != kt {
-		return nil, liberror.NewTypeMismatchError(hm.keyTypeURL, kt)
+		return nil, liberr.TypeMismatchError(hm.keyTypeURL, kt)
 	}
 
 	cp, err := get(hm, k)
@@ -164,7 +164,7 @@ func (hm *HashMap) ReplaceAll(f function.BiFunction) error {
 		nv := f.Apply(p.k, p.v)
 
 		if hm.valueTypeURL != utils.GetTypeName(nv) {
-			return liberror.NewTypeMismatchError(hm.valueTypeURL, utils.GetTypeName(nv))
+			return liberr.TypeMismatchError(hm.valueTypeURL, utils.GetTypeName(nv))
 		}
 
 		p.v = nv
@@ -182,7 +182,7 @@ func (hm *HashMap) Compute(k interface{}, f function.BiFunction) (interface{}, e
 	nv := f.Apply(k, cp.v)
 
 	if hm.valueTypeURL != utils.GetTypeName(nv) {
-		return nil, liberror.NewTypeMismatchError(hm.valueTypeURL, utils.GetTypeName(nv))
+		return nil, liberr.TypeMismatchError(hm.valueTypeURL, utils.GetTypeName(nv))
 	}
 
 	cp.v = nv
@@ -288,9 +288,9 @@ func insertAll(hm *HashMap, p ...*Pair) error {
 		hm.keyTypeURL = kt
 		hm.valueTypeURL = vt
 	} else if hm.keyTypeURL != kt {
-		return liberror.NewTypeMismatchError(hm.keyTypeURL, kt)
+		return liberr.TypeMismatchError(hm.keyTypeURL, kt)
 	} else if hm.valueTypeURL != vt {
-		return liberror.NewTypeMismatchError(hm.valueTypeURL, vt)
+		return liberr.TypeMismatchError(hm.valueTypeURL, vt)
 	}
 
 	for i := 0; i < len(p); i++ {
@@ -496,11 +496,11 @@ func validateType(values ...*Pair) (string, string, error) {
 
 	for i := 1; i < sz; i++ {
 		if utils.GetTypeName(values[i].k) != kt {
-			return utils.NA, utils.NA, liberror.NewTypeMismatchError(kt, utils.GetTypeName(values[i].k))
+			return utils.NA, utils.NA, liberr.TypeMismatchError(kt, utils.GetTypeName(values[i].k))
 		}
 
 		if utils.GetTypeName(values[i].v) != vt {
-			return utils.NA, utils.NA, liberror.NewTypeMismatchError(vt, utils.GetTypeName(values[i].v))
+			return utils.NA, utils.NA, liberr.TypeMismatchError(vt, utils.GetTypeName(values[i].v))
 		}
 	}
 
