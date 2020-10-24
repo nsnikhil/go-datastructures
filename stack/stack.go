@@ -35,7 +35,7 @@ func (s *Stack) Empty() bool {
 	return s.ll.IsEmpty()
 }
 
-func (s *Stack) Count() int {
+func (s *Stack) Size() int {
 	return s.ll.Size()
 }
 

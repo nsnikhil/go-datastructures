@@ -347,7 +347,7 @@ func TestStackCount(t *testing.T) {
 
 				require.NoError(t, s.Push(1))
 
-				return s.Count()
+				return s.Size()
 			},
 			expectedResult: 1,
 		},
@@ -360,7 +360,7 @@ func TestStackCount(t *testing.T) {
 				require.NoError(t, s.Push(1))
 				require.NoError(t, s.Push(2))
 
-				return s.Count()
+				return s.Size()
 			},
 			expectedResult: 2,
 		},
@@ -370,7 +370,7 @@ func TestStackCount(t *testing.T) {
 				s, err := NewStack()
 				require.NoError(t, err)
 
-				return s.Count()
+				return s.Size()
 			},
 			expectedResult: 0,
 		},
