@@ -1,0 +1,15 @@
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+
+out
+.idea/
+*.iml
+*.DS_Store
+vendor/
+*.out
+
+playground.go
