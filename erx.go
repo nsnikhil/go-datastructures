@@ -68,8 +68,6 @@ func erxOperations(e *Erx, ops *[]Operation) {
 }
 
 func (e *Erx) String() string {
-	fmt.Println(marshal(e))
-
 	return marshal(e)
 }
 
