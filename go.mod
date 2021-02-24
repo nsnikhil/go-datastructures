@@ -1,4 +1,4 @@
-module erx
+module github.com/nsnikhil/erx
 
 go 1.16
 

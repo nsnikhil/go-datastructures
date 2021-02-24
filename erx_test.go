@@ -2,8 +2,8 @@ package erx_test
 
 import (
 	"errors"
-	"erx"
 	"fmt"
+	"github.com/nsnikhil/erx"
 	"github.com/stretchr/testify/assert"
 	"math/rand"
 	"strings"
