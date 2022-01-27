@@ -5,57 +5,57 @@ import (
 	"github.com/nsnikhil/go-datastructures/heap"
 )
 
-type PriorityQueue struct {
-	h heap.Heap
+type PriorityQueue[T comparable] struct {
+	h heap.Heap[T]
 }
 
-func NewPriorityQueue(isMax bool, c comparator.Comparator) (*PriorityQueue, error) {
-	var h heap.Heap
+func NewPriorityQueue[T comparable](isMax bool, c comparator.Comparator[T]) (*PriorityQueue[T], error) {
+	var h heap.Heap[T]
 	var err error
 
 	if isMax {
-		h, err = heap.NewMaxHeap(c)
+		h, err = heap.NewMaxHeap[T](c)
 	} else {
-		h, err = heap.NewMinHeap(c)
+		h, err = heap.NewMinHeap[T](c)
 	}
 
 	if err != nil {
 		return nil, err
 	}
 
-	return &PriorityQueue{
+	return &PriorityQueue[T]{
 		h: h,
 	}, nil
 }
 
-func (pq *PriorityQueue) Add(e interface{}) error {
+func (pq *PriorityQueue[T]) Add(e T) error {
 	return pq.h.Add(e)
 }
 
-func (pq *PriorityQueue) Remove() (interface{}, error) {
+func (pq *PriorityQueue[T]) Remove() (T, error) {
 	return pq.h.Extract()
 }
 
-func (pq *PriorityQueue) Update(prev, new interface{}) error {
+func (pq *PriorityQueue[T]) Update(prev, new T) error {
 	return pq.h.Update(prev, new)
 }
 
-func (pq *PriorityQueue) UpdateFunc(prev interface{}, op func(interface{}) interface{}) error {
+func (pq *PriorityQueue[T]) UpdateFunc(prev T, op func(T) T) error {
 	return pq.h.UpdateFunc(prev, op)
 }
 
-func (pq *PriorityQueue) Peek() (interface{}, error) {
-	return pq.h.Iterator().Next(), nil
+func (pq *PriorityQueue[T]) Peek() (T, error) {
+	return pq.h.Iterator().Next()
 }
 
-func (pq *PriorityQueue) Empty() bool {
+func (pq *PriorityQueue[T]) Empty() bool {
 	return pq.h.IsEmpty()
 }
 
-func (pq *PriorityQueue) Size() int {
+func (pq *PriorityQueue[T]) Size() int {
 	return pq.h.Size()
 }
 
-func (pq *PriorityQueue) Clear() {
+func (pq *PriorityQueue[T]) Clear() {
 	pq.h.Clear()
 }

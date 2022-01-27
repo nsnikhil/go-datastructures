@@ -6,161 +6,161 @@ import (
 	"github.com/nsnikhil/go-datastructures/utils"
 )
 
-type NAryTree struct {
+type NAryTree[T comparable] struct {
 }
 
-func NewNAryTree(e ...interface{}) (*NAryTree, error) {
+func NewNAryTree[T comparable](e ...T) (*NAryTree[T], error) {
 	return nil, nil
 }
 
-func (nt *NAryTree) Insert(e interface{}) error {
+func (nt *NAryTree[T]) Insert(e T) error {
 	return nil
 }
 
-func (nt *NAryTree) Delete(e interface{}) error {
+func (nt *NAryTree[T]) Delete(e T) error {
 	return nil
 }
 
-func (nt *NAryTree) Search(e interface{}) (bool, error) {
+func (nt *NAryTree[T]) Search(e T) (bool, error) {
 	return false, nil
 }
 
-func (nt *NAryTree) Count() int {
+func (nt *NAryTree[T]) Count() int {
 	return utils.InvalidIndex
 }
 
-func (nt *NAryTree) Height() int {
+func (nt *NAryTree[T]) Height() int {
 	return utils.InvalidIndex
 }
 
-func (nt *NAryTree) Diameter() int {
+func (nt *NAryTree[T]) Diameter() int {
 	return utils.InvalidIndex
 }
 
-func (nt *NAryTree) Empty() bool {
+func (nt *NAryTree[T]) Empty() bool {
 	return false
 }
 
-func (nt *NAryTree) Clear() {
+func (nt *NAryTree[T]) Clear() {
 
 }
 
-func (nt *NAryTree) Clone() Tree {
+func (nt *NAryTree[T]) Clone() Tree[T] {
 	return nil
 }
 
-func (nt *NAryTree) Mirror() (bool, error) {
+func (nt *NAryTree[T]) Mirror() (bool, error) {
 	return false, nil
 }
 
-func (nt *NAryTree) MirrorAt(e interface{}) (bool, error) {
+func (nt *NAryTree[T]) MirrorAt(e T) (bool, error) {
 	return false, nil
 }
 
-func (nt *NAryTree) RotateLeft() error {
+func (nt *NAryTree[T]) RotateLeft() error {
 	return nil
 }
 
-func (nt *NAryTree) RotateRight() error {
+func (nt *NAryTree[T]) RotateRight() error {
 	return nil
 }
 
-func (nt *NAryTree) RotateLeftAt(e interface{}) error {
+func (nt *NAryTree[T]) RotateLeftAt(e T) error {
 	return nil
 }
 
-func (nt *NAryTree) RotateRightAt(e interface{}) error {
+func (nt *NAryTree[T]) RotateRightAt(e T) error {
 	return nil
 }
 
-func (nt *NAryTree) IsFull() bool {
+func (nt *NAryTree[T]) IsFull() bool {
 	return false
 }
 
-func (nt *NAryTree) IsBalanced() bool {
+func (nt *NAryTree[T]) IsBalanced() bool {
 	return false
 }
 
-func (nt *NAryTree) IsPerfect() bool {
+func (nt *NAryTree[T]) IsPerfect() bool {
 	return false
 }
 
-func (nt *NAryTree) IsComplete() bool {
+func (nt *NAryTree[T]) IsComplete() bool {
 	return false
 }
 
-func (nt *NAryTree) LowestCommonAncestor(a, b interface{}) (interface{}, error) {
+func (nt *NAryTree[T]) LowestCommonAncestor(a, b T) (T, error) {
 	return nil, nil
 }
 
-func (nt *NAryTree) Paths() (list.List, error) {
+func (nt *NAryTree[T]) Paths() (list.List[T], error) {
 	return nil, nil
 }
 
-func (nt *NAryTree) Mode() (list.List, error) {
+func (nt *NAryTree[T]) Mode() (list.List[T], error) {
 	return nil, nil
 }
 
-func (nt *NAryTree) Equal(t Tree) (bool, error) {
+func (nt *NAryTree[T]) Equal(t Tree[T]) (bool, error) {
 	return false, nil
 }
 
-func (nt *NAryTree) Symmetric() bool {
+func (nt *NAryTree[T]) Symmetric() bool {
 	return false
 }
 
-func (nt *NAryTree) Invert() {
+func (nt *NAryTree[T]) Invert() {
 
 }
 
-func (nt *NAryTree) InOrderSuccessor(e interface{}) (interface{}, error) {
+func (nt *NAryTree[T]) InOrderSuccessor(e T) (T, error) {
 	return nil, nil
 }
 
-func (nt *NAryTree) PreOrderSuccessor(e interface{}) (interface{}, error) {
+func (nt *NAryTree[T]) PreOrderSuccessor(e T) (T, error) {
 	return nil, nil
 }
 
-func (nt *NAryTree) PostOrderSuccessor(e interface{}) (interface{}, error) {
+func (nt *NAryTree[T]) PostOrderSuccessor(e T) (T, error) {
 	return nil, nil
 }
 
-func (nt *NAryTree) LevelOrderSuccessor(e interface{}) (interface{}, error) {
+func (nt *NAryTree[T]) LevelOrderSuccessor(e T) (T, error) {
 	return nil, nil
 }
 
-func (nt *NAryTree) PreOrderIterator() iterator.Iterator {
+func (nt *NAryTree[T]) PreOrderIterator() iterator.Iterator[T] {
 	return nil
 }
 
-func (nt *NAryTree) PostOrderIterator() iterator.Iterator {
+func (nt *NAryTree[T]) PostOrderIterator() iterator.Iterator[T] {
 	return nil
 }
 
-func (nt *NAryTree) InOrderIterator() iterator.Iterator {
+func (nt *NAryTree[T]) InOrderIterator() iterator.Iterator[T] {
 	return nil
 }
 
-func (nt *NAryTree) LevelOrderIterator() iterator.Iterator {
+func (nt *NAryTree[T]) LevelOrderIterator() iterator.Iterator[T] {
 	return nil
 }
 
-func (nt *NAryTree) VerticalViewIterator() iterator.Iterator {
+func (nt *NAryTree[T]) VerticalViewIterator() iterator.Iterator[T] {
 	return nil
 }
 
-func (nt *NAryTree) LeftViewIterator() iterator.Iterator {
+func (nt *NAryTree[T]) LeftViewIterator() iterator.Iterator[T] {
 	return nil
 }
 
-func (nt *NAryTree) RightViewIterator() iterator.Iterator {
+func (nt *NAryTree[T]) RightViewIterator() iterator.Iterator[T] {
 	return nil
 }
 
-func (nt *NAryTree) TopViewIterator() iterator.Iterator {
+func (nt *NAryTree[T]) TopViewIterator() iterator.Iterator[T] {
 	return nil
 }
 
-func (nt *NAryTree) BottomViewIterator() iterator.Iterator {
+func (nt *NAryTree[T]) BottomViewIterator() iterator.Iterator[T] {
 	return nil
 }

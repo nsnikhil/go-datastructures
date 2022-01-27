@@ -2,7 +2,7 @@ package list
 
 import "github.com/nsnikhil/go-datastructures/functions/comparator"
 
-type sorter interface {
+type sorter[T comparable] interface {
 
 	/*
 		sorts an list given a specified comparator.
@@ -11,24 +11,20 @@ type sorter interface {
 		l: the list to sort.
 		c: the comparator to use while sorting.
 	*/
-	sort(l List, c comparator.Comparator)
+	sort(l List[T], c comparator.Comparator[T])
 }
 
-func newSorter() sorter {
-	return newQuickSorter()
+type quickSort[T comparable] struct{}
+
+func newQuickSorter[T comparable]() sorter[T] {
+	return quickSort[T]{}
 }
 
-type quickSort struct{}
-
-func newQuickSorter() sorter {
-	return quickSort{}
-}
-
-func (qs quickSort) sort(l List, c comparator.Comparator) {
+func (qs quickSort[T]) sort(l List[T], c comparator.Comparator[T]) {
 	quickSortUtil(l, c, 0, l.Size()-1)
 }
 
-func quickSortUtil(l List, c comparator.Comparator, s, p int) {
+func quickSortUtil[T comparable](l List[T], c comparator.Comparator[T], s, p int64) {
 	if s < p {
 		pivot := findPivot(l, c, s, p)
 		quickSortUtil(l, c, s, pivot-1)
@@ -36,12 +32,15 @@ func quickSortUtil(l List, c comparator.Comparator, s, p int) {
 	}
 }
 
-func findPivot(l List, c comparator.Comparator, s, p int) int {
+func findPivot[T comparable](l List[T], c comparator.Comparator[T], s, p int64) int64 {
 	i := s - 1
 	j := s
 
 	for j < p {
-		r, _ := c.Compare(l.Get(j), l.Get(p))
+		je, _ := l.Get(j)
+		pe, _ := l.Get(p)
+
+		r := c.Compare(je, pe)
 		if r < 0 {
 			i++
 			swap(l, i, j)
@@ -54,8 +53,11 @@ func findPivot(l List, c comparator.Comparator, s, p int) int {
 	return i + 1
 }
 
-func swap(l List, i, j int) {
-	temp := l.Get(j)
-	_, _ = l.Set(j, l.Get(i))
+func swap[T comparable](l List[T], i, j int64) {
+	tl, _ := l.Get(j)
+	temp := tl
+
+	el, _ := l.Get(i)
+	_, _ = l.Set(j, el)
 	_, _ = l.Set(i, temp)
 }

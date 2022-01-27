@@ -1,5 +1,5 @@
 package comparator
 
-type Comparator interface {
-	Compare(one interface{}, two interface{}) (int, error)
+type Comparator[T any] interface {
+	Compare(one T, two T) int
 }

@@ -7,31 +7,26 @@ import (
 
 const max = 1<<63 - 62135596801
 
-type BlockingQueue struct {
-	*LinkedQueue
+type BlockingQueue[T comparable] struct {
+	*LinkedQueue[T]
 }
 
-func NewBlockingQueue() (*BlockingQueue, error) {
-	lq, err := NewLinkedQueue()
-	if err != nil {
-		return nil, err
-	}
-
-	return &BlockingQueue{LinkedQueue: lq}, nil
+func NewBlockingQueue[T comparable]() *BlockingQueue[T] {
+	return &BlockingQueue[T]{LinkedQueue: NewLinkedQueue[T]()}
 }
 
-func (bq *BlockingQueue) Remove() (interface{}, error) {
+func (bq *BlockingQueue[T]) Remove() (T, error) {
 	return removeBlocking(bq, time.Duration(max))
 }
 
-func (bq *BlockingQueue) RemoveWithTimeout(duration time.Duration) (interface{}, error) {
+func (bq *BlockingQueue[T]) RemoveWithTimeout(duration time.Duration) (T, error) {
 	e, err := removeBlocking(bq, duration)
 
 	return e, err
 }
 
-func removeBlocking(bq *BlockingQueue, duration time.Duration) (interface{}, error) {
-	c := make(chan interface{})
+func removeBlocking[T comparable](bq *BlockingQueue[T], duration time.Duration) (T, error) {
+	c := make(chan T)
 	e := make(chan error)
 
 	go func() {
@@ -53,9 +48,9 @@ func removeBlocking(bq *BlockingQueue, duration time.Duration) (interface{}, err
 	case v := <-c:
 		return v, nil
 	case err := <-e:
-		return nil, err
+		return *new(T), err
 	case <-time.After(duration):
-		return nil, errors.New("timed out")
+		return *new(T), errors.New("timed out")
 	}
 
 }

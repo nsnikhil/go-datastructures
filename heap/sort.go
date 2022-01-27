@@ -4,21 +4,21 @@ import (
 	"github.com/nsnikhil/go-datastructures/functions/comparator"
 )
 
-type heapSort struct {
+type heapSort[T comparable] struct {
 }
 
-func newHeapSort() *heapSort {
-	return &heapSort{}
+func newHeapSort[T comparable]() *heapSort[T] {
+	return &heapSort[T]{}
 }
 
-func (hs *heapSort) sort(c comparator.Comparator, isMaxHeap bool, data *[]interface{}) error {
+func (hs *heapSort[T]) sort(c comparator.Comparator[T], isMaxHeap bool, data *[]T) error {
 	h, err := buildHeapUtil(c, isMaxHeap, data)
 	if err != nil {
 		return err
 	}
 
 	sz := h.Size()
-	temp := make([]interface{}, sz)
+	temp := make([]T, sz)
 
 	for i := 0; i < sz; i++ {
 		ele, err := h.Extract()
@@ -34,10 +34,10 @@ func (hs *heapSort) sort(c comparator.Comparator, isMaxHeap bool, data *[]interf
 	return nil
 }
 
-func buildHeapUtil(c comparator.Comparator, isMaxHeap bool, data *[]interface{}) (Heap, error) {
+func buildHeapUtil[T comparable](c comparator.Comparator[T], isMaxHeap bool, data *[]T) (Heap[T], error) {
 	if isMaxHeap {
-		return NewMaxHeap(c, *data...)
+		return NewMaxHeap[T](c, *data...)
 	}
 
-	return NewMinHeap(c, *data...)
+	return NewMinHeap[T](c, *data...)
 }

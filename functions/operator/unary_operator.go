@@ -1,5 +1,5 @@
 package operator
 
-type UnaryOperator interface {
-	Apply(e interface{}) interface{}
+type UnaryOperator[T any] interface {
+	Apply(e T) T
 }

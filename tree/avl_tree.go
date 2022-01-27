@@ -4,23 +4,23 @@ import (
 	"github.com/nsnikhil/go-datastructures/functions/comparator"
 )
 
-type AVLTree struct {
-	c comparator.Comparator
-	*BinarySearchTree
+type AVLTree[T comparable] struct {
+	c comparator.Comparator[T]
+	*BinarySearchTree[T]
 }
 
-func NewAVLTree(c comparator.Comparator, e ...interface{}) (*AVLTree, error) {
+func NewAVLTree[T comparable](c comparator.Comparator[T], e ...T) (*AVLTree[T], error) {
 	return nil, nil
 }
 
-func (avt *AVLTree) Insert(e interface{}) error {
+func (avt *AVLTree[T]) Insert(e T) error {
 	return nil
 }
 
-func (avt *AVLTree) Delete(e interface{}) error {
+func (avt *AVLTree[T]) Delete(e T) error {
 	return nil
 }
 
-func (avt *AVLTree) Search(e interface{}) error {
+func (avt *AVLTree[T]) Search(e T) error {
 	return nil
 }

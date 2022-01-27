@@ -4,7 +4,7 @@ import (
 	"github.com/nsnikhil/go-datastructures/functions/comparator"
 )
 
-func buildHeap(c comparator.Comparator, isMaxHeap bool, data []interface{}, indexes map[interface{}]int) error {
+func buildHeap[T comparable](c comparator.Comparator[T], isMaxHeap bool, data []T, indexes map[T]int) error {
 	sz := len(data)
 
 	for i, d := range data {

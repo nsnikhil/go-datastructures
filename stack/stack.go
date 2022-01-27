@@ -1,49 +1,59 @@
 package stack
 
 import (
+	"github.com/nsnikhil/erx"
 	"github.com/nsnikhil/go-datastructures/list"
 )
 
-type Stack struct {
-	ll *list.LinkedList
+type Stack[T comparable] struct {
+	ll *list.LinkedList[T]
 }
 
-func NewStack() (*Stack, error) {
-	ll, err := list.NewLinkedList()
-	if err != nil {
-		return nil, err
+//TODO: SHOULD THE CONSTRUCTOR ACCEPT VAR ARGS?
+func NewStack[T comparable]() *Stack[T] {
+	return &Stack[T]{
+		ll: list.NewLinkedList[T](),
+	}
+}
+
+func (s *Stack[T]) Push(e T) {
+	s.ll.AddFirst(e)
+}
+
+func (s *Stack[T]) Pop() (T, error) {
+	if s.Empty() {
+		return *new(T), emptyStackError("Stack.Pop")
 	}
 
-	return &Stack{
-		ll: ll,
-	}, nil
+	res, err := s.ll.RemoveFirst()
+	if err != nil {
+		return *new(T), erx.WithArgs(erx.Operation("Stack.Pop"), err)
+	}
+
+	return res, nil
 }
 
-func (s *Stack) Push(e interface{}) error {
-	return s.ll.AddFirst(e)
+func (s *Stack[T]) Peek() (T, error) {
+	if s.Empty() {
+		return *new(T), emptyStackError("Stack.Peek")
+	}
+
+	res, err := s.ll.GetFirst()
+	if err != nil {
+		return *new(T), erx.WithArgs(erx.Operation("Stack.Peek"), err)
+	}
+
+	return res, nil
 }
 
-func (s *Stack) Pop() (interface{}, error) {
-	return s.ll.RemoveFirst()
-}
-
-func (s *Stack) Peek() (interface{}, error) {
-	return s.ll.GetFirst(), nil
-}
-
-func (s *Stack) Empty() bool {
+func (s *Stack[T]) Empty() bool {
 	return s.ll.IsEmpty()
 }
 
-func (s *Stack) Size() int {
+func (s *Stack[T]) Size() int64 {
 	return s.ll.Size()
 }
 
-func (s *Stack) Clear() {
+func (s *Stack[T]) Clear() {
 	s.ll.Clear()
-}
-
-func (s *Stack) Search(e interface{}) (int, error) {
-	//TODO FIX "LIST IS EMPTY ERROR" & "ELEMENT NOT FOUND IN THE LIST"
-	return s.ll.IndexOf(e)
 }

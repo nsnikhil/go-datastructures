@@ -1,461 +1,324 @@
 package list
 
 import (
-	"errors"
-	"fmt"
 	"github.com/nsnikhil/go-datastructures/functions/comparator"
 	"github.com/nsnikhil/go-datastructures/functions/iterator"
 	"github.com/nsnikhil/go-datastructures/functions/operator"
 	"github.com/nsnikhil/go-datastructures/functions/predicate"
-	"github.com/nsnikhil/go-datastructures/liberr"
-	"github.com/nsnikhil/go-datastructures/utils"
 )
 
 type factors struct {
 	upperLoadFactor float64
 	lowerLoadFactor float64
 
-	scalingFactor int
-	capacity      int
+	scalingFactor int64
+	capacity      int64
 }
 
-type ArrayList struct {
-	typeURL string
+type ArrayList[T comparable] struct {
 	*factors
-	size int
-	data []interface{}
+	size int64
+	data []T
 }
 
-func NewArrayList(data ...interface{}) (*ArrayList, error) {
-	al := &ArrayList{
-		factors: &factors{upperLoadFactor: upperLoadFactor, lowerLoadFactor: lowerLoadFactor, scalingFactor: scalingFactor, capacity: initialCapacity},
-		size:    nought,
-		typeURL: utils.NA,
-		data:    make([]interface{}, initialCapacity),
+func NewArrayList[T comparable](elements ...T) *ArrayList[T] {
+	al := &ArrayList[T]{
+		factors: &factors{
+			upperLoadFactor: upperLoadFactor,
+			lowerLoadFactor: lowerLoadFactor,
+			scalingFactor:   scalingFactor,
+			capacity:        initialCapacity,
+		},
+		size: nought,
+		data: make([]T, initialCapacity),
 	}
 
-	if len(data) == 0 {
-		return al, nil
-	}
+	al.addAllFrom(nought, elements...)
 
-	if err := addAll(al, data...); err != nil {
-		return nil, err
-	}
-
-	return al, nil
+	return al
 }
 
-func (al *ArrayList) Add(e interface{}) error {
-	return addAll(al, e)
+func (al *ArrayList[T]) Add(element T) {
+	al.addAllFrom(al.size, element)
 }
 
-func (al *ArrayList) AddAt(i int, e interface{}) error {
-	if al.IsEmpty() && al.typeURL == utils.NA {
-		al.typeURL = utils.GetTypeName(e)
-		return addAll(al, e)
-	}
-
-	if err := al.isValidIndex(i); err != nil {
-		return err
-	}
-
-	if err := al.isValidType(e); err != nil {
-		return err
-	}
-
-	checkIncreaseCapacity(al)
-
-	for j := al.Size(); j > i; j-- {
-		al.data[j] = al.data[j-1]
-	}
-
-	al.data[i] = e
-
-	al.size++
-
-	return nil
+func (al *ArrayList[T]) AddAt(index int64, element T) error {
+	return al.addAllFrom(index, element)
 }
 
-func (al *ArrayList) AddAll(l ...interface{}) error {
-	return addAll(al, l...)
+//TODO: SHOULD IT FAIL WHEN ARGS ARE EMPTY?
+func (al *ArrayList[T]) AddAll(elements ...T) {
+	al.addAllFrom(al.size, elements...)
 }
 
-func addAll(al *ArrayList, l ...interface{}) error {
-	if len(l) == 0 {
-		return nil
-	}
-
-	for i := 0; i < len(l)-1; i++ {
-		if utils.GetTypeName(l[i]) != utils.GetTypeName(l[i+1]) {
-			return fmt.Errorf("type mismatch : all elements must be of same type")
-		}
-	}
-
-	eleType := utils.GetTypeName(l[0])
-
-	if al.typeURL == utils.NA {
-		al.typeURL = eleType
-	} else if al.typeURL != eleType {
-		return liberr.TypeMismatchError(al.typeURL, eleType)
-	}
-
-	for _, e := range l {
-		if err := add(al, e); err != nil {
-			return nil
-		}
-	}
-
-	return nil
-}
-
-func add(al *ArrayList, e interface{}) error {
-	checkIncreaseCapacity(al)
-
-	if al.typeURL != utils.GetTypeName(e) {
-		return liberr.TypeMismatchError(al.typeURL, utils.GetTypeName(e))
-	}
-
-	al.data[al.size] = e
-	al.size++
-
-	return nil
-}
-
-func (al *ArrayList) Clear() {
-	for i := 0; i < al.Size(); i++ {
-		al.data[i] = nil
-	}
+//TODO: SHOULD WE JUST RESET THE SIZE OR ALSO RE-INITIALIZE THE DATA TO CLAIM UNUSED SPACE?
+func (al *ArrayList[T]) Clear() {
 	al.size = nought
+	al.data = make([]T, initialCapacity)
 }
 
-func (al *ArrayList) Clone() (List, error) {
+func (al *ArrayList[T]) Clone() List[T] {
 	if al.IsEmpty() {
-		return NewArrayList()
-	}
-	return al.SubList(nought, al.Size())
-}
-
-func (al *ArrayList) Contains(e interface{}) (bool, error) {
-
-	_, err := newFinder(concurrent).search(al, e)
-	if err != nil {
-		return false, err
+		return NewArrayList[T]()
 	}
 
-	return true, nil
+	clonedList, _ := al.SubList(nought, al.size-1)
+
+	return clonedList
 }
 
-func (al *ArrayList) ContainsAll(l ...interface{}) (bool, error) {
-	for _, d := range l {
-		ok, err := al.Contains(d)
-		if !ok || err != nil {
-			return false, err
+func (al *ArrayList[T]) Contains(element T) bool {
+	return newDoublyFinder[T]().search(al, element) != -1
+}
+
+func (al *ArrayList[T]) ContainsAll(elements ...T) bool {
+	if al.IsEmpty() {
+		return false
+	}
+
+	dataSet := make(map[T]bool)
+	for i := int64(0); i < al.size; i++ {
+		dataSet[al.data[i]] = true
+	}
+
+	for _, ele := range elements {
+		if !al.Contains(ele) {
+			return false
 		}
 	}
-	return true, nil
+
+	return true
 }
 
-func (al *ArrayList) Get(i int) interface{} {
-	if err := al.isValidIndex(i); al.IsEmpty() || err != nil {
-		return nil
-	}
-	return al.data[i]
-}
-
-func (al *ArrayList) IndexOf(e interface{}) (int, error) {
+//TODO: WHAT TO RETURN AS DEFAULT VALUE?
+func (al *ArrayList[T]) Get(index int64) (T, error) {
 	if al.IsEmpty() {
-		return utils.InvalidIndex, fmt.Errorf("list is empty")
+		return *new(T), emptyListError("ArrayList.Get")
 	}
 
-	if err := al.isValidType(e); err != nil {
-		return utils.InvalidIndex, err
+	if ok := al.isValidIndex(index); !ok {
+		return *new(T), invalidIndexError(index, "ArrayList.Get")
 	}
 
-	i, _ := newFinder(concurrent).search(al, e)
-	if i == utils.InvalidIndex {
-		return utils.InvalidIndex, fmt.Errorf("element %v not found in the list", e)
-	}
-
-	return i, nil
+	return al.data[index], nil
 }
 
-func (al *ArrayList) IsEmpty() bool {
-	return al.Size() == nought
+func (al *ArrayList[T]) IndexOf(element T) int64 {
+	return newLinearFinder[T]().search(al, element)
 }
 
-func (al *ArrayList) Iterator() iterator.Iterator {
-	return newArrayListIterator(al)
+func (al *ArrayList[T]) IsEmpty() bool {
+	return al.size == nought
 }
 
-func (al *ArrayList) LastIndexOf(e interface{}) (int, error) {
+func (al *ArrayList[T]) LastIndexOf(element T) int64 {
+	return newReverseFinder[T]().search(al, element)
+}
+
+func (al *ArrayList[T]) Remove(element T) error {
 	if al.IsEmpty() {
-		return utils.InvalidIndex, fmt.Errorf("list is empty")
+		return emptyListError("ArrayList.Remove")
 	}
 
-	if err := al.isValidType(e); err != nil {
-		return utils.InvalidIndex, err
+	index := newLinearFinder[T]().search(al, element)
+	if index == invalidIndex {
+		return elementNotFoundError(element, "ArrayList.Remove")
 	}
 
-	i := al.Size() - 1
-	for i >= 0 {
-		if al.Get(i) == e {
-			return i, nil
-		}
-		i--
-	}
+	al.removeAllFrom(index, index)
 
-	return utils.InvalidIndex, fmt.Errorf("element %v not found in the list", e)
+	return nil
 }
 
-func (al *ArrayList) Remove(e interface{}) (bool, error) {
+func (al *ArrayList[T]) RemoveAt(index int64) (T, error) {
 	if al.IsEmpty() {
-		return false, fmt.Errorf("list is empty")
+		return *new(T), emptyListError("ArrayList.RemoveAt")
 	}
 
-	if err := al.isValidType(e); err != nil {
-		return false, err
+	if ok := al.isValidIndex(index); !ok {
+		return *new(T), invalidIndexError(index, "ArrayList.RemoveAt")
 	}
 
-	i, err := al.IndexOf(e)
-	if err != nil || i == utils.InvalidIndex {
-		return false, err
-	}
+	e, _ := al.Get(index)
 
-	removeAt(al, i)
-
-	return true, nil
-}
-
-func (al *ArrayList) RemoveAt(i int) (interface{}, error) {
-	if al.IsEmpty() {
-		return nil, fmt.Errorf("list is empty")
-	}
-
-	if err := al.isValidIndex(i); err != nil {
-		return nil, err
-	}
-
-	e := al.Get(i)
-	removeAt(al, i)
+	al.removeAllFrom(index, index)
 
 	return e, nil
 }
 
-func removeAt(al *ArrayList, i int) {
-	for j := i; j < al.Size(); j++ {
-		al.data[j] = al.data[j+1]
-	}
-
-	al.size--
-	checkDecreaseCapacity(al)
+func (al *ArrayList[T]) RemoveAll(l ...T) error {
+	return al.filterArrayList(false, l...)
 }
 
-func (al *ArrayList) RemoveAll(l ...interface{}) (bool, error) {
-	return filterArrayList(al, false, l...)
-}
-
-func (al *ArrayList) RemoveIf(predicate predicate.Predicate) (bool, error) {
-	var l []interface{}
+func (al *ArrayList[T]) RemoveIf(predicate predicate.Predicate[T]) error {
+	var l []T
 
 	it := al.Iterator()
 
 	for it.HasNext() {
-		e := it.Next()
+		e, _ := it.Next()
 		if predicate.Test(e) {
 			l = append(l, e)
 		}
 	}
 
-	return filterArrayList(al, false, l...)
+	return al.filterArrayList(false, l...)
 }
 
-func (al *ArrayList) RemoveRange(from, to int) (bool, error) {
-	if to < from {
-		return false, fmt.Errorf("to cannot be smaller than from")
-	}
-
-	if err := al.isValidIndex(from); err != nil {
-		return false, err
-	}
-
-	if to < 0 || to > al.Size() {
-		return false, liberr.IndexOutOfBoundError(to)
-	}
-
-	idx := to
-	for i := from; i < al.Size(); i++ {
-		if idx < al.Size() {
-			al.data[i] = al.data[idx]
-			idx++
-		} else {
-			al.data[i] = interface{}(nil)
-		}
-	}
-
-	al.size -= to - from
-
-	checkDecreaseCapacity(al)
-
-	return true, nil
+func (al *ArrayList[T]) RemoveRange(from, to int64) error {
+	return al.removeAllFrom(from, to)
 }
 
-func (al *ArrayList) Replace(old, new interface{}) error {
+func (al *ArrayList[T]) Replace(old, new T) error {
 	if al.IsEmpty() {
-		return errors.New("list is empty")
+		return emptyListError("ArrayList.Replace")
 	}
 
-	oldType := utils.GetTypeName(old)
-	newType := utils.GetTypeName(new)
-
-	if al.typeURL != oldType {
-		return liberr.TypeMismatchError(al.typeURL, oldType)
+	idx := al.IndexOf(old)
+	if idx == invalidIndex {
+		return elementNotFoundError(old, "ArrayList.Replace")
 	}
 
-	if al.typeURL != newType {
-		return liberr.TypeMismatchError(al.typeURL, newType)
-	}
-
-	id, err := al.IndexOf(old)
-	if err != nil {
-		return err
-	}
-
-	al.data[id] = new
+	al.data[idx] = new
 
 	return nil
 }
 
-func (al *ArrayList) ReplaceAll(uo operator.UnaryOperator) error {
-	sz := al.Size()
-	for i := 0; i < sz; i++ {
+func (al *ArrayList[T]) ReplaceAll(uo operator.UnaryOperator[T]) {
+	sz := al.size
 
-		e := uo.Apply(al.Get(i))
-
-		if err := al.isValidType(e); err != nil {
-			return err
-		}
-
-		if _, err := al.Set(i, e); err != nil {
-			return err
-		}
+	for i := int64(0); i < sz; i++ {
+		al.data[i] = uo.Apply(al.data[i])
 	}
-
-	return nil
 }
 
-func (al *ArrayList) RetainAll(l ...interface{}) (bool, error) {
-	return filterArrayList(al, true, l...)
+func (al *ArrayList[T]) RetainAll(l ...T) error {
+	return al.filterArrayList(true, l...)
 }
 
-func (al *ArrayList) Set(i int, e interface{}) (interface{}, error) {
+func (al *ArrayList[T]) Set(index int64, element T) (T, error) {
 	if al.IsEmpty() {
-		return nil, fmt.Errorf("list is empty")
+		return *new(T), emptyListError("ArrayList.Set")
 	}
 
-	if err := al.isValidIndex(i); err != nil {
-		return nil, err
+	if ok := al.isValidIndex(index); !ok {
+		return *new(T), invalidIndexError(index, "ArrayList.Set")
 	}
 
-	if err := al.isValidType(e); err != nil {
-		return nil, err
-	}
+	al.data[index] = element
 
-	al.data[i] = e
-	return al.data[i], nil
+	return al.data[index], nil
 }
 
-func (al *ArrayList) Size() int {
+func (al *ArrayList[T]) Size() int64 {
 	return al.size
 }
 
-func (al *ArrayList) Sort(c comparator.Comparator) {
-	newSorter().sort(al, c)
+func (al *ArrayList[T]) Sort(c comparator.Comparator[T]) {
+	newQuickSorter[T]().sort(al, c)
 }
 
-func (al *ArrayList) SubList(s int, e int) (List, error) {
-	if e < s {
-		return nil, fmt.Errorf("end cannot be smaller than start")
+func (al *ArrayList[T]) SubList(start int64, end int64) (List[T], error) {
+	if end < start {
+		return nil, invalidArgsError("end cannot be smaller than start", "ArrayList.SubList")
 	}
 
-	if err := al.isValidIndex(s); err != nil {
-		return nil, err
+	if ok := al.isValidIndex(start); !ok {
+		return nil, invalidIndexError(start, "ArrayList.SubList")
 	}
 
-	if e < 0 || e > al.Size() {
-		return nil, liberr.IndexOutOfBoundError(e)
+	if end < 0 || end >= al.size {
+		return nil, invalidIndexError(end, "ArrayList.SubList")
 	}
 
-	tempList, err := NewArrayList()
-	if err != nil {
-		return nil, err
-	}
+	tempList := NewArrayList[T]()
 
-	for i := s; i < e; i++ {
-		if err := tempList.Add(al.Get(i)); err != nil {
-			return nil, err
-		}
+	for i := start; i <= end; i++ {
+		tempList.Add(al.data[i])
 	}
 
 	return tempList, nil
 }
 
-type arrayListIterator struct {
-	currentIndex int
-	al           *ArrayList
+type arrayListIterator[T comparable] struct {
+	currentIndex int64
+	al           *ArrayList[T]
 }
 
-func newArrayListIterator(al *ArrayList) *arrayListIterator {
-	return &arrayListIterator{
+func newArrayListIterator[T comparable](al *ArrayList[T]) iterator.Iterator[T] {
+	return &arrayListIterator[T]{
 		currentIndex: 0,
 		al:           al,
 	}
 }
 
-func (ali *arrayListIterator) HasNext() bool {
+func (al *ArrayList[T]) Iterator() iterator.Iterator[T] {
+	return newArrayListIterator[T](al)
+}
+
+func (ali *arrayListIterator[T]) HasNext() bool {
 	return ali.currentIndex != ali.al.Size()
 }
 
-func (ali *arrayListIterator) Next() interface{} {
+func (ali *arrayListIterator[T]) Next() (T, error) {
 	if ali.currentIndex >= ali.al.Size() {
-		return nil
+		return *new(T), emptyIteratorError("arrayListIterator.Next")
 	}
 
-	e := ali.al.Get(ali.currentIndex)
+	e, _ := ali.al.Get(ali.currentIndex)
+
 	ali.currentIndex++
 
-	return e
+	return e, nil
 }
 
-func (al *ArrayList) isValidIndex(i int) error {
-	if i < 0 || i >= al.Size() {
-		return liberr.IndexOutOfBoundError(i)
+type arrayListDescendingIterator[T comparable] struct {
+	currentIndex int64
+	al           *ArrayList[T]
+}
+
+func newArrayListDescendingIterator[T comparable](al *ArrayList[T]) iterator.Iterator[T] {
+	return &arrayListDescendingIterator[T]{
+		currentIndex: al.size - 1,
+		al:           al,
 	}
-	return nil
 }
 
-func (al *ArrayList) isValidType(e interface{}) error {
-	if utils.GetTypeName(e) != al.typeURL {
-		return liberr.TypeMismatchError(al.typeURL, utils.GetTypeName(e))
+func (al *ArrayList[T]) DescendingIterator() iterator.Iterator[T] {
+	return newArrayListDescendingIterator[T](al)
+}
+
+func (ali *arrayListDescendingIterator[T]) HasNext() bool {
+	return ali.currentIndex >= 0
+}
+
+func (ali *arrayListDescendingIterator[T]) Next() (T, error) {
+	if ali.currentIndex < 0 {
+		return *new(T), emptyIteratorError("arrayListDescendingIterator.Next")
 	}
-	return nil
+
+	e, _ := ali.al.Get(ali.currentIndex)
+
+	ali.currentIndex--
+
+	return e, nil
 }
 
-func filterArrayList(al *ArrayList, inverse bool, l ...interface{}) (bool, error) {
+func (al *ArrayList[T]) isValidIndex(i int64) bool {
+	return i >= 0 && i < al.size
+}
+
+func (al *ArrayList[T]) filterArrayList(inverse bool, l ...T) error {
 	if al.IsEmpty() {
-		return false, fmt.Errorf("list is empty")
+		return emptyListError("ArrayList.filterArrayList")
 	}
 
-	for _, e := range l {
-		if err := al.isValidType(e); err != nil {
-			return false, err
-		}
-	}
+	idx := make(map[int64]bool)
 
-	idx := make(map[int]bool)
 	for _, e := range l {
-		i, _ := al.IndexOf(e)
+		i := al.IndexOf(e)
 
-		if i == utils.InvalidIndex {
+		if i == invalidIndex {
 			continue
 		}
 
@@ -463,17 +326,21 @@ func filterArrayList(al *ArrayList, inverse bool, l ...interface{}) (bool, error
 	}
 
 	sz := al.Size()
-	tempData := make([]interface{}, al.capacity)
+	tempData := make([]T, al.capacity)
+
 	k := 0
-	for i := 0; i < sz; i++ {
+
+	for i := int64(0); i < sz; i++ {
 		if inverse {
 			if idx[i] {
-				tempData[k] = al.Get(i)
+				el, _ := al.Get(i)
+				tempData[k] = el
 				k++
 			}
 		} else {
 			if !idx[i] {
-				tempData[k] = al.Get(i)
+				el, _ := al.Get(i)
+				tempData[k] = el
 				k++
 			}
 		}
@@ -482,33 +349,108 @@ func filterArrayList(al *ArrayList, inverse bool, l ...interface{}) (bool, error
 	al.data = tempData
 
 	if inverse {
-		al.size = len(l)
+		al.size = int64(len(l))
 	} else {
-		al.size -= len(l)
+		al.size -= int64(len(l))
 	}
 
-	checkDecreaseCapacity(al)
+	al.checkAndDecreaseCapacity()
 
-	return true, nil
+	return nil
 
 }
 
-func checkIncreaseCapacity(al *ArrayList) {
-	if al.size >= int(float64(al.capacity)*al.upperLoadFactor) {
+func (al *ArrayList[T]) addAllFrom(index int64, elements ...T) error {
+	//TODO: HERE THE AL.SIZE VALUE IS CONSIDERED A VALID INDEX WHERE AS IT IS NOT IN OTHER INVALID INDEX CASES
+	if index < 0 || index > al.size {
+		return invalidIndexError(index, "ArrayList.addAllFrom")
+	}
+
+	newElementsCount := int64(len(elements))
+
+	al.checkAndIncreaseCapacity(newElementsCount)
+
+	for i := al.size - 1; i >= index; i-- {
+		al.data[i+newElementsCount] = al.data[i]
+	}
+
+	for _, e := range elements {
+		al.data[index] = e
+		index++
+	}
+
+	al.size += newElementsCount
+
+	return nil
+}
+
+func (al *ArrayList[T]) removeAllFrom(startIndex, endIndex int64) error {
+	if endIndex < startIndex {
+		return invalidArgsError("end cannot be smaller than start", "ArrayList.removeAllFrom")
+	}
+
+	if ok := al.isValidIndex(startIndex); !ok {
+		return invalidIndexError(startIndex, "ArrayList.removeAllFrom")
+	}
+
+	if ok := al.isValidIndex(endIndex); !ok {
+		return invalidIndexError(endIndex, "ArrayList.removeAllFrom")
+	}
+
+	sz := (endIndex - startIndex) + 1
+
+	i := startIndex
+	j := endIndex + 1
+
+	for j < al.size {
+		al.data[i] = al.data[j]
+		i++
+		j++
+	}
+
+	al.size -= sz
+
+	al.checkAndDecreaseCapacity()
+
+	return nil
+}
+
+//TODO: REFACTOR, AND BREAKS THE SINGLE RESPONSIBILITY
+func (al *ArrayList[T]) checkAndIncreaseCapacity(newElementsCount int64) {
+	willExceedCapacity := func(newElementsCount int64, al *ArrayList[T]) bool {
+		return al.size+newElementsCount >= int64(float64(al.capacity)*al.upperLoadFactor)
+	}
+
+	if !willExceedCapacity(newElementsCount, al) {
+		return
+	}
+
+	for willExceedCapacity(newElementsCount, al) {
 		al.capacity *= al.scalingFactor
-		al.data = resize(al.capacity, al.data)
 	}
+
+	al.data = resize(al.capacity, al.data)
 }
 
-func checkDecreaseCapacity(al *ArrayList) {
-	if al.capacity != initialCapacity && al.size <= int(float64(al.capacity)*al.lowerLoadFactor) {
+//TODO: REFACTOR, AND BREAKS THE SINGLE RESPONSIBILITY
+func (al *ArrayList[T]) checkAndDecreaseCapacity() {
+	canDecreaseCapacity := func(al *ArrayList[T]) bool {
+		return al.capacity != initialCapacity && al.size <= int64(float64(al.capacity)*al.lowerLoadFactor)
+	}
+
+	if !canDecreaseCapacity(al) {
+		return
+	}
+
+	for canDecreaseCapacity(al) {
 		al.capacity /= al.scalingFactor
-		al.data = resize(al.capacity, al.data)
 	}
+
+	al.data = resize(al.capacity, al.data)
 }
 
-func resize(capacity int, data []interface{}) []interface{} {
-	temp := make([]interface{}, capacity)
+func resize[T any](capacity int64, data []T) []T {
+	temp := make([]T, capacity)
 
 	sz := len(data)
 	if len(temp) < sz {

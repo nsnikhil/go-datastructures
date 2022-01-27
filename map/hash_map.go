@@ -20,11 +20,6 @@ const (
 	values        = "values"
 )
 
-type typeURL struct {
-	keyTypeURL   string
-	valueTypeURL string
-}
-
 type factors struct {
 	upperLoadFactor float64
 	lowerLoadFactor float64
@@ -39,14 +34,13 @@ type counter struct {
 	uniqueCount  int
 }
 
-type HashMap struct {
+type HashMap[T comparable] struct {
 	h hash.Hash
 
-	*typeURL
 	*factors
 	*counter
 
-	data []*list.LinkedList
+	data *list.ArrayList[*list.LinkedList[T]]
 }
 
 func NewHashMap(values ...*Pair) (Map, error) {

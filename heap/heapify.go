@@ -4,18 +4,18 @@ import (
 	"github.com/nsnikhil/go-datastructures/functions/comparator"
 )
 
-func heapify(curr int, c comparator.Comparator, maxHeapify bool, data []interface{}, indexes map[interface{}]int) error {
+func heapify[T comparable](curr int, c comparator.Comparator[T], maxHeapify bool, data []T, indexes map[T]int) error {
 	return heapUtil(curr, c, maxHeapify, data, indexes)
 }
 
-func heapUtil(curr int, c comparator.Comparator, maxHeapify bool, data []interface{}, indexes map[interface{}]int) error {
+func heapUtil[T comparable](curr int, c comparator.Comparator[T], maxHeapify bool, data []T, indexes map[T]int) error {
 	if curr == len(data)-1 {
 		return shiftUp(curr, c, maxHeapify, data, indexes)
 	}
 	return shiftDown(curr, c, maxHeapify, data, indexes)
 }
 
-func shiftUp(curr int, c comparator.Comparator, maxHeapify bool, data []interface{}, indexes map[interface{}]int) error {
+func shiftUp[T comparable](curr int, c comparator.Comparator[T], maxHeapify bool, data []T, indexes map[T]int) error {
 	if curr == 0 {
 		return nil
 	}
@@ -44,7 +44,7 @@ func shiftUp(curr int, c comparator.Comparator, maxHeapify bool, data []interfac
 	return nil
 }
 
-func shiftDown(curr int, c comparator.Comparator, maxHeapify bool, data []interface{}, indexes map[interface{}]int) error {
+func shiftDown[T comparable](curr int, c comparator.Comparator[T], maxHeapify bool, data []T, indexes map[T]int) error {
 	if curr >= len(data)/2 {
 		return nil
 	}
@@ -73,17 +73,14 @@ func shiftDown(curr int, c comparator.Comparator, maxHeapify bool, data []interf
 	return nil
 }
 
-func shouldSwapWithParent(curr int, c comparator.Comparator, maxHeapify bool, data []interface{}) (bool, int, error) {
+func shouldSwapWithParent[T comparable](curr int, c comparator.Comparator[T], maxHeapify bool, data []T) (bool, int, error) {
 	if curr == 0 {
 		return false, invalidIndex, nil
 	}
 
 	parent := parentIndex(curr)
 
-	diff, err := c.Compare(data[parent], data[curr])
-	if err != nil {
-		return false, invalidIndex, err
-	}
+	diff := c.Compare(data[parent], data[curr])
 
 	if maxHeapify {
 		return diff < 0, parent, nil
@@ -92,21 +89,15 @@ func shouldSwapWithParent(curr int, c comparator.Comparator, maxHeapify bool, da
 	return diff > 0, parent, nil
 }
 
-func shouldSwapWithChild(curr int, c comparator.Comparator, maxHeapify bool, data []interface{}) (bool, int, error) {
+func shouldSwapWithChild[T comparable](curr int, c comparator.Comparator[T], maxHeapify bool, data []T) (bool, int, error) {
 	lcIndex := leftChildIndex(curr)
-	leftDiff, err := c.Compare(data[curr], data[lcIndex])
-	if err != nil {
-		return false, invalidIndex, err
-	}
+	leftDiff := c.Compare(data[curr], data[lcIndex])
 
 	hasRC := hasRightChild(curr, len(data))
 	var rcIndex, rightDiff int
 	if hasRC {
 		rcIndex = rightChildIndex(curr)
-		rd, err := c.Compare(data[curr], data[rcIndex])
-		if err != nil {
-			return false, invalidIndex, err
-		}
+		rd := c.Compare(data[curr], data[rcIndex])
 		rightDiff = rd
 	}
 

@@ -6,18 +6,18 @@ import (
 	"github.com/nsnikhil/go-datastructures/utils"
 )
 
-type BinarySearchTree struct {
-	c comparator.Comparator
-	*BinaryTree
+type BinarySearchTree[T comparable] struct {
+	c comparator.Comparator[T]
+	*BinaryTree[T]
 }
 
-func NewBinarySearchTree(c comparator.Comparator, e ...interface{}) (*BinarySearchTree, error) {
-	bt, err := NewBinaryTree()
+func NewBinarySearchTree[T comparable](c comparator.Comparator[T], e ...T) (*BinarySearchTree[T], error) {
+	bt, err := NewBinaryTree[T]()
 	if err != nil {
 		return nil, err
 	}
 
-	bst := &BinarySearchTree{
+	bst := &BinarySearchTree[T]{
 		c:          c,
 		BinaryTree: bt,
 	}
@@ -45,14 +45,14 @@ func NewBinarySearchTree(c comparator.Comparator, e ...interface{}) (*BinarySear
 	return bst, nil
 }
 
-func (bst *BinarySearchTree) Insert(e interface{}) error {
+func (bst *BinarySearchTree[T]) Insert(e T) error {
 	return bst.InsertCompare(e, bst.c)
 }
 
-func (bst *BinarySearchTree) Delete(e interface{}) error {
+func (bst *BinarySearchTree[T]) Delete(e T) error {
 	return bst.DeleteCompare(e, bst.c)
 }
 
-func (bst *BinarySearchTree) Search(e interface{}) (bool, error) {
+func (bst *BinarySearchTree[T]) Search(e T) (bool, error) {
 	return bst.SearchCompare(e, bst.c)
 }

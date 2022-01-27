@@ -4,43 +4,38 @@ import (
 	"github.com/nsnikhil/go-datastructures/list"
 )
 
-type LinkedQueue struct {
-	ll *list.LinkedList
+type LinkedQueue[T comparable] struct {
+	ll *list.LinkedList[T]
 }
 
-func NewLinkedQueue() (*LinkedQueue, error) {
-	ll, err := list.NewLinkedList()
-	if err != nil {
-		return nil, err
+func NewLinkedQueue[T comparable]() *LinkedQueue[T] {
+	return &LinkedQueue[T]{
+		ll: list.NewLinkedList[T](),
 	}
-
-	return &LinkedQueue{
-		ll: ll,
-	}, nil
 }
 
-func (lq *LinkedQueue) Add(e interface{}) error {
+func (lq *LinkedQueue[T]) Add(e T) error {
 	return lq.ll.AddLast(e)
 }
 
-func (lq *LinkedQueue) Remove() (interface{}, error) {
+func (lq *LinkedQueue[T]) Remove() (T, error) {
 	//TODO FIX "LIST IS EMPTY ERROR"
 	return lq.ll.RemoveFirst()
 }
 
-func (lq *LinkedQueue) Peek() (interface{}, error) {
+func (lq *LinkedQueue[T]) Peek() (T, error) {
 	//TODO CHECK IF EMPTY QUEUE SHOULD RETURN ERROR
-	return lq.ll.GetFirst(), nil
+	return lq.ll.GetFirst()
 }
 
-func (lq *LinkedQueue) Empty() bool {
+func (lq *LinkedQueue[T]) Empty() bool {
 	return lq.ll.IsEmpty()
 }
 
-func (lq *LinkedQueue) Size() int {
+func (lq *LinkedQueue[T]) Size() int64 {
 	return lq.ll.Size()
 }
 
-func (lq *LinkedQueue) Clear() {
+func (lq *LinkedQueue[T]) Clear() {
 	lq.ll.Clear()
 }

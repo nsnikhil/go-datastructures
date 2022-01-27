@@ -1,319 +1,279 @@
 package list
 
 import (
-	"fmt"
 	"github.com/nsnikhil/go-datastructures/functions/comparator"
 	"github.com/nsnikhil/go-datastructures/functions/iterator"
 	"github.com/nsnikhil/go-datastructures/functions/operator"
-	"github.com/nsnikhil/go-datastructures/liberr"
-	"github.com/nsnikhil/go-datastructures/utils"
-	"sync"
 )
 
-type node struct {
-	data interface{}
-	next *node
-	prev *node
+type node[T comparable] struct {
+	element T
+	next    *node[T]
+	prev    *node[T]
 }
 
-func newNode(data interface{}) *node {
-	return &node{
-		data: data,
+func newNode[T comparable](element T) *node[T] {
+	return &node[T]{
+		element: element,
 	}
 }
 
-type LinkedList struct {
-	typeURL string
-	count   int
-	mt      *sync.Mutex
-
-	first *node
-	last  *node
+type LinkedList[T comparable] struct {
+	size  int64
+	first *node[T]
+	last  *node[T]
 }
 
-func NewLinkedList(data ...interface{}) (*LinkedList, error) {
-	ll := &LinkedList{typeURL: utils.NA, mt: new(sync.Mutex), count: 0}
+func NewLinkedList[T comparable](elements ...T) *LinkedList[T] {
+	ll := &LinkedList[T]{size: nought}
 
-	err := ll.AddAll(data...)
-	if err != nil {
-		return nil, err
+	ll.AddAll(elements...)
+
+	return ll
+}
+
+func (ll *LinkedList[T]) Add(element T) {
+	ll.addAt(element, ll.size)
+}
+
+func (ll *LinkedList[T]) AddAt(index int64, element T) error {
+	return ll.addAt(element, index)
+}
+
+//TODO: SHOULD IT FAIL WHEN ARGS ARE EMPTY
+func (ll *LinkedList[T]) AddAll(elements ...T) {
+	lsz := ll.size
+
+	for i := int64(0); i < int64(len(elements)); i++ {
+		ll.addAt(elements[i], i+lsz)
 	}
 
-	return ll, nil
+	return
 }
 
-func (ll *LinkedList) Add(e interface{}) error {
-	return ll.addAt(e, ll.Size())
+func (ll *LinkedList[T]) AddFirst(element T) error {
+	return ll.addAt(element, 0)
 }
 
-func (ll *LinkedList) AddAt(i int, e interface{}) error {
-	return ll.addAt(e, i)
+func (ll *LinkedList[T]) AddLast(element T) error {
+	return ll.addAt(element, ll.size)
 }
 
-func (ll *LinkedList) AddAll(data ...interface{}) error {
-	sz := len(data)
-	if sz == 0 {
-		return nil
-	}
-
-	err := utils.AreAllSameType(data...)
-	if err != nil {
-		return err
-	}
-
-	lsz := ll.Size()
-
-	for i := 0; i < sz; i++ {
-		err := ll.addAt(data[i], i+lsz)
-		if err != nil {
-			return err
-		}
-	}
-
-	return nil
-}
-
-func (ll *LinkedList) AddFirst(e interface{}) error {
-	return ll.addAt(e, 0)
-}
-
-func (ll *LinkedList) AddLast(e interface{}) error {
-	return ll.addAt(e, ll.Size())
-}
-
-func (ll *LinkedList) Clear() {
+func (ll *LinkedList[T]) Clear() {
 	ll.first = nil
 	ll.last = nil
-	ll.count = 0
+	ll.size = 0
 }
 
-func (ll *LinkedList) Clone() (List, error) {
+func (ll *LinkedList[T]) Clone() List[T] {
 	if ll.IsEmpty() {
-		return NewLinkedList()
+		return NewLinkedList[T]()
 	}
 
-	return ll.SubList(0, ll.Size())
+	e, _ := ll.SubList(0, ll.size-1)
+	return e
 }
 
-func (ll *LinkedList) Contains(e interface{}) (bool, error) {
-	_, err := newFinder(doubly).search(ll, e)
-	if err != nil {
-		return false, err
-	}
-
-	return true, nil
+func (ll *LinkedList[T]) Contains(element T) bool {
+	return newDoublyFinder[T]().search(ll, element) != -1
 }
 
-//TODO: OPTIMIZE, SHOULD FIND ALL THE ELEMENTS IN ONE PASS
-func (ll *LinkedList) ContainsAll(l ...interface{}) (bool, error) {
-	for _, e := range l {
-		if _, err := ll.Contains(e); err != nil {
-			return false, err
-		}
-	}
-
-	return true, nil
-}
-
-func (ll *LinkedList) Get(i int) interface{} {
-	curr, err := ll.traverseTo(i)
-	if err != nil {
-		return nil
-	}
-
-	return curr.data
-}
-
-func (ll *LinkedList) GetFirst() interface{} {
+func (ll *LinkedList[T]) ContainsAll(elements ...T) bool {
 	if ll.IsEmpty() {
-		return nil
+		return false
 	}
 
-	return ll.first.data
-}
-
-func (ll *LinkedList) GetLast() interface{} {
-	if ll.IsEmpty() {
-		return nil
-	}
-
-	return ll.last.data
-}
-
-func (ll *LinkedList) IndexOf(e interface{}) (int, error) {
-	err := checks(ll, []checkData{{empty, nil}, {typeURL, e}})
-	if err != nil {
-		return -1, err
-	}
+	elementSet := make(map[T]bool)
 
 	curr := ll.first
-	idx := 0
 
 	for curr != nil {
-		if curr.data == e {
-			return idx, nil
-		}
-
+		elementSet[curr.element] = true
 		curr = curr.next
-		idx++
 	}
 
-	return -1, liberr.NotFondErrorInList(e)
+	for _, ele := range elements {
+		if !elementSet[ele] {
+			return false
+		}
+	}
+
+	return true
 }
 
-func (ll *LinkedList) IsEmpty() bool {
-	return ll.Size() == 0
+func (ll *LinkedList[T]) Get(index int64) (T, error) {
+	if ll.IsEmpty() {
+		return *new(T), emptyListError("LinkedList.Get")
+	}
+
+	curr, err := ll.traverseTo(index)
+	if err != nil {
+		return *new(T), invalidIndexError(index, "LinkedList.Get")
+	}
+
+	return curr.element, nil
 }
 
-func (ll *LinkedList) Iterator() iterator.Iterator {
+func (ll *LinkedList[T]) GetFirst() (T, error) {
+	if ll.IsEmpty() {
+		return *new(T), emptyListError("LinkedList.GetFirst")
+	}
+
+	return ll.first.element, nil
+}
+
+func (ll *LinkedList[T]) GetLast() (T, error) {
+	if ll.IsEmpty() {
+		return *new(T), emptyListError("LinkedList.GetLast")
+	}
+
+	return ll.last.element, nil
+}
+
+func (ll *LinkedList[T]) IndexOf(element T) int64 {
+	if ll.IsEmpty() {
+		return invalidIndex
+	}
+
+	return newLinearFinder[T]().search(ll, element)
+}
+
+func (ll *LinkedList[T]) IsEmpty() bool {
+	return ll.size == 0
+}
+
+func (ll *LinkedList[T]) Iterator() iterator.Iterator[T] {
 	return newLinkedListIterator(ll)
 }
 
-func (ll *LinkedList) DescendingIterator() iterator.Iterator {
+func (ll *LinkedList[T]) DescendingIterator() iterator.Iterator[T] {
 	return newLinkedListDescendingIterator(ll)
 }
 
 //TODO: OPTIMIZE, MAKE IT SHORT
-func (ll *LinkedList) LastIndexOf(e interface{}) (int, error) {
-	err := checks(ll, []checkData{{empty, nil}, {typeURL, e}})
-	if err != nil {
-		return -1, err
+func (ll *LinkedList[T]) LastIndexOf(element T) int64 {
+	if ll.IsEmpty() {
+		return invalidIndex
 	}
 
-	curr := ll.last
-	idx := ll.Size() - 1
-
-	for curr != nil {
-		if curr.data == e {
-			return idx, nil
-		}
-
-		curr = curr.prev
-		idx--
-	}
-
-	return -1, liberr.NotFondErrorInList(e)
+	return newReverseFinder[T]().search(ll, element)
 }
 
-func (ll *LinkedList) Remove(e interface{}) (bool, error) {
-	err := checks(ll, []checkData{{empty, nil}, {typeURL, e}})
-	if err != nil {
-		return false, err
+func (ll *LinkedList[T]) Remove(element T) error {
+	if ll.IsEmpty() {
+		return emptyListError("LinkedList.Remove")
 	}
 
-	i, err := ll.IndexOf(e)
-	if err != nil {
-		return false, err
+	i := ll.IndexOf(element)
+	if i == -1 {
+		return elementNotFoundError(element, "LinkedList.Remove")
 	}
 
 	if _, err := ll.removeAt(i); err != nil {
-		return false, err
-	}
-
-	return true, nil
-}
-
-func (ll *LinkedList) RemoveAt(i int) (interface{}, error) {
-	data, err := ll.removeAt(i)
-	if err != nil {
-		return nil, err
-	}
-
-	return data, nil
-}
-
-func (ll *LinkedList) RemoveAll(l ...interface{}) (bool, error) {
-	return filterLinkedList(ll, false, l...)
-}
-
-func (ll *LinkedList) RemoveFirst() (interface{}, error) {
-	return ll.removeAt(0)
-}
-
-func (ll *LinkedList) RemoveFirstOccurrence(e interface{}) (bool, error) {
-	return ll.Remove(e)
-}
-
-func (ll *LinkedList) RemoveLast() (interface{}, error) {
-	return ll.removeAt(ll.Size() - 1)
-}
-
-func (ll *LinkedList) RemoveLastOccurrence(e interface{}) (bool, error) {
-	i, err := ll.LastIndexOf(e)
-	if err != nil {
-		return false, err
-	}
-
-	if _, err := ll.removeAt(i); err != nil {
-		return false, err
-	}
-
-	return true, nil
-}
-
-func (ll *LinkedList) Replace(old, new interface{}) error {
-	err := checks(ll, []checkData{{empty, nil}, {typeURL, old}, {typeURL, new}})
-	if err != nil {
 		return err
 	}
 
+	return nil
+}
+
+func (ll *LinkedList[T]) RemoveAt(index int64) (T, error) {
+	element, err := ll.removeAt(index)
+	if err != nil {
+		return *new(T), err
+	}
+
+	return element, nil
+}
+
+//TODO: SHOULD IT FAIL OR NOT WHEN ARG LIST IS EMPTY
+func (ll *LinkedList[T]) RemoveAll(elements ...T) error {
+	return filterLinkedList(ll, false, elements...)
+}
+
+func (ll *LinkedList[T]) RemoveFirst() (T, error) {
+	return ll.removeAt(0)
+}
+
+func (ll *LinkedList[T]) RemoveFirstOccurrence(element T) error {
+	return ll.Remove(element)
+}
+
+func (ll *LinkedList[T]) RemoveLast() (T, error) {
+	return ll.removeAt(ll.Size() - 1)
+}
+
+func (ll *LinkedList[T]) RemoveLastOccurrence(element T) (bool, error) {
+	if ll.IsEmpty() {
+		return false, emptyListError("LinkedList.RemoveLastOccurrence")
+	}
+
+	index := ll.LastIndexOf(element)
+	if index == invalidIndex {
+		return false, elementNotFoundError(element, "LinkedList.RemoveLastOccurrence")
+	}
+
+	if _, err := ll.removeAt(index); err != nil {
+		return false, err
+	}
+
+	return true, nil
+}
+
+func (ll *LinkedList[T]) Replace(old, new T) error {
+	if ll.IsEmpty() {
+		return emptyListError("LinkedList.Replace")
+	}
+
 	curr := ll.first
-	for curr != nil && curr.data != old {
+	for curr != nil && curr.element != old {
 		curr = curr.next
 	}
 
 	if curr == nil {
-		return liberr.NotFondErrorInList(old)
+		return elementNotFoundError(old, "LinkedList.Replace")
 	}
 
-	curr.data = new
+	curr.element = new
 	return nil
 }
 
-func (ll *LinkedList) ReplaceAll(uo operator.UnaryOperator) error {
-	temp := ll.first
+func (ll *LinkedList[T]) ReplaceAll(uo operator.UnaryOperator[T]) {
+	curr := ll.first
 
-	e := uo.Apply(temp.data)
-	if err := ll.isValidType(e); err != nil {
-		return err
+	for curr != nil {
+		curr.element = uo.Apply(curr.element)
+		curr = curr.next
 	}
-
-	temp.data = e
-	temp = temp.next
-
-	for temp != nil {
-		temp.data = uo.Apply(temp.data)
-		temp = temp.next
-	}
-
-	return nil
 }
 
-func (ll *LinkedList) RetainAll(l ...interface{}) (bool, error) {
-	return filterLinkedList(ll, true, l...)
+func (ll *LinkedList[T]) RetainAll(elements ...T) error {
+	return filterLinkedList(ll, true, elements...)
 }
 
-func (ll *LinkedList) Set(i int, e interface{}) (interface{}, error) {
-	err := checks(ll, []checkData{{empty, nil}, {index, i}, {typeURL, e}})
+func (ll *LinkedList[T]) Set(index int64, element T) (T, error) {
+	if ll.IsEmpty() {
+		return *new(T), emptyListError("LinkedList.Set")
+	}
+
+	if !ll.isValidIndex(index) {
+		return *new(T), invalidIndexError(index, "LinkedList.Set")
+	}
+
+	curr, err := ll.traverseTo(index)
 	if err != nil {
-		return nil, err
+		return *new(T), err
 	}
 
-	curr, err := ll.traverseTo(i)
-	if err != nil {
-		return nil, err
-	}
-
-	curr.data = e
-	return curr.data, nil
+	curr.element = element
+	return curr.element, nil
 }
 
-func (ll *LinkedList) Size() int {
-	return ll.count
+func (ll *LinkedList[T]) Size() int64 {
+	return ll.size
 }
 
 //TODO: CHANGE TO LINKED LIST MERGE SORT
-func (ll *LinkedList) Sort(c comparator.Comparator) {
+func (ll *LinkedList[T]) Sort(c comparator.Comparator[T]) {
 	al := ll.ToArrayList()
 	al.Sort(c)
 
@@ -321,44 +281,34 @@ func (ll *LinkedList) Sort(c comparator.Comparator) {
 	temp := ll.first
 
 	for temp != nil && it.HasNext() {
-		temp.data = it.Next()
+		temp.element, _ = it.Next()
 		temp = temp.next
 	}
 }
 
 //TODO: OPTIMIZE
-func (ll *LinkedList) SubList(s int, e int) (List, error) {
-	if e < s {
-		return nil, liberr.InvalidOperationError("end cannot be smaller than start")
+func (ll *LinkedList[T]) SubList(start int64, end int64) (List[T], error) {
+	if end < start {
+		return nil, invalidArgsError("end cannot be smaller than start", "LinkedList.SubList")
 	}
 
-	if err := ll.isValidIndex(s); err != nil {
-		return nil, err
+	if !ll.isValidIndex(start) {
+		return nil, invalidIndexError(start, "LinkedList.SubList")
 	}
 
 	//TODO USE IS VALID INDEX METHOD HERE
-	if e < 0 || e > ll.Size() {
-		return nil, liberr.IndexOutOfBoundError(e)
+	if end < 0 || end > ll.Size() {
+		return nil, invalidIndexError(end, "LinkedList.SubList")
 	}
 
-	tempLL, err := NewLinkedList()
-	if err != nil {
-		return nil, err
-	}
+	var tempLL *LinkedList[T] = NewLinkedList[T]()
 
-	temp := ll.first
+	temp, _ := ll.traverseTo(start)
 
-	n := s
+	n := start
 
-	for s > 0 {
-		s--
-		temp = temp.next
-	}
-
-	for temp != nil && n < e {
-		if err = tempLL.AddLast(temp.data); err != nil {
-			return nil, err
-		}
+	for temp != nil && n <= end {
+		tempLL.addAt(temp.element, tempLL.size)
 		temp = temp.next
 		n++
 	}
@@ -366,37 +316,28 @@ func (ll *LinkedList) SubList(s int, e int) (List, error) {
 	return tempLL, nil
 }
 
-func filterLinkedList(ll *LinkedList, inverse bool, l ...interface{}) (bool, error) {
+func filterLinkedList[T comparable](ll *LinkedList[T], inverse bool, elements ...T) error {
 	if ll.IsEmpty() {
-		return false, liberr.EmptyListError
+		return emptyListError("LinkedList.filterLinkedList")
 	}
 
-	for _, e := range l {
-		if err := ll.isValidType(e); err != nil {
-			return false, err
-		}
-	}
-
-	ll.mt.Lock()
-	defer ll.mt.Unlock()
-
-	dataMap := make(map[interface{}]bool)
-	for _, e := range l {
-		dataMap[e] = true
+	elementSet := make(map[T]bool)
+	for _, e := range elements {
+		elementSet[e] = true
 	}
 
 	curr := ll.first
 
-	rc := 0
+	rc := int64(0)
 
 	for curr != nil {
 
 		var shouldRemove bool
 
 		if inverse {
-			shouldRemove = !dataMap[curr.data]
+			shouldRemove = !elementSet[curr.element]
 		} else {
-			shouldRemove = dataMap[curr.data]
+			shouldRemove = elementSet[curr.element]
 		}
 
 		if shouldRemove {
@@ -428,120 +369,111 @@ func filterLinkedList(ll *LinkedList, inverse bool, l ...interface{}) (bool, err
 		curr = curr.next
 	}
 
-	ll.count -= rc
-	return true, nil
+	ll.size -= rc
+	return nil
 }
 
-type linkedListIterator struct {
-	currNode *node
-	ll       *LinkedList
+type linkedListIterator[T comparable] struct {
+	currNode *node[T]
+	ll       *LinkedList[T]
 }
 
-func newLinkedListIterator(ll *LinkedList) *linkedListIterator {
-	return &linkedListIterator{
+func newLinkedListIterator[T comparable](ll *LinkedList[T]) iterator.Iterator[T] {
+	return &linkedListIterator[T]{
 		currNode: ll.first,
 		ll:       ll,
 	}
 }
 
-func (ll *linkedListIterator) HasNext() bool {
+func (ll *linkedListIterator[T]) HasNext() bool {
 	return ll.currNode != nil
 }
 
-func (ll *linkedListIterator) Next() interface{} {
+func (ll *linkedListIterator[T]) Next() (T, error) {
 	if ll.currNode == nil {
-		return nil
+		return *new(T), emptyIteratorError("linkedListIterator.Next")
 	}
 
-	e := ll.currNode.data
+	e := ll.currNode.element
 	ll.currNode = ll.currNode.next
 
-	return e
+	return e, nil
 }
 
-type linkedListDescendingIterator struct {
-	currNode *node
-	ll       *LinkedList
+type linkedListDescendingIterator[T comparable] struct {
+	currNode *node[T]
+	ll       *LinkedList[T]
 }
 
-func newLinkedListDescendingIterator(ll *LinkedList) *linkedListDescendingIterator {
-	return &linkedListDescendingIterator{
+func newLinkedListDescendingIterator[T comparable](ll *LinkedList[T]) iterator.Iterator[T] {
+	return &linkedListDescendingIterator[T]{
 		currNode: ll.last,
 		ll:       ll,
 	}
 }
 
-func (ll *linkedListDescendingIterator) HasNext() bool {
+func (ll *linkedListDescendingIterator[T]) HasNext() bool {
 	return ll.currNode != nil
 }
 
-func (ll *linkedListDescendingIterator) Next() interface{} {
+func (ll *linkedListDescendingIterator[T]) Next() (T, error) {
 	if ll.currNode == nil {
-		return nil
+		return *new(T), emptyIteratorError("linkedListDescendingIterator.Next")
 	}
 
-	e := ll.currNode.data
+	e := ll.currNode.element
 	ll.currNode = ll.currNode.prev
 
-	return e
+	return e, nil
 }
 
-func (ll *LinkedList) ToArrayList() *ArrayList {
-	var e []interface{}
+func (ll *LinkedList[T]) ToArrayList() *ArrayList[T] {
+	var e []T
 	it := ll.Iterator()
 
 	for it.HasNext() {
-		e = append(e, it.Next())
+		v, _ := it.Next()
+		e = append(e, v)
 	}
 
-	al, _ := NewArrayList(e...)
+	al := NewArrayList[T](e...)
 	return al
 }
 
 // HELPER FUNCTION FROM HERE ON
-func (ll *LinkedList) addAt(e interface{}, p int) error {
-	ll.mt.Lock()
-	defer ll.mt.Unlock()
+func (ll *LinkedList[T]) addAt(element T, index int64) error {
+	sz := ll.size
 
-	sz := ll.Size()
-
-	if p < 0 || p > sz {
-		return liberr.IndexOutOfBoundError(p)
+	if index < 0 || index > sz {
+		return invalidIndexError(index, "LinkedList.addAt")
 	}
 
-	et := utils.GetTypeName(e)
-	nd := newNode(e)
-
-	if ll.typeURL == utils.NA {
-		ll.typeURL = et
-	} else if ll.typeURL != et {
-		return liberr.TypeMismatchError(ll.typeURL, et)
-	}
+	nd := newNode(element)
 
 	if ll.IsEmpty() {
 		ll.first = nd
 		ll.last = nd
-		ll.count++
+		ll.size++
 		return nil
 	}
 
-	if p == 0 {
+	if index == 0 {
 		nd.next = ll.first
 		ll.first.prev = nd
 		ll.first = nd
-		ll.count++
+		ll.size++
 		return nil
 	}
 
-	if p == sz {
+	if index == sz {
 		ll.last.next = nd
 		nd.prev = ll.last
 		ll.last = nd
-		ll.count++
+		ll.size++
 		return nil
 	}
 
-	curr, err := ll.traverseTo(p)
+	curr, err := ll.traverseTo(index)
 	if err != nil {
 		return err
 	}
@@ -554,52 +486,47 @@ func (ll *LinkedList) addAt(e interface{}, p int) error {
 	cp.next = nd
 	nd.prev = cp
 
-	ll.count++
+	ll.size++
 
 	return nil
 }
 
-func (ll *LinkedList) removeAt(p int) (interface{}, error) {
-	ll.mt.Lock()
-	defer ll.mt.Unlock()
-
-	sz := ll.Size()
+func (ll *LinkedList[T]) removeAt(index int64) (T, error) {
+	sz := ll.size
 
 	if sz == 0 {
-		return nil, liberr.EmptyListError
+		return *new(T), emptyListError("LinkedList.removeAt")
 	}
 
-	if p < 0 || p >= sz {
-		return nil, liberr.IndexOutOfBoundError(p)
+	if index < 0 || index >= sz {
+		return *new(T), invalidIndexError(index, "LinkedList.removeAt")
 	}
 
 	if sz == 1 {
-		data := ll.first.data
-		ll.first = nil
-		ll.last = nil
-		ll.count = 0
-		return data, nil
+		element := ll.first.element
+		ll.Clear()
+		return element, nil
 	}
 
-	if p == 0 {
-		data := ll.first.data
+	if index == 0 {
+		element := ll.first.element
 		ll.first = ll.first.next
 		ll.first.prev = nil
-		ll.count--
-		return data, nil
+		ll.size--
+		return element, nil
 	}
 
-	if p == sz-1 {
-		data := ll.last.data
+	if index == sz-1 {
+		element := ll.last.element
 		ll.last = ll.last.prev
 		ll.last.next = nil
-		ll.count--
-		return data, nil
+		ll.size--
+		return element, nil
 	}
 
-	curr, err := ll.traverseTo(p)
+	curr, err := ll.traverseTo(index)
 	if err != nil {
-		return nil, err
+		return *new(T), err
 	}
 
 	cp := curr.prev
@@ -607,119 +534,68 @@ func (ll *LinkedList) removeAt(p int) (interface{}, error) {
 
 	cp.next = cn
 	cn.prev = cp
-	ll.count--
+	ll.size--
 
-	return curr.data, nil
+	return curr.element, nil
 }
 
-func (ll *LinkedList) traverseTo(p int) (*node, error) {
-	sz := ll.Size()
-
-	if p < 0 || p >= sz {
-		return nil, liberr.IndexOutOfBoundError(p)
-	}
-
-	if p == 0 {
-		return ll.first, nil
-	}
-
-	if p == sz-1 {
-		return ll.last, nil
-	}
-
-	md := sz / 2
-	df := sz - p
-
-	var curr *node
-
-	if df > md {
-
-		curr = ll.first
-		k := p
+func (ll *LinkedList[T]) traverseTo(index int64) (*node[T], error) {
+	traverseToFromFirst := func(index int64) *node[T] {
+		curr := ll.first
+		k := index
 
 		for curr != nil && k > 0 {
 			curr = curr.next
 			k--
 		}
 
-	} else {
+		return curr
+	}
 
+	traverseToFromLast := func(sz, index int64) *node[T] {
 		curr := ll.last
-		k := sz - p
+		k := sz - index - 1
 
 		for curr != nil && k > 0 {
 			curr = curr.prev
 			k--
 		}
 
+		return curr
+	}
+
+	sz := ll.Size()
+
+	if index < 0 || index >= sz {
+		return nil, invalidIndexError(index, "LinkedList.traverseTo")
+	}
+
+	if index == 0 {
+		return ll.first, nil
+	}
+
+	if index == sz-1 {
+		return ll.last, nil
+	}
+
+	md := sz / 2
+	df := sz - index
+
+	var curr *node[T]
+
+	if df > md {
+		curr = traverseToFromFirst(index)
+	} else {
+		curr = traverseToFromLast(sz, index)
 	}
 
 	if curr == nil {
-		return nil, liberr.IndexOutOfBoundError(p)
+		return nil, invalidIndexError(index, "LinkedList.traverseTo")
 	}
 
 	return curr, nil
 }
 
-//TODO: RELOCATE CHECK
-type check string
-
-const (
-	index   check = "index"
-	typeURL check = "typeURL"
-	empty   check = "empty"
-)
-
-var cm = map[check]func(ll *LinkedList, e interface{}) error{
-	index: func(ll *LinkedList, e interface{}) error {
-		t, ok := e.(int)
-		if !ok {
-			return liberr.InvalidOperationError(fmt.Sprintf("%v is not an integer", e))
-		}
-
-		return ll.isValidIndex(t)
-	},
-
-	typeURL: func(ll *LinkedList, e interface{}) error {
-		return ll.isValidType(e)
-	},
-
-	empty: func(ll *LinkedList, e interface{}) error {
-		if ll.Size() == 0 {
-			return liberr.EmptyListError
-		}
-
-		return nil
-	},
-}
-
-func (ll *LinkedList) isValidIndex(i int) error {
-	if i < 0 || i >= ll.Size() {
-		return liberr.IndexOutOfBoundError(i)
-	}
-
-	return nil
-}
-
-func (ll *LinkedList) isValidType(e interface{}) error {
-	if et := utils.GetTypeName(e); et != ll.typeURL {
-		return liberr.TypeMismatchError(ll.typeURL, et)
-	}
-
-	return nil
-}
-
-type checkData struct {
-	check check
-	data  interface{}
-}
-
-func checks(ll *LinkedList, cd []checkData) error {
-	for _, v := range cd {
-		if err := cm[v.check](ll, v.data); err != nil {
-			return err
-		}
-	}
-
-	return nil
+func (ll *LinkedList[T]) isValidIndex(i int64) bool {
+	return i >= 0 && i < ll.size
 }

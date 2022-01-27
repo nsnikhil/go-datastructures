@@ -1,5 +1,5 @@
 package predicate
 
-type Predicate interface {
-	Test(e interface{}) bool
+type Predicate[T any] interface {
+	Test(e T) bool
 }

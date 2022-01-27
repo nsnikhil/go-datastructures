@@ -3,96 +3,61 @@ package list
 import (
 	"github.com/nsnikhil/go-datastructures/functions/comparator"
 	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
 	"testing"
 )
 
 type testObj struct {
-	elements []int
+	key   int
+	value int
 }
 
-func newTestObj(elements ...int) testObj {
+func newTestObj(key, value int) testObj {
 	return testObj{
-		elements: elements,
+		key:   key,
+		value: value,
 	}
 }
 
-func (to testObj) sum() int {
-	total := 0
-	for _, e := range to.elements {
-		total += e
-	}
-	return total
+func (to testObj) product() int {
+	return to.key * to.value
+}
+
+func (to testObj) compare(other testObj) int {
+	return testObjComparator{}.Compare(to, other)
 }
 
 type testObjComparator struct{}
 
-func (testObjComparator) Compare(one interface{}, two interface{}) (int, error) {
-	return (one).(testObj).sum() - (two).(testObj).sum(), nil
+func (testObjComparator) Compare(one testObj, two testObj) int {
+	return one.product() - two.product()
 }
 
-func TestQuickSort(t *testing.T) {
-	testCases := []struct {
-		name           string
-		actualResult   func() List
-		expectedResult func() List
-	}{
-		{
-			name: "sort integer list",
-			actualResult: func() List {
-				al, err := NewArrayList(5, 4, 3, 2, 1)
-				require.NoError(t, err)
+func TestQuickSortIntegerList(t *testing.T) {
+	al := NewArrayList[int](5, 4, 3, 2, 1)
 
-				newQuickSorter().sort(al, comparator.NewIntegerComparator())
+	newQuickSorter[int]().sort(al, comparator.NewIntegerComparator())
 
-				return al
-			},
-			expectedResult: func() List {
-				al, err := NewArrayList(1, 2, 3, 4, 5)
-				require.NoError(t, err)
+	expectedList := NewArrayList[int](1, 2, 3, 4, 5)
 
-				return al
-			},
-		},
-		{
-			name: "sort string list",
-			actualResult: func() List {
-				al, err := NewArrayList("e", "d", "c", "b", "a")
-				require.NoError(t, err)
+	assert.Equal(t, expectedList, al)
+}
 
-				newQuickSorter().sort(al, comparator.NewStringComparator())
+func TestQuickSortStringList(t *testing.T) {
+	al := NewArrayList[string]("e", "d", "c", "b", "a")
 
-				return al
-			},
-			expectedResult: func() List {
-				al, err := NewArrayList("a", "b", "c", "d", "e")
-				require.NoError(t, err)
+	newQuickSorter[string]().sort(al, comparator.NewStringComparator())
 
-				return al
-			},
-		},
-		{
-			name: "sort object list",
-			actualResult: func() List {
-				al, err := NewArrayList(newTestObj(2, 3), newTestObj(4, 6), newTestObj(1, 4))
-				require.NoError(t, err)
+	expectedList := NewArrayList[string]("a", "b", "c", "d", "e")
 
-				newQuickSorter().sort(al, testObjComparator{})
+	assert.Equal(t, expectedList, al)
+}
 
-				return al
-			},
-			expectedResult: func() List {
-				al, err := NewArrayList(newTestObj(1, 4), newTestObj(2, 3), newTestObj(4, 6))
-				require.NoError(t, err)
+func TestQuickSortObjectList(t *testing.T) {
+	al := NewArrayList[testObj](newTestObj(2, 3), newTestObj(4, 6), newTestObj(1, 4))
 
-				return al
-			},
-		},
-	}
+	newQuickSorter[testObj]().sort(al, testObjComparator{})
 
-	for _, testCase := range testCases {
-		t.Run(testCase.name, func(t *testing.T) {
-			assert.Equal(t, testCase.expectedResult(), testCase.actualResult())
-		})
-	}
+	expectedList := NewArrayList[testObj](newTestObj(1, 4), newTestObj(2, 3), newTestObj(4, 6))
+
+	assert.Equal(t, expectedList, al)
 }

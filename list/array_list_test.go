@@ -4,74 +4,56 @@ import (
 	"errors"
 	"fmt"
 	"github.com/nsnikhil/go-datastructures/functions/comparator"
-	"github.com/nsnikhil/go-datastructures/liberr"
+	"github.com/nsnikhil/go-datastructures/internal"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"strings"
+	"math"
 	"testing"
 )
 
 func TestCreateNewArrayList(t *testing.T) {
 	testCases := []struct {
 		name           string
-		actualResult   func() (List, error)
-		expectedResult List
-		expectedError  error
+		actualResult   func() List[int64]
+		expectedResult List[int64]
 	}{
 		{
-			name: "test create new empty array list",
-			actualResult: func() (List, error) {
-				return NewArrayList()
+			name: "should create a empty array list",
+			actualResult: func() List[int64] {
+				return NewArrayList[int64]()
 			},
-			expectedResult: &ArrayList{
-				typeURL: "na",
+			expectedResult: &ArrayList[int64]{
 				factors: &factors{upperLoadFactor: 0.75, lowerLoadFactor: 0.40, scalingFactor: 2, capacity: 16},
-				data:    make([]interface{}, 16),
+				data:    make([]int64, 16),
 			},
 		},
 		{
-			name: "test create new array list with elements",
-			actualResult: func() (List, error) {
-				return NewArrayList(1, 2, 3, 4, 5)
+			name: "should create array list with elements",
+			actualResult: func() List[int64] {
+				return NewArrayList[int64](1, 2, 3, 4, 5)
 			},
-			expectedResult: &ArrayList{
-				typeURL: "int",
+			expectedResult: &ArrayList[int64]{
 				size:    5,
 				factors: &factors{upperLoadFactor: 0.75, lowerLoadFactor: 0.40, scalingFactor: 2, capacity: 16},
-				data:    []interface{}{1, 2, 3, 4, 5, interface{}(nil), interface{}(nil), interface{}(nil), interface{}(nil), interface{}(nil), interface{}(nil), interface{}(nil), interface{}(nil), interface{}(nil), interface{}(nil), interface{}(nil)},
+				data:    []int64{1, 2, 3, 4, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
 			},
 		},
 		{
-			name: "test create new array list 20 elements",
-			actualResult: func() (List, error) {
-				data := make([]interface{}, 20)
-				for i := 0; i < 20; i++ {
-					data[i] = i
-				}
-
-				return NewArrayList(data...)
+			name: "should create array list with variable arg elements",
+			actualResult: func() List[int64] {
+				return NewArrayList[int64](internal.SliceGenerator{Size: math.MaxInt8}.Generate()...)
 			},
-			expectedResult: &ArrayList{
-				typeURL: "int",
-				size:    20,
-				factors: &factors{upperLoadFactor: 0.75, lowerLoadFactor: 0.40, scalingFactor: 2, capacity: 32},
-				data:    []interface{}{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, interface{}(nil), interface{}(nil), interface{}(nil), interface{}(nil), interface{}(nil), interface{}(nil), interface{}(nil), interface{}(nil), interface{}(nil), interface{}(nil), interface{}(nil), interface{}(nil)},
+			expectedResult: &ArrayList[int64]{
+				size:    int64(math.MaxInt8),
+				factors: &factors{upperLoadFactor: 0.75, lowerLoadFactor: 0.40, scalingFactor: 2, capacity: 256},
+				data:    append(internal.SliceGenerator{Size: math.MaxInt8}.Generate(), internal.SliceGenerator{Size: math.MaxInt8 + 2, AbsoluteValue: 0, Absolute: true}.Generate()...),
 			},
-		},
-		{
-			name: "test failed to create new array list due to element type mismatch",
-			actualResult: func() (List, error) {
-				return NewArrayList(1, "2")
-			},
-			expectedResult: (*ArrayList)(nil),
-			expectedError:  errors.New("type mismatch : all elements must be of same type"),
 		},
 	}
 
 	for _, testCase := range testCases {
 		t.Run(testCase.name, func(t *testing.T) {
-			res, err := testCase.actualResult()
-			assert.Equal(t, testCase.expectedError, err)
+			res := testCase.actualResult()
 			assert.Equal(t, testCase.expectedResult, res)
 		})
 	}
@@ -81,26 +63,23 @@ func TestCreateNewArrayList(t *testing.T) {
 func TestArrayListSize(t *testing.T) {
 	testCases := []struct {
 		name         string
-		actualSize   func() int
-		expectedSize int
+		actualSize   func() int64
+		expectedSize int64
 	}{
 		{
-			name: "test Size is 1 after adding one element",
-			actualSize: func() int {
-				list, err := NewArrayList()
-				require.NoError(t, err)
+			name: "should return the size as 1 when listen contains single element",
+			actualSize: func() int64 {
+				list := NewArrayList[int]()
+				list.Add(1)
 
-				err = list.Add(1)
-				require.NoError(t, err)
 				return list.Size()
 			},
 			expectedSize: 1,
 		},
 		{
-			name: "test Size is 0 for a new List",
-			actualSize: func() int {
-				list, err := NewArrayList()
-				require.NoError(t, err)
+			name: "should return size as 0 for empty list",
+			actualSize: func() int64 {
+				list := NewArrayList[any]()
 
 				return list.Size()
 			},
@@ -108,20 +87,13 @@ func TestArrayListSize(t *testing.T) {
 		},
 
 		{
-			name: "test Size is 2 after adding two elements",
-			actualSize: func() int {
-				list, err := NewArrayList()
-				require.NoError(t, err)
-
-				err = list.Add("a")
-				require.NoError(t, err)
-
-				err = list.Add("b")
-				require.NoError(t, err)
+			name: "should return the size as math.MaxInt16 when listen contains math.MaxInt16 elements",
+			actualSize: func() int64 {
+				list := NewArrayList[int64](internal.SliceGenerator{Size: math.MaxInt16}.Generate()...)
 
 				return list.Size()
 			},
-			expectedSize: 2,
+			expectedSize: math.MaxInt16,
 		},
 	}
 
@@ -131,162 +103,82 @@ func TestArrayListSize(t *testing.T) {
 }
 
 func TestArrayListAdd(t *testing.T) {
-	type testStruct struct{}
-
 	testCases := []struct {
 		name           string
-		actualResult   func() (int, error, List)
-		expectedResult func() List
-		expectedError  error
-		expectedSize   int
+		actualResult   func() (int64, List[int64])
+		expectedResult List[int64]
+		expectedSize   int64
 	}{
 		{
-			name: "test Size is 1 after adding one element",
-			actualResult: func() (int, error, List) {
-				al, err := NewArrayList()
-				require.NoError(t, err)
+			name: "should return the size as 1 when listen contains single element",
+			actualResult: func() (int64, List[int64]) {
+				al := NewArrayList[int64]()
+				al.Add(1)
 
-				err = al.Add(1)
-				return al.Size(), err, al
+				return al.Size(), al
 			},
-			expectedSize: 1,
-			expectedResult: func() List {
-				al, err := NewArrayList(1)
-				require.NoError(t, err)
-
-				return al
-			},
+			expectedSize:   1,
+			expectedResult: NewArrayList[int64](1),
 		},
 		{
-			name: "test Size is 2 after adding two element",
-			actualResult: func() (int, error, List) {
-				al, err := NewArrayList()
-				require.NoError(t, err)
+			name: "should return the size as math.MaxInt16 when listen contains math.MaxInt16 elements",
+			actualResult: func() (int64, List[int64]) {
+				al := NewArrayList[int64]()
+				for i := int64(0); i < math.MaxInt16; i++ {
+					al.Add(i)
+				}
 
-				err = al.Add(1)
-				require.NoError(t, err)
-
-				err = al.Add(2)
-				return al.Size(), err, al
+				return al.Size(), al
 			},
-			expectedSize: 2,
-			expectedResult: func() List {
-				al, err := NewArrayList(1, 2)
-				require.NoError(t, err)
-
-				return al
-			},
-		},
-		{
-			name: "test Size is 1 after trying to Add element of different type",
-			actualResult: func() (int, error, List) {
-				al, err := NewArrayList()
-				require.NoError(t, err)
-
-				err = al.Add(1)
-				require.NoError(t, err)
-
-				err = al.Add("name")
-				return al.Size(), err, al
-			},
-			expectedSize:  1,
-			expectedError: liberr.TypeMismatchError("int", "string"),
-			expectedResult: func() List {
-				al, err := NewArrayList(1)
-				require.NoError(t, err)
-
-				return al
-			},
-		},
-		{
-			name: "test Size is 2 after adding structs",
-			actualResult: func() (int, error, List) {
-				al, err := NewArrayList()
-				require.NoError(t, err)
-
-				err = al.Add(testStruct{})
-				require.NoError(t, err)
-
-				err = al.Add(testStruct{})
-				return al.Size(), err, al
-			},
-			expectedSize: 2,
-			expectedResult: func() List {
-				al, err := NewArrayList(testStruct{}, testStruct{})
-				require.NoError(t, err)
-
-				return al
-			},
+			expectedSize:   math.MaxInt16,
+			expectedResult: NewArrayList[int64](internal.SliceGenerator{Size: math.MaxInt16}.Generate()...),
 		},
 	}
 
 	for _, testCase := range testCases {
-		size, err, res := testCase.actualResult()
+		size, res := testCase.actualResult()
 
-		assert.Equal(t, testCase.expectedError, err)
 		assert.Equal(t, testCase.expectedSize, size)
-		assert.Equal(t, testCase.expectedResult(), res)
+		assert.Equal(t, testCase.expectedResult, res)
 	}
 }
 
 func TestArrayListGet(t *testing.T) {
 	testCases := []struct {
 		name           string
-		actualResult   func() interface{}
-		expectedResult interface{}
+		actualResult   func() (int64, error)
+		expectedResult int64
 	}{
 		{
-			name: "test get nil for empty List",
-			actualResult: func() interface{} {
-				list, err := NewArrayList()
-				require.NoError(t, err)
+			name: "should return error when trying to get value from empty list",
+			actualResult: func() (int64, error) {
+				list := NewArrayList[int64]()
 
 				return list.Get(0)
 			},
 		},
 		{
-			name: "test get 0th element from the List",
-			actualResult: func() interface{} {
-				list, err := NewArrayList()
-				require.NoError(t, err)
-
-				err = list.Add(1)
-				require.NoError(t, err)
+			name: "should return first element from the list",
+			actualResult: func() (int64, error) {
+				list := NewArrayList[int64](1)
 
 				return list.Get(0)
 			},
 			expectedResult: 1,
 		},
 		{
-			name: "test get 4th element from the List",
-			actualResult: func() interface{} {
-				list, err := NewArrayList()
-				require.NoError(t, err)
-
-				err = list.Add(0)
-				require.NoError(t, err)
-
-				err = list.Add(1)
-				require.NoError(t, err)
-
-				err = list.Add(2)
-				require.NoError(t, err)
-
-				err = list.Add(3)
-				require.NoError(t, err)
+			name: "should return last element from the list",
+			actualResult: func() (int64, error) {
+				list := NewArrayList[int64](internal.SliceGenerator{Size: 4}.Generate()...)
 
 				return list.Get(3)
 			},
 			expectedResult: 3,
 		},
 		{
-			name: "test get nil when index is greater than the size of list",
-			actualResult: func() interface{} {
-				list, err := NewArrayList()
-				require.NoError(t, err)
-
-				err = list.Add(0)
-				require.NoError(t, err)
+			name: "should return error when trying to fetch value for invalid index",
+			actualResult: func() (int64, error) {
+				list := NewArrayList[int64](0)
 
 				return list.Get(1)
 			},
@@ -295,7 +187,9 @@ func TestArrayListGet(t *testing.T) {
 
 	for _, testCase := range testCases {
 		t.Run(testCase.name, func(t *testing.T) {
-			assert.Equal(t, testCase.expectedResult, testCase.actualResult())
+			res, err := testCase.actualResult()
+			fmt.Println(err)
+			assert.Equal(t, testCase.expectedResult, res)
 		})
 	}
 }
@@ -307,22 +201,18 @@ func TestArrayListIteratorHasNext(t *testing.T) {
 		expectedResult bool
 	}{
 		{
-			name: "test has next return false for empty List",
+			name: "should return false when list is empty",
 			actualResult: func() bool {
-				list, err := NewArrayList()
-				require.NoError(t, err)
+				list := NewArrayList[int]()
 
 				return list.Iterator().HasNext()
 			},
 		},
 		{
-			name: "test has next return true for non empty List",
+			name: "should return true when list is not empty",
 			actualResult: func() bool {
-				list, err := NewArrayList()
-				require.NoError(t, err)
+				list := NewArrayList[int](1)
 
-				err = list.Add(1)
-				require.NoError(t, err)
 				return list.Iterator().HasNext()
 			},
 			expectedResult: true,
@@ -339,60 +229,81 @@ func TestArrayListIteratorHasNext(t *testing.T) {
 func TestArrayListIteratorNext(t *testing.T) {
 	testCases := []struct {
 		name           string
-		actualResult   func() interface{}
-		expectedResult interface{}
+		actualResult   func() ([]int64, error)
+		expectedResult []int64
 	}{
 		{
-			name: "test Get nil for empty List",
-			actualResult: func() interface{} {
-				list, err := NewArrayList()
-				require.NoError(t, err)
+			name: "should return error for empty list",
+			actualResult: func() ([]int64, error) {
+				list := NewArrayList[int64]()
 
-				return list.Iterator().Next()
+				res, err := list.Iterator().Next()
+				return []int64{res}, err
 			},
+			expectedResult: []int64{0},
 		},
 		{
-			name: "test Get first item from List",
-			actualResult: func() interface{} {
-				list, err := NewArrayList()
-				require.NoError(t, err)
+			name: "should return first element from the list",
+			actualResult: func() ([]int64, error) {
+				list := NewArrayList[int64](1)
 
-				err = list.Add(1)
-				require.NoError(t, err)
+				res, err := list.Iterator().Next()
 
-				return list.Iterator().Next()
+				return []int64{res}, err
 			},
-			expectedResult: 1,
+			expectedResult: []int64{1},
 		},
 		{
-			name: "test Get all items from List",
-			actualResult: func() interface{} {
-				list, err := NewArrayList()
-				require.NoError(t, err)
+			name: "should return all elements from the list",
+			actualResult: func() ([]int64, error) {
+				list := NewArrayList[int64](internal.SliceGenerator{Size: 4}.Generate()...)
 
-				err = list.Add(0)
-				require.NoError(t, err)
+				it := list.Iterator()
 
-				err = list.Add(1)
-				require.NoError(t, err)
+				var res []int64
 
-				err = list.Add(2)
-				require.NoError(t, err)
-
-				err = list.Add(3)
-				require.NoError(t, err)
-
-				i := list.Iterator()
-
-				var res []interface{}
-
-				for i.HasNext() {
-					res = append(res, i.Next())
+				for it.HasNext() {
+					v, _ := it.Next()
+					res = append(res, v)
 				}
 
-				return res
+				//TODO: CHANGE NIL
+				return res, nil
 			},
-			expectedResult: []interface{}{0, 1, 2, 3},
+			expectedResult: []int64{0, 1, 2, 3},
+		},
+	}
+
+	for _, testCase := range testCases {
+		t.Run(testCase.name, func(t *testing.T) {
+			res, _ := testCase.actualResult() //TODO: TEST ERROR
+			assert.Equal(t, testCase.expectedResult, res)
+		})
+	}
+}
+
+func TestArrayListDescendingIteratorHasNext(t *testing.T) {
+	testCases := []struct {
+		name           string
+		actualResult   func() bool
+		expectedResult bool
+	}{
+		{
+			name: "should return false when list is empty",
+			actualResult: func() bool {
+				list := NewArrayList[int]()
+
+				return list.DescendingIterator().HasNext()
+			},
+		},
+		{
+			name: "should return true when list is not empty",
+			actualResult: func() bool {
+				list := NewArrayList[int](1)
+
+				return list.DescendingIterator().HasNext()
+			},
+			expectedResult: true,
 		},
 	}
 
@@ -403,80 +314,128 @@ func TestArrayListIteratorNext(t *testing.T) {
 	}
 }
 
-func TestArrayListSet(t *testing.T) {
+func TestArrayListDescendingIteratorNext(t *testing.T) {
 	testCases := []struct {
 		name           string
-		actualResult   func() (interface{}, error)
-		expectedResult interface{}
-		expectedError  error
+		actualResult   func() ([]int64, error)
+		expectedResult []int64
 	}{
 		{
-			name: "test set value at index 3",
-			actualResult: func() (interface{}, error) {
-				al, err := NewArrayList(1, 2, 3, 4)
-				require.NoError(t, err)
+			name: "should return error for empty list",
+			actualResult: func() ([]int64, error) {
+				list := NewArrayList[int64]()
 
-				return al.Set(3, 5)
+				res, err := list.DescendingIterator().Next()
+
+				return []int64{res}, err
 			},
-			expectedResult: 5,
+			expectedResult: []int64{0},
 		},
 		{
-			name: "test set value at index 0",
-			actualResult: func() (interface{}, error) {
-				al, err := NewArrayList(1, 2, 3, 4)
-				require.NoError(t, err)
+			name: "should return first element from the list",
+			actualResult: func() ([]int64, error) {
+				list := NewArrayList[int64](1)
 
-				return al.Set(0, 2)
+				res, err := list.DescendingIterator().Next()
+
+				return []int64{res}, err
 			},
-			expectedResult: 2,
+			expectedResult: []int64{1},
 		},
 		{
-			name: "test set value at index 1",
-			actualResult: func() (interface{}, error) {
-				al, err := NewArrayList(1, 2, 3, 4)
-				require.NoError(t, err)
+			name: "should return all elements from the list",
+			actualResult: func() ([]int64, error) {
+				list := NewArrayList[int64](internal.SliceGenerator{Size: 4}.Generate()...)
 
-				return al.Set(1, 4)
-			},
-			expectedResult: 4,
-		},
-		{
-			name: "test failed to set value due to invalid index",
-			actualResult: func() (interface{}, error) {
-				al, err := NewArrayList(1, 2, 3, 4)
-				require.NoError(t, err)
+				it := list.DescendingIterator()
 
-				return al.Set(5, 3)
-			},
-			expectedError: liberr.IndexOutOfBoundError(5),
-		},
-		{
-			name: "test set fails when list is empty",
-			actualResult: func() (interface{}, error) {
-				al, err := NewArrayList()
-				require.NoError(t, err)
+				var res []int64
 
-				return al.Set(0, 3)
-			},
-			expectedError: errors.New("list is empty"),
-		},
-		{
-			name: "test failed to set value due to type mismatch",
-			actualResult: func() (interface{}, error) {
-				al, err := NewArrayList(1, 2, 3, 4)
-				require.NoError(t, err)
+				for it.HasNext() {
+					v, _ := it.Next()
+					res = append(res, v)
+				}
 
-				return al.Set(0, "a")
+				//TODO: CHANGE NIL
+				return res, nil
 			},
-			expectedError: liberr.TypeMismatchError("int", "string"),
+			expectedResult: []int64{3, 2, 1, 0},
 		},
 	}
 
 	for _, testCase := range testCases {
 		t.Run(testCase.name, func(t *testing.T) {
-			res, err := testCase.actualResult()
-			assert.Equal(t, testCase.expectedError, err)
+			res, _ := testCase.actualResult() //TODO: TEST ERROR
 			assert.Equal(t, testCase.expectedResult, res)
+		})
+	}
+}
+
+func TestArrayListSet(t *testing.T) {
+	testCases := []struct {
+		name           string
+		actualResult   func() (int, error, List[int])
+		expectedResult int
+		expectedList   List[int]
+		expectedError  error
+	}{
+		{
+			name: "should set value at index 3",
+			actualResult: func() (int, error, List[int]) {
+				al := NewArrayList[int](1, 2, 3, 4)
+
+				idx, err := al.Set(3, 5)
+
+				return idx, err, al
+			},
+			expectedResult: 5,
+			expectedList:   NewArrayList[int](1, 2, 3, 5),
+		},
+		{
+			name: "should set value at index 0",
+			actualResult: func() (int, error, List[int]) {
+				al := NewArrayList[int](1, 2, 3, 4)
+
+				idx, err := al.Set(0, 2)
+
+				return idx, err, al
+			},
+			expectedResult: 2,
+			expectedList:   NewArrayList[int](2, 2, 3, 4),
+		},
+		{
+			name: "should fail to set value due to invalid index",
+			actualResult: func() (int, error, List[int]) {
+				al := NewArrayList[int](1, 2, 3, 4)
+
+				idx, err := al.Set(5, 3)
+
+				return idx, err, al
+			},
+			expectedError: fmt.Errorf("invalid index %d", 5),
+			expectedList:  NewArrayList[int](1, 2, 3, 4),
+		},
+		{
+			name: "should fail to set when list is empty",
+			actualResult: func() (int, error, List[int]) {
+				al := NewArrayList[int]()
+
+				idx, err := al.Set(0, 3)
+
+				return idx, err, al
+			},
+			expectedError: errors.New("list is empty"),
+			expectedList:  NewArrayList[int](),
+		},
+	}
+
+	for _, testCase := range testCases {
+		t.Run(testCase.name, func(t *testing.T) {
+			res, err, al := testCase.actualResult()
+
+			internal.AssertErrorEquals(t, testCase.expectedError, err)
+			assert.Equal(t, testCase.expectedResult, res)
+			assert.Equal(t, testCase.expectedList, al)
 		})
 	}
 }
@@ -484,65 +443,25 @@ func TestArrayListSet(t *testing.T) {
 func TestArrayListSort(t *testing.T) {
 	testCases := []struct {
 		name           string
-		actualResult   func() List
-		expectedResult func() List
+		actualResult   func() List[int]
+		expectedResult List[int]
 	}{
 		{
-			name: "test Sort integer list",
-			actualResult: func() List {
-				al, err := NewArrayList(5, 4, 3, 2, 1)
-				require.NoError(t, err)
+			name: "should sort integer list",
+			actualResult: func() List[int] {
+				al := NewArrayList[int](5, 4, 3, 2, 1)
 
 				al.Sort(comparator.NewIntegerComparator())
 
 				return al
 			},
-			expectedResult: func() List {
-				al, err := NewArrayList(1, 2, 3, 4, 5)
-				require.NoError(t, err)
-
-				return al
-			},
-		},
-		{
-			name: "test Sort string list with equal length",
-			actualResult: func() List {
-				al, err := NewArrayList("e", "d", "c", "b", "a")
-				require.NoError(t, err)
-
-				al.Sort(comparator.NewStringComparator())
-
-				return al
-			},
-			expectedResult: func() List {
-				al, err := NewArrayList("a", "b", "c", "d", "e")
-				require.NoError(t, err)
-
-				return al
-			},
-		},
-		{
-			name: "test Sort string List with un equal length",
-			actualResult: func() List {
-				al, err := NewArrayList("a", "aaa", "aaa", "a", "aaaa")
-				require.NoError(t, err)
-
-				al.Sort(comparator.NewStringComparator())
-
-				return al
-			},
-			expectedResult: func() List {
-				al, err := NewArrayList("a", "a", "aaa", "aaa", "aaaa")
-				require.NoError(t, err)
-
-				return al
-			},
+			expectedResult: NewArrayList[int](1, 2, 3, 4, 5),
 		},
 	}
 
 	for _, testCase := range testCases {
 		t.Run(testCase.name, func(t *testing.T) {
-			assert.Equal(t, testCase.expectedResult(), testCase.actualResult())
+			assert.Equal(t, testCase.expectedResult, testCase.actualResult())
 		})
 	}
 }
@@ -550,119 +469,72 @@ func TestArrayListSort(t *testing.T) {
 func TestArrayListAddAt(t *testing.T) {
 	testCases := []struct {
 		name           string
-		actualResult   func() (error, int, List)
-		expectedResult func() List
-		expectedSize   int
+		actualResult   func() (error, int64, List[int])
+		expectedResult List[int]
+		expectedSize   int64
 		expectedError  error
 	}{
 		{
-			name: "test add element when list is empty",
-			actualResult: func() (error, int, List) {
-				al, err := NewArrayList()
-				require.NoError(t, err)
+			name: "should add element when list is empty",
+			actualResult: func() (error, int64, List[int]) {
+				al := NewArrayList[int]()
 
-				err = al.AddAt(0, 1)
+				err := al.AddAt(0, 1)
 
 				return err, al.Size(), al
 			},
-			expectedResult: func() List {
-				al, err := NewArrayList(1)
-				require.NoError(t, err)
-
-				return al
-			},
-			expectedSize: 1,
+			expectedResult: NewArrayList[int](1),
+			expectedSize:   1,
 		},
 		{
-			name: "test add element at index 1",
-			actualResult: func() (error, int, List) {
-				al, err := NewArrayList(1, 3, 4, 5)
-				require.NoError(t, err)
+			name: "should add element at index 1",
+			actualResult: func() (error, int64, List[int]) {
+				al := NewArrayList[int](1, 3, 4, 5)
 
 				return al.AddAt(1, 2), al.Size(), al
 			},
-			expectedResult: func() List {
-				al, err := NewArrayList(1, 2, 3, 4, 5)
-				require.NoError(t, err)
-
-				return al
-			},
-			expectedSize: 5,
+			expectedResult: NewArrayList[int](1, 2, 3, 4, 5),
+			expectedSize:   5,
 		},
 		{
-			name: "test add element at index 0",
-			actualResult: func() (error, int, List) {
-				al, err := NewArrayList(1, 2, 3, 4)
-				require.NoError(t, err)
+			name: "should add element at index 0",
+			actualResult: func() (error, int64, List[int]) {
+				al := NewArrayList[int](1, 2, 3, 4)
 
 				return al.AddAt(0, 0), al.Size(), al
 			},
-			expectedResult: func() List {
-				al, err := NewArrayList(0, 1, 2, 3, 4)
-				require.NoError(t, err)
-
-				return al
-			},
-			expectedSize: 5,
+			expectedResult: NewArrayList[int](0, 1, 2, 3, 4),
+			expectedSize:   5,
 		},
 		{
-			name: "test add element at index 3",
-			actualResult: func() (error, int, List) {
-				al, err := NewArrayList(1, 2, 3, 5)
-				require.NoError(t, err)
+			name: "should add element at index 3",
+			actualResult: func() (error, int64, List[int]) {
+				al := NewArrayList[int](1, 2, 3, 5)
 
 				return al.AddAt(3, 4), al.Size(), al
 			},
-			expectedResult: func() List {
-				al, err := NewArrayList(1, 2, 3, 4, 5)
-				require.NoError(t, err)
-
-				return al
-			},
-			expectedSize: 5,
+			expectedResult: NewArrayList[int](1, 2, 3, 4, 5),
+			expectedSize:   5,
 		},
 		{
-			name: "test return error when adding element at invalid index",
-			actualResult: func() (error, int, List) {
-				al, err := NewArrayList(1, 2, 3, 5)
-				require.NoError(t, err)
+			name: "should return error when adding element at invalid index",
+			actualResult: func() (error, int64, List[int]) {
+				al := NewArrayList[int](1, 2, 3, 5)
 
-				return al.AddAt(4, 8), al.Size(), al
+				return al.AddAt(5, 8), al.Size(), al
 			},
-			expectedResult: func() List {
-				al, err := NewArrayList(1, 2, 3, 5)
-				require.NoError(t, err)
-
-				return al
-			},
-			expectedSize:  4,
-			expectedError: liberr.IndexOutOfBoundError(4),
-		},
-		{
-			name: "test return error when adding element of invalid type",
-			actualResult: func() (error, int, List) {
-				al, err := NewArrayList(1, 2, 3, 5)
-				require.NoError(t, err)
-
-				return al.AddAt(0, "a"), al.Size(), al
-			},
-			expectedResult: func() List {
-				al, err := NewArrayList(1, 2, 3, 5)
-				require.NoError(t, err)
-
-				return al
-			},
-			expectedSize:  4,
-			expectedError: liberr.TypeMismatchError("int", "string"),
+			expectedResult: NewArrayList[int](1, 2, 3, 5),
+			expectedSize:   4,
+			expectedError:  fmt.Errorf("invalid index %d", 5),
 		},
 	}
 	for _, testCase := range testCases {
 		t.Run(testCase.name, func(t *testing.T) {
 			err, sz, l := testCase.actualResult()
 
-			assert.Equal(t, testCase.expectedError, err)
+			internal.AssertErrorEquals(t, testCase.expectedError, err)
 			assert.Equal(t, testCase.expectedSize, sz)
-			assert.Equal(t, testCase.expectedResult(), l)
+			assert.Equal(t, testCase.expectedResult, l)
 		})
 	}
 }
@@ -670,209 +542,68 @@ func TestArrayListAddAt(t *testing.T) {
 func TestArrayListAddAll(t *testing.T) {
 	testCases := []struct {
 		name           string
-		actualResult   func() (error, int, List)
-		expectedResult func() List
-		expectedSize   int
-		expectedError  error
+		actualResult   func() (int64, List[int64])
+		expectedResult List[int64]
+		expectedSize   int64
 	}{
 		{
-			name: "test add all for integer elements",
-			actualResult: func() (error, int, List) {
-				al, err := NewArrayList(1, 2)
-				require.NoError(t, err)
+			name: "should add all elements to list",
+			actualResult: func() (int64, List[int64]) {
+				al := NewArrayList[int64](1, 2)
+				al.AddAll(3, 4)
 
-				return al.AddAll(3, 4), al.Size(), al
+				return al.Size(), al
 			},
-			expectedResult: func() List {
-				al, err := NewArrayList(1, 2, 3, 4)
-				require.NoError(t, err)
-
-				return al
-			},
-			expectedSize: 4,
+			expectedResult: NewArrayList[int64](1, 2, 3, 4),
+			expectedSize:   4,
 		},
 		{
-			name: "test add all 40 integer elements",
-			actualResult: func() (error, int, List) {
-				data := make([]interface{}, 40)
-				for i := 0; i < 40; i++ {
-					data[i] = i
-				}
+			name: "should add all var args elements to list",
+			actualResult: func() (int64, List[int64]) {
+				al := NewArrayList[int64]()
+				al.AddAll(internal.SliceGenerator{Size: 40}.Generate()...)
 
-				al, err := NewArrayList()
-				require.NoError(t, err)
-
-				return al.AddAll(data...), al.Size(), al
+				return al.Size(), al
 			},
-			expectedResult: func() List {
-				data := make([]interface{}, 40)
-				for i := 0; i < 40; i++ {
-					data[i] = i
-				}
-
-				al, err := NewArrayList(data...)
-				require.NoError(t, err)
-
-				return al
-			},
-			expectedSize: 40,
+			expectedResult: NewArrayList[int64](internal.SliceGenerator{Size: 40}.Generate()...),
+			expectedSize:   40,
 		},
 		{
-			name: "test add all for string elements",
-			actualResult: func() (error, int, List) {
-				al, err := NewArrayList("a", "b")
-				require.NoError(t, err)
+			name: "should add all not fail when args is empty",
+			actualResult: func() (int64, List[int64]) {
+				al := NewArrayList[int64](1, 2)
 
-				return al.AddAll("c", "d"), al.Size(), al
+				al.AddAll()
+
+				return al.Size(), al
 			},
-			expectedResult: func() List {
-				al, err := NewArrayList("a", "b", "c", "d")
-				require.NoError(t, err)
-
-				return al
-			},
-			expectedSize: 4,
-		},
-		{
-			name: "test failed to add all elements when type if different",
-			actualResult: func() (error, int, List) {
-				al, err := NewArrayList("a", "b")
-				require.NoError(t, err)
-
-				return al.AddAll("c", 5), al.Size(), al
-			},
-			expectedResult: func() List {
-				al, err := NewArrayList("a", "b")
-				require.NoError(t, err)
-
-				return al
-			},
-			expectedSize:  2,
-			expectedError: errors.New("type mismatch : all elements must be of same type"),
-		},
-		{
-			name: "test add all return nil when arguments are empty",
-			actualResult: func() (error, int, List) {
-				al, err := NewArrayList(1, 2)
-				require.NoError(t, err)
-
-				return al.AddAll(), al.Size(), al
-			},
-			expectedResult: func() List {
-				al, err := NewArrayList(1, 2)
-				require.NoError(t, err)
-
-				return al
-			},
-			expectedSize: 2,
-		},
-		{
-			name: "test add all when list is new",
-			actualResult: func() (error, int, List) {
-				al, err := NewArrayList()
-				require.NoError(t, err)
-
-				return al.AddAll(1, 2), al.Size(), al
-			},
-			expectedResult: func() List {
-				al, err := NewArrayList(1, 2)
-				require.NoError(t, err)
-
-				return al
-			},
-			expectedSize: 2,
-		},
-		{
-			name: "test add all when list is empty",
-			actualResult: func() (error, int, List) {
-				al, err := NewArrayList(1, 2)
-				require.NoError(t, err)
-
-				al.Clear()
-
-				return al.AddAll("a", "b"), al.Size(), al
-			},
-			expectedResult: func() List {
-				al, err := NewArrayList(1)
-				require.NoError(t, err)
-
-				al.Clear()
-
-				return al
-			},
-			expectedSize:  0,
-			expectedError: liberr.TypeMismatchError("int", "string"),
-		},
-		{
-			name: "test add all when list is empty and type was set",
-			actualResult: func() (error, int, List) {
-				al, err := NewArrayList(1, 2)
-				require.NoError(t, err)
-
-				al.Clear()
-
-				return al.AddAll(1, 2), al.Size(), al
-			},
-			expectedResult: func() List {
-				al, err := NewArrayList(1, 2)
-				require.NoError(t, err)
-
-				return al
-			},
-			expectedSize: 2,
+			expectedResult: NewArrayList[int64](1, 2),
+			expectedSize:   2,
 		},
 	}
 
 	for _, testCase := range testCases {
 		t.Run(testCase.name, func(t *testing.T) {
-			err, sz, l := testCase.actualResult()
+			sz, l := testCase.actualResult()
 
-			assert.Equal(t, testCase.expectedError, err)
 			assert.Equal(t, testCase.expectedSize, sz)
-			assert.Equal(t, testCase.expectedResult(), l)
+			assert.Equal(t, testCase.expectedResult, l)
 		})
 	}
 }
 
 func TestArrayListClear(t *testing.T) {
 	testCases := []struct {
-		name           string
-		actualResult   func() (int, List)
-		expectedResult func() List
+		name         string
+		actualResult func() (int64, []int64)
 	}{
 		{
-			name: "test clear integer list",
-			actualResult: func() (int, List) {
-				al, err := NewArrayList(1, 2)
-				require.NoError(t, err)
-
-				al.Clear()
-				return al.Size(), al
-			},
-			expectedResult: func() List {
-				al, err := NewArrayList()
-				require.NoError(t, err)
-				al.typeURL = "int"
-
-				return al
-			},
-		},
-		{
-			name: "test clear string list",
-			actualResult: func() (int, List) {
-				al, err := NewArrayList("a", "b")
-				require.NoError(t, err)
-
+			name: "should clear integer list",
+			actualResult: func() (int64, []int64) {
+				al := NewArrayList[int64](1, 2)
 				al.Clear()
 
-				return al.Size(), al
-			},
-			expectedResult: func() List {
-				al, err := NewArrayList()
-				require.NoError(t, err)
-				al.typeURL = "string"
-
-				return al
+				return al.Size(), toSlice[int64](al)
 			},
 		},
 	}
@@ -881,8 +612,8 @@ func TestArrayListClear(t *testing.T) {
 		t.Run(testCase.name, func(t *testing.T) {
 			sz, res := testCase.actualResult()
 
-			assert.Equal(t, 0, sz)
-			assert.Equal(t, testCase.expectedResult(), res)
+			assert.Equal(t, int64(0), sz)
+			assert.Equal(t, []int64{}, res)
 		})
 	}
 }
@@ -890,48 +621,35 @@ func TestArrayListClear(t *testing.T) {
 func TestArrayListClone(t *testing.T) {
 	testCases := []struct {
 		name           string
-		actualResult   func() (List, error)
-		expectedResult func() List
+		actualResult   func() List[int]
+		expectedResult List[int]
 		expectedError  error
 	}{
 		{
-			name: "test clone integer array list",
-			actualResult: func() (List, error) {
-				al, err := NewArrayList(1, 2, 3, 4)
-				require.NoError(t, err)
+			name: "should clone list",
+			actualResult: func() List[int] {
+				al := NewArrayList[int](1, 2, 3, 4)
 
 				return al.Clone()
 			},
-			expectedResult: func() List {
-				al, err := NewArrayList(1, 2, 3, 4)
-				require.NoError(t, err)
-
-				return al
-			},
+			expectedResult: NewArrayList[int](1, 2, 3, 4),
 		},
 		{
-			name: "test clone empty array list",
-			actualResult: func() (List, error) {
-				al, err := NewArrayList()
-				require.NoError(t, err)
+			name: "should clone empty array list",
+			actualResult: func() List[int] {
+				al := NewArrayList[int]()
 
 				return al.Clone()
 			},
-			expectedResult: func() List {
-				al, err := NewArrayList()
-				require.NoError(t, err)
-
-				return al
-			},
+			expectedResult: NewArrayList[int](),
 		},
 	}
 
 	for _, testCase := range testCases {
 		t.Run(testCase.name, func(t *testing.T) {
-			res, err := testCase.actualResult()
+			res := testCase.actualResult()
 
-			assert.Equal(t, testCase.expectedError, err)
-			assert.Equal(t, testCase.expectedResult(), res)
+			assert.Equal(t, testCase.expectedResult, res)
 		})
 	}
 }
@@ -939,48 +657,35 @@ func TestArrayListClone(t *testing.T) {
 func TestArrayListContains(t *testing.T) {
 	testCases := []struct {
 		name           string
-		actualResult   func() (bool, error)
+		actualResult   func() bool
 		expectedResult bool
 		expectedError  error
 	}{
 		{
-			name: "test return true when element is present",
-			actualResult: func() (bool, error) {
-				al, err := NewArrayList(1, 2)
-				require.NoError(t, err)
+			name: "should return true when element is present",
+			actualResult: func() bool {
+				al := NewArrayList[int](1, 2)
 
 				return al.Contains(1)
 			},
 			expectedResult: true,
 		},
 		{
-			name: "test return false when element is not present",
-			actualResult: func() (bool, error) {
-				al, err := NewArrayList(1, 2)
-				require.NoError(t, err)
+			name: "should return false when element is not present",
+			actualResult: func() bool {
+				al := NewArrayList[int](1, 2)
 
 				return al.Contains(0)
 			},
 			expectedResult: false,
 			expectedError:  errors.New("element 0 not found in the list"),
 		},
-		{
-			name: "test return false when element type mismatch",
-			actualResult: func() (bool, error) {
-				al, err := NewArrayList(1, 2)
-				require.NoError(t, err)
-
-				return al.Contains("a")
-			},
-			expectedResult: false,
-			expectedError:  liberr.TypeMismatchError("int", "string"),
-		},
 	}
 
 	for _, testCase := range testCases {
 		t.Run(testCase.name, func(t *testing.T) {
-			res, err := testCase.actualResult()
-			assert.Equal(t, testCase.expectedError, err)
+			res := testCase.actualResult()
+
 			assert.Equal(t, testCase.expectedResult, res)
 		})
 	}
@@ -989,48 +694,34 @@ func TestArrayListContains(t *testing.T) {
 func TestArrayListContainsAll(t *testing.T) {
 	testCases := []struct {
 		name           string
-		actualResult   func() (bool, error)
+		actualResult   func() bool
 		expectedResult bool
 		expectedError  error
 	}{
 		{
-			name: "return true when all elements are present",
-			actualResult: func() (bool, error) {
-				al, err := NewArrayList(1, 2, 3, 4, 5, 6)
-				require.NoError(t, err)
+			name: "should return true when all elements are present",
+			actualResult: func() bool {
+				al := NewArrayList[int](1, 2, 3, 4, 5, 6)
 
 				return al.ContainsAll(6, 1, 3)
 			},
 			expectedResult: true,
 		},
 		{
-			name: "return false when a element is not present",
-			actualResult: func() (bool, error) {
-				al, err := NewArrayList(1, 2, 3, 4, 5, 6)
-				require.NoError(t, err)
+			name: "should return false when all elements are not present",
+			actualResult: func() bool {
+				al := NewArrayList[int](1, 2, 3, 4, 5, 6)
 
 				return al.ContainsAll(6, 1, 0)
 			},
 			expectedResult: false,
 			expectedError:  errors.New("element 0 not found in the list"),
 		},
-		{
-			name: "return false when a element type mismatch",
-			actualResult: func() (bool, error) {
-				al, err := NewArrayList(1, 2, 3, 4, 5, 6)
-				require.NoError(t, err)
-
-				return al.ContainsAll(6, 1, "a")
-			},
-			expectedResult: false,
-			expectedError:  liberr.TypeMismatchError("int", "string"),
-		},
 	}
 
 	for _, testCase := range testCases {
 		t.Run(testCase.name, func(t *testing.T) {
-			res, err := testCase.actualResult()
-			assert.Equal(t, testCase.expectedError, err)
+			res := testCase.actualResult()
 			assert.Equal(t, testCase.expectedResult, res)
 		})
 	}
@@ -1039,58 +730,40 @@ func TestArrayListContainsAll(t *testing.T) {
 func TestArrayListIndexOf(t *testing.T) {
 	testCases := []struct {
 		name           string
-		actualResult   func() (int, error)
-		expectedResult int
-		expectedError  error
+		actualResult   func() int64
+		expectedResult int64
 	}{
 		{
-			name: "return index when element is found",
-			actualResult: func() (int, error) {
-				al, err := NewArrayList(1, 2, 3, 4)
-				require.NoError(t, err)
+			name: "should return index when element is present",
+			actualResult: func() int64 {
+				al := NewArrayList[int](1, 2, 3, 4)
 
 				return al.IndexOf(2)
 			},
 			expectedResult: 1,
 		},
 		{
-			name: "return -1 when element is not present",
-			actualResult: func() (int, error) {
-				al, err := NewArrayList(1, 2, 3, 4)
-				require.NoError(t, err)
+			name: "should return -1 when element is not present",
+			actualResult: func() int64 {
+				al := NewArrayList[int](1, 2, 3, 4)
 
 				return al.IndexOf(0)
 			},
 			expectedResult: -1,
-			expectedError:  errors.New("element 0 not found in the list"),
 		},
 		{
-			name: "return error when list is empty",
-			actualResult: func() (int, error) {
-				al, err := NewArrayList()
-				require.NoError(t, err)
+			name: "should return -1 when list is empty",
+			actualResult: func() int64 {
+				al := NewArrayList[int]()
 
 				return al.IndexOf(0)
 			},
 			expectedResult: -1,
-			expectedError:  errors.New("list is empty"),
-		},
-		{
-			name: "return type mismatch error when searching for invalid type",
-			actualResult: func() (int, error) {
-				al, err := NewArrayList(1, 2, 3, 4)
-				require.NoError(t, err)
-
-				return al.IndexOf("a")
-			},
-			expectedResult: -1,
-			expectedError:  liberr.TypeMismatchError("int", "string"),
 		},
 	}
 	for _, testCase := range testCases {
 		t.Run(testCase.name, func(t *testing.T) {
-			res, err := testCase.actualResult()
-			assert.Equal(t, testCase.expectedError, err)
+			res := testCase.actualResult()
 			assert.Equal(t, testCase.expectedResult, res)
 		})
 	}
@@ -1103,20 +776,18 @@ func TestArrayListEmpty(t *testing.T) {
 		expectedResult bool
 	}{
 		{
-			name: "return true when list is empty",
+			name: "should return true when list is empty",
 			actualResult: func() bool {
-				al, err := NewArrayList()
-				require.NoError(t, err)
+				al := NewArrayList[int]()
 
 				return al.IsEmpty()
 			},
 			expectedResult: true,
 		},
 		{
-			name: "return false when list is not empty",
+			name: "should return false when list is not empty",
 			actualResult: func() bool {
-				al, err := NewArrayList(1)
-				require.NoError(t, err)
+				al := NewArrayList[int](1)
 
 				return al.IsEmpty()
 			},
@@ -1134,59 +805,41 @@ func TestArrayListEmpty(t *testing.T) {
 func TestArrayListLastIndexOf(t *testing.T) {
 	testCases := []struct {
 		name           string
-		actualResult   func() (int, error)
-		expectedResult int
-		expectedError  error
+		actualResult   func() int64
+		expectedResult int64
 	}{
 		{
-			name: "get last index of the element in List",
-			actualResult: func() (int, error) {
-				al, err := NewArrayList(1, 2, 3, 1, 4)
-				require.NoError(t, err)
+			name: "should return last index of the element in List",
+			actualResult: func() int64 {
+				al := NewArrayList[int](1, 2, 3, 1, 4)
 
 				return al.LastIndexOf(1)
 			},
 			expectedResult: 3,
 		},
 		{
-			name: "return -1 when the element in not present",
-			actualResult: func() (int, error) {
-				al, err := NewArrayList(1, 2, 3, 1, 4)
-				require.NoError(t, err)
+			name: "should return -1 when the element in not present",
+			actualResult: func() int64 {
+				al := NewArrayList[int](1, 2, 3, 1, 4)
 
 				return al.LastIndexOf(0)
 			},
 			expectedResult: -1,
-			expectedError:  errors.New("element 0 not found in the list"),
 		},
 		{
-			name: "return error when list is empty",
-			actualResult: func() (int, error) {
-				al, err := NewArrayList()
-				require.NoError(t, err)
+			name: "should return error when list is empty",
+			actualResult: func() int64 {
+				al := NewArrayList[int]()
 
 				return al.LastIndexOf(0)
 			},
 			expectedResult: -1,
-			expectedError:  errors.New("list is empty"),
-		},
-		{
-			name: "return type mismatch error when searching for different type",
-			actualResult: func() (int, error) {
-				al, err := NewArrayList(1, 2, 3, 1, 4)
-				require.NoError(t, err)
-
-				return al.LastIndexOf("a")
-			},
-			expectedResult: -1,
-			expectedError:  liberr.TypeMismatchError("int", "string"),
 		},
 	}
 
 	for _, testCase := range testCases {
 		t.Run(testCase.name, func(t *testing.T) {
-			res, err := testCase.actualResult()
-			assert.Equal(t, testCase.expectedError, err)
+			res := testCase.actualResult()
 			assert.Equal(t, testCase.expectedResult, res)
 		})
 	}
@@ -1195,90 +848,49 @@ func TestArrayListLastIndexOf(t *testing.T) {
 func TestArrayListRemoveElement(t *testing.T) {
 	testCases := []struct {
 		name           string
-		actualResult   func() (List, int, error)
-		expectedResult func() List
-		expectedSize   int
+		actualResult   func() ([]int64, int64, error)
+		expectedResult []int64
+		expectedSize   int64
 		expectedError  error
 	}{
 		{
-			name: "test successfully remove element",
-			actualResult: func() (List, int, error) {
-				al, err := NewArrayList(1, 2, 3, 4)
+			name: "should successfully remove element",
+			actualResult: func() ([]int64, int64, error) {
+				al := NewArrayList[int64](1, 2, 3, 4)
+
+				err := al.Remove(2)
 				require.NoError(t, err)
 
-				ok, err := al.Remove(2)
-				require.NoError(t, err)
-				require.True(t, ok)
-
-				return al, al.Size(), nil
+				return toSlice[int64](al), al.Size(), nil
 			},
-			expectedResult: func() List {
-				al, err := NewArrayList(1, 3, 4)
-				require.NoError(t, err)
-
-				return al
-			},
-			expectedSize: 3,
+			expectedResult: []int64{1, 3, 4},
+			expectedSize:   3,
 		},
 		{
-			name: "test return false when trying to remove element which is not present",
-			actualResult: func() (List, int, error) {
-				al, err := NewArrayList(1, 2, 3, 4)
-				require.NoError(t, err)
+			name: "should return error when trying to remove element which is not present",
+			actualResult: func() ([]int64, int64, error) {
+				al := NewArrayList[int64](1, 2, 3, 4)
 
-				ok, err := al.Remove(0)
-				require.False(t, ok)
+				err := al.Remove(0)
 
-				return al, al.Size(), err
+				return toSlice[int64](al), al.Size(), err
 			},
-			expectedResult: func() List {
-				al, err := NewArrayList(1, 2, 3, 4)
-				require.NoError(t, err)
-
-				return al
-			},
-			expectedSize:  4,
-			expectedError: errors.New("element 0 not found in the list"),
+			expectedResult: []int64{1, 2, 3, 4},
+			expectedSize:   4,
+			expectedError:  errors.New("element 0 not found in the list"),
 		},
 		{
-			name: "test return false and error when list is empty",
-			actualResult: func() (List, int, error) {
-				al, err := NewArrayList()
-				require.NoError(t, err)
+			name: "should return error when list is empty",
+			actualResult: func() ([]int64, int64, error) {
+				al := NewArrayList[int64]()
 
-				ok, err := al.Remove(0)
-				require.False(t, ok)
+				err := al.Remove(0)
 
-				return al, al.Size(), err
+				return toSlice[int64](al), al.Size(), err
 			},
-			expectedResult: func() List {
-				al, err := NewArrayList()
-				require.NoError(t, err)
-
-				return al
-			},
-			expectedSize:  0,
-			expectedError: errors.New("list is empty"),
-		},
-		{
-			name: "test return false when trying to remove element of different type",
-			actualResult: func() (List, int, error) {
-				al, err := NewArrayList(1, 2, 3, 4)
-				require.NoError(t, err)
-
-				ok, err := al.Remove("a")
-				require.False(t, ok)
-
-				return al, al.Size(), err
-			},
-			expectedResult: func() List {
-				al, err := NewArrayList(1, 2, 3, 4)
-				require.NoError(t, err)
-
-				return al
-			},
-			expectedSize:  4,
-			expectedError: liberr.TypeMismatchError("int", "string"),
+			expectedResult: []int64{},
+			expectedSize:   0,
+			expectedError:  errors.New("list is empty"),
 		},
 	}
 
@@ -1286,88 +898,71 @@ func TestArrayListRemoveElement(t *testing.T) {
 		t.Run(testCase.name, func(t *testing.T) {
 			res, sz, err := testCase.actualResult()
 
-			assert.Equal(t, testCase.expectedError, err)
+			internal.AssertErrorEquals(t, testCase.expectedError, err)
 			assert.Equal(t, testCase.expectedSize, sz)
-			assert.Equal(t, testCase.expectedResult(), res)
+			assert.Equal(t, testCase.expectedResult, res)
 		})
 	}
 }
 
 func TestArrayListRemoveAt(t *testing.T) {
 	testCases := []struct {
-		name           string
-		actualResult   func() (List, int, error)
-		expectedResult func() List
-		expectedSize   int
-		expectedError  error
+		name            string
+		actualResult    func() ([]int64, int64, int64, error)
+		expectedResult  []int64
+		expectedElement int64
+		expectedSize    int64
+		expectedError   error
 	}{
 		{
-			name: "test remove element at index 1",
-			actualResult: func() (List, int, error) {
-				al, err := NewArrayList(1, 2, 3, 4)
-				require.NoError(t, err)
+			name: "should remove element at index 1",
+			actualResult: func() ([]int64, int64, int64, error) {
+				al := NewArrayList[int64](1, 2, 3, 4)
 
 				e, err := al.RemoveAt(1)
-				assert.Equal(t, 2, e)
-				return al, al.Size(), err
-			},
-			expectedResult: func() List {
-				al, err := NewArrayList(1, 3, 4)
-				require.NoError(t, err)
 
-				return al
+				return toSlice[int64](al), e, al.Size(), err
 			},
-			expectedSize: 3,
+			expectedResult:  []int64{1, 3, 4},
+			expectedElement: 2,
+			expectedSize:    3,
 		},
 		{
-			name: "test return error when list is empty",
-			actualResult: func() (List, int, error) {
-				al, err := NewArrayList()
-				require.NoError(t, err)
+			name: "should return error when list is empty",
+			actualResult: func() ([]int64, int64, int64, error) {
+				al := NewArrayList[int64]()
 
 				e, err := al.RemoveAt(0)
-				assert.Nil(t, e)
 
-				return al, al.Size(), err
+				return toSlice[int64](al), e, al.Size(), err
 			},
-			expectedResult: func() List {
-				al, err := NewArrayList()
-				require.NoError(t, err)
-
-				return al
-			},
-			expectedSize:  0,
-			expectedError: errors.New("list is empty"),
+			expectedResult: []int64{},
+			expectedSize:   0,
+			expectedError:  errors.New("list is empty"),
 		},
 		{
-			name: "test failed to remove element at invalid index",
-			actualResult: func() (List, int, error) {
-				al, err := NewArrayList(1, 2, 3, 4)
-				require.NoError(t, err)
+			name: "should return error when trying to remove element at invalid index",
+			actualResult: func() ([]int64, int64, int64, error) {
+				al := NewArrayList[int64](1, 2, 3, 4)
 
 				e, err := al.RemoveAt(4)
-				assert.Nil(t, e)
 
-				return al, al.Size(), err
+				return toSlice[int64](al), e, al.Size(), err
 			},
-			expectedResult: func() List {
-				al, err := NewArrayList(1, 2, 3, 4)
-				require.NoError(t, err)
-
-				return al
-			},
-			expectedSize:  4,
-			expectedError: liberr.IndexOutOfBoundError(4),
+			expectedResult: []int64{1, 2, 3, 4},
+			expectedSize:   4,
+			expectedError:  fmt.Errorf("invalid index %d", 4),
 		},
 	}
 
 	for _, testCase := range testCases {
 		t.Run(testCase.name, func(t *testing.T) {
-			res, sz, err := testCase.actualResult()
+			res, el, sz, err := testCase.actualResult()
 
-			assert.Equal(t, testCase.expectedError, err)
+			internal.AssertErrorEquals(t, testCase.expectedError, err)
 			assert.Equal(t, testCase.expectedSize, sz)
-			assert.Equal(t, testCase.expectedResult(), res)
+			assert.Equal(t, testCase.expectedResult, res)
+			assert.Equal(t, testCase.expectedElement, el)
 		})
 	}
 }
@@ -1375,78 +970,22 @@ func TestArrayListRemoveAt(t *testing.T) {
 func TestArrayListRemoveAll(t *testing.T) {
 	testCases := []struct {
 		name           string
-		actualResult   func() (List, int, error)
-		expectedResult func() List
-		expectedSize   int
+		actualResult   func() (List[int64], int64, error)
+		expectedResult List[int64]
+		expectedSize   int64
 		expectedError  error
 	}{
 		{
-			name: "test successfully remove elements",
-			actualResult: func() (List, int, error) {
-				al, err := NewArrayList(1, 2, 3, 4)
-				require.NoError(t, err)
+			name: "should successfully remove elements",
+			actualResult: func() (List[int64], int64, error) {
+				al := NewArrayList[int64](1, 2, 3, 4)
 
-				ok, err := al.RemoveAll(2, 4)
-				require.True(t, ok)
+				err := al.RemoveAll(2, 4)
 
 				return al, al.Size(), err
 			},
-			expectedResult: func() List {
-				al, err := NewArrayList(1, 3)
-				require.NoError(t, err)
-
-				return al
-			},
-			expectedSize: 2,
-		},
-		{
-			name: "test successfully remove with decreasing capacity",
-			actualResult: func() (List, int, error) {
-				data := make([]interface{}, 22)
-				for i := 0; i < 22; i++ {
-					data[i] = i
-				}
-
-				al, err := NewArrayList(data...)
-				require.NoError(t, err)
-
-				rem := make([]interface{}, 11)
-				for i := 0; i < 11; i++ {
-					rem[i] = i
-				}
-
-				ok, err := al.RemoveAll(rem...)
-				require.True(t, ok)
-
-				return al, al.Size(), err
-			},
-			expectedResult: func() List {
-				al, err := NewArrayList(11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21)
-				require.NoError(t, err)
-
-				return al
-			},
-			expectedSize: 11,
-		},
-		{
-			name: "test failed to Remove elements due to type mismatch",
-			actualResult: func() (List, int, error) {
-				al, err := NewArrayList(1, 2, 3, 4)
-				require.NoError(t, err)
-
-				ok, err := al.RemoveAll(2, "a")
-				require.False(t, ok)
-
-				return al, al.Size(), err
-			},
-			expectedResult: func() List {
-				al, err := NewArrayList(1, 2, 3, 4)
-				require.NoError(t, err)
-
-				return al
-			},
-			expectedSize:  4,
-			expectedError: liberr.TypeMismatchError("int", "string"),
+			expectedResult: NewArrayList[int64](1, 3),
+			expectedSize:   2,
 		},
 	}
 
@@ -1456,107 +995,61 @@ func TestArrayListRemoveAll(t *testing.T) {
 
 			assert.Equal(t, testCase.expectedError, err)
 			assert.Equal(t, testCase.expectedSize, sz)
-			assert.Equal(t, testCase.expectedResult(), res)
+			assert.Equal(t, testCase.expectedResult, res)
 		})
 	}
 }
 
 type isEven struct{}
 
-func (ie isEven) Test(e interface{}) bool {
-	return e.(int)%2 == 0
-}
-
-type containsA struct{}
-
-func (ca containsA) Test(e interface{}) bool {
-	return strings.Contains(e.(string), "a")
+func (ie isEven) Test(e int) bool {
+	return e%2 == 0
 }
 
 func TestArrayListRemoveIf(t *testing.T) {
 	testCases := []struct {
 		name           string
-		actualResult   func() (List, int, error)
-		expectedResult func() List
-		expectedSize   int
+		actualResult   func() (List[int], int64, error)
+		expectedResult List[int]
+		expectedSize   int64
 		expectedError  error
 	}{
 		{
-			name: "test remove if number is even",
-			actualResult: func() (List, int, error) {
-				al, err := NewArrayList(1, 2, 3, 4)
-				require.NoError(t, err)
+			name: "should remove if number is even",
+			actualResult: func() (List[int], int64, error) {
+				al := NewArrayList[int](1, 2, 3, 4)
 
-				ok, err := al.RemoveIf(isEven{})
-				require.True(t, ok)
+				err := al.RemoveIf(isEven{})
 
 				return al, al.Size(), err
 			},
-			expectedResult: func() List {
-				al, err := NewArrayList(1, 3)
-				require.NoError(t, err)
-
-				return al
-			},
-			expectedSize: 2,
+			expectedResult: NewArrayList[int](1, 3),
+			expectedSize:   2,
 		},
 		{
-			name: "test remove if string contains a",
-			actualResult: func() (List, int, error) {
-				al, err := NewArrayList("a", "bcd", "abg", "efg", "gb")
-				require.NoError(t, err)
+			name: "should remove no element when no element match predicate",
+			actualResult: func() (List[int], int64, error) {
+				al := NewArrayList[int](1, 3, 5, 7)
 
-				ok, err := al.RemoveIf(containsA{})
-				require.True(t, ok)
+				err := al.RemoveIf(isEven{})
 
 				return al, al.Size(), err
 			},
-			expectedResult: func() List {
-				al, err := NewArrayList("bcd", "efg", "gb")
-				require.NoError(t, err)
-
-				return al
-			},
-			expectedSize: 3,
+			expectedResult: NewArrayList[int](1, 3, 5, 7),
+			expectedSize:   4,
 		},
 		{
-			name: "test remove no element when no element match predicate",
-			actualResult: func() (List, int, error) {
-				al, err := NewArrayList("bcd", "efg", "hij")
-				require.NoError(t, err)
+			name: "should return error when list is empty",
+			actualResult: func() (List[int], int64, error) {
+				al := NewArrayList[int]()
 
-				ok, err := al.RemoveIf(containsA{})
-				require.True(t, ok)
+				err := al.RemoveIf(isEven{})
 
 				return al, al.Size(), err
 			},
-			expectedResult: func() List {
-				al, err := NewArrayList("bcd", "efg", "hij")
-				require.NoError(t, err)
-
-				return al
-			},
-			expectedSize: 3,
-		},
-		{
-			name: "test return error when list is empty",
-			actualResult: func() (List, int, error) {
-				al, err := NewArrayList()
-				require.NoError(t, err)
-
-				ok, err := al.RemoveIf(isEven{})
-				require.False(t, ok)
-
-				return al, al.Size(), err
-			},
-			expectedResult: func() List {
-				al, err := NewArrayList()
-				require.NoError(t, err)
-
-				return al
-			},
-			expectedSize:  0,
-			expectedError: errors.New("list is empty"),
+			expectedResult: NewArrayList[int](),
+			expectedSize:   0,
+			expectedError:  errors.New("list is empty"),
 		},
 	}
 
@@ -1564,9 +1057,9 @@ func TestArrayListRemoveIf(t *testing.T) {
 		t.Run(testCase.name, func(t *testing.T) {
 			res, sz, err := testCase.actualResult()
 
-			assert.Equal(t, testCase.expectedError, err)
+			internal.AssertErrorEquals(t, testCase.expectedError, err)
 			assert.Equal(t, testCase.expectedSize, sz)
-			assert.Equal(t, testCase.expectedResult(), res)
+			assert.Equal(t, testCase.expectedResult, res)
 		})
 	}
 }
@@ -1574,127 +1067,85 @@ func TestArrayListRemoveIf(t *testing.T) {
 func TestArrayListRemoveRange(t *testing.T) {
 	testCases := []struct {
 		name           string
-		actualResult   func() (List, int, error)
-		expectedResult func() List
-		expectedSize   int
+		actualResult   func() ([]int64, int64, error)
+		expectedResult []int64
+		expectedSize   int64
 		expectedError  error
 	}{
 		{
-			name: "test remove elements from range 0 to 3",
-			actualResult: func() (List, int, error) {
-				al, err := NewArrayList(1, 2, 3, 4, 5, 6, 7, 8)
-				require.NoError(t, err)
+			name: "should remove elements from range 0 to 3",
+			actualResult: func() ([]int64, int64, error) {
+				al := NewArrayList[int64](1, 2, 3, 4, 5, 6, 7, 8)
 
-				ok, err := al.RemoveRange(0, 3)
-				require.True(t, ok)
+				err := al.RemoveRange(0, 3)
 
-				return al, al.Size(), err
+				return toSlice[int64](al), al.Size(), err
 			},
-			expectedResult: func() List {
-				al, err := NewArrayList(4, 5, 6, 7, 8)
-				require.NoError(t, err)
-
-				return al
-			},
-			expectedSize: 5,
+			expectedResult: []int64{5, 6, 7, 8},
+			expectedSize:   4,
 		},
 		{
-			name: "test remove elements from range 2 to 4",
-			actualResult: func() (List, int, error) {
-				al, err := NewArrayList(1, 2, 3, 4)
-				require.NoError(t, err)
+			name: "should remove elements from range 2 to 3",
+			actualResult: func() ([]int64, int64, error) {
+				al := NewArrayList[int64](1, 2, 3, 4)
 
-				ok, err := al.RemoveRange(2, 4)
-				require.True(t, ok)
+				err := al.RemoveRange(2, 3)
 
-				return al, al.Size(), err
+				return toSlice[int64](al), al.Size(), err
 			},
-			expectedResult: func() List {
-				al, err := NewArrayList(1, 2)
-				require.NoError(t, err)
-
-				return al
-			},
-			expectedSize: 2,
+			expectedResult: []int64{1, 2},
+			expectedSize:   2,
 		},
 		{
-			name: "test remove no elements when to and from are the same",
-			actualResult: func() (List, int, error) {
-				al, err := NewArrayList(1, 2, 3, 4)
-				require.NoError(t, err)
+			name: "should remove single element when to and from are the same",
+			actualResult: func() ([]int64, int64, error) {
+				al := NewArrayList[int64](1, 2, 3, 4)
 
-				ok, err := al.RemoveRange(0, 0)
-				require.True(t, ok)
+				err := al.RemoveRange(0, 0)
 
-				return al, al.Size(), err
+				return toSlice[int64](al), al.Size(), err
 			},
-			expectedResult: func() List {
-				al, err := NewArrayList(1, 2, 3, 4)
-				require.NoError(t, err)
-
-				return al
-			},
-			expectedSize: 4,
+			expectedResult: []int64{2, 3, 4},
+			expectedSize:   3,
 		},
 		{
-			name: "test return error when to is smaller than from",
-			actualResult: func() (List, int, error) {
-				al, err := NewArrayList(1, 2, 3, 4)
-				require.NoError(t, err)
+			name: "should return error when to is smaller than from",
+			actualResult: func() ([]int64, int64, error) {
+				al := NewArrayList[int64](1, 2, 3, 4)
 
-				ok, err := al.RemoveRange(1, 0)
-				require.False(t, ok)
+				err := al.RemoveRange(1, 0)
 
-				return al, al.Size(), err
+				return toSlice[int64](al), al.Size(), err
 			},
-			expectedResult: func() List {
-				al, err := NewArrayList(1, 2, 3, 4)
-				require.NoError(t, err)
-
-				return al
-			},
-			expectedSize:  4,
-			expectedError: errors.New("to cannot be smaller than from"),
+			expectedResult: []int64{1, 2, 3, 4},
+			expectedSize:   4,
+			expectedError:  errors.New("end cannot be smaller than start"),
 		},
 		{
-			name: "test return error when from is an invalid index",
-			actualResult: func() (List, int, error) {
-				al, err := NewArrayList(1, 2, 3, 4)
-				require.NoError(t, err)
+			name: "should return error when start is an invalid index",
+			actualResult: func() ([]int64, int64, error) {
+				al := NewArrayList[int64](1, 2, 3, 4)
 
-				ok, err := al.RemoveRange(-1, 2)
-				require.False(t, ok)
+				err := al.RemoveRange(-1, 2)
 
-				return al, al.Size(), err
+				return toSlice[int64](al), al.Size(), err
 			},
-			expectedResult: func() List {
-				al, err := NewArrayList(1, 2, 3, 4)
-				require.NoError(t, err)
-
-				return al
-			},
-			expectedSize:  4,
-			expectedError: liberr.IndexOutOfBoundError(-1),
+			expectedResult: []int64{1, 2, 3, 4},
+			expectedSize:   4,
+			expectedError:  fmt.Errorf("invalid index %d", -1),
 		},
 		{
-			name: "test return error when to is an invalid index",
-			actualResult: func() (List, int, error) {
-				al, err := NewArrayList(1, 2, 3, 4)
-				require.NoError(t, err)
+			name: "should return error when end is an invalid index",
+			actualResult: func() ([]int64, int64, error) {
+				al := NewArrayList[int64](1, 2, 3, 4)
 
-				ok, err := al.RemoveRange(1, 10)
-				require.False(t, ok)
+				err := al.RemoveRange(1, 10)
 
-				return al, al.Size(), err
+				return toSlice[int64](al), al.Size(), err
 			},
-			expectedResult: func() List {
-				al, err := NewArrayList(1, 2, 3, 4)
-				require.NoError(t, err)
-
-				return al
-			},
-			expectedSize:  4,
-			expectedError: liberr.IndexOutOfBoundError(10),
+			expectedResult: []int64{1, 2, 3, 4},
+			expectedSize:   4,
+			expectedError:  fmt.Errorf("invalid index %d", 10),
 		},
 	}
 
@@ -1702,145 +1153,52 @@ func TestArrayListRemoveRange(t *testing.T) {
 		t.Run(testCase.name, func(t *testing.T) {
 			res, sz, err := testCase.actualResult()
 
-			assert.Equal(t, testCase.expectedError, err)
+			internal.AssertErrorEquals(t, testCase.expectedError, err)
 			assert.Equal(t, testCase.expectedSize, sz)
-			assert.Equal(t, testCase.expectedResult(), res)
+			assert.Equal(t, testCase.expectedResult, res)
 		})
 	}
 }
 
 type testIntIncOperator struct{}
 
-func (ti testIntIncOperator) Apply(e interface{}) interface{} { return e.(int) + 1 }
-
-type testStringConcatOperator struct{}
-
-func (ts testStringConcatOperator) Apply(e interface{}) interface{} {
-	return fmt.Sprintf("%s%s", e.(string), "a")
-}
-
-type testInvalidOperator struct{}
-
-func (ts testInvalidOperator) Apply(e interface{}) interface{} {
-	return fmt.Sprintf("%d", e.(int))
-}
+func (ti testIntIncOperator) Apply(e int) int { return e + 1 }
 
 func TestArrayListReplace(t *testing.T) {
 	testCases := []struct {
 		name           string
-		actualResult   func() (error, List)
-		expectedResult func() List
+		actualResult   func() (error, List[int])
+		expectedResult List[int]
 		expectedError  error
 	}{
 		{
-			name: "test replace a given value with new one",
-			actualResult: func() (error, List) {
-				al, err := NewArrayList(1)
-				require.NoError(t, err)
+			name: "should replace a given value with new one",
+			actualResult: func() (error, List[int]) {
+				al := NewArrayList[int](1)
 
 				return al.Replace(1, 2), al
 			},
-			expectedResult: func() List {
-				al, err := NewArrayList(2)
-				require.NoError(t, err)
-
-				return al
-			},
+			expectedResult: NewArrayList[int](2),
 		},
 		{
-			name: "test replace a given value with new one two",
-			actualResult: func() (error, List) {
-				al, err := NewArrayList(1, 2, 5, 4)
-				require.NoError(t, err)
+			name: "should return error when item is not found in the list",
+			actualResult: func() (error, List[int]) {
+				al := NewArrayList[int](1, 2)
 
 				return al.Replace(5, 3), al
 			},
-			expectedResult: func() List {
-				al, err := NewArrayList(1, 2, 3, 4)
-				require.NoError(t, err)
-
-				return al
-			},
+			expectedResult: NewArrayList[int](1, 2),
+			expectedError:  errors.New("element 5 not found in the list"),
 		},
 		{
-			name: "test return error when item is not found in the list",
-			actualResult: func() (error, List) {
-				al, err := NewArrayList(1, 2)
-				require.NoError(t, err)
-
-				return al.Replace(5, 3), al
-			},
-			expectedResult: func() List {
-				al, err := NewArrayList(1, 2)
-				require.NoError(t, err)
-
-				return al
-			},
-			expectedError: errors.New("element 5 not found in the list"),
-		},
-		{
-			name: "test return error when old item has different type",
-			actualResult: func() (error, List) {
-				al, err := NewArrayList(1, 2)
-				require.NoError(t, err)
-
-				return al.Replace('a', 3), al
-			},
-			expectedResult: func() List {
-				al, err := NewArrayList(1, 2)
-				require.NoError(t, err)
-
-				return al
-			},
-			expectedError: liberr.TypeMismatchError("int", "int32"),
-		},
-		{
-			name: "test return error when new item has different type",
-			actualResult: func() (error, List) {
-				al, err := NewArrayList(1, 2)
-				require.NoError(t, err)
-
-				return al.Replace(1, 'a'), al
-			},
-			expectedResult: func() List {
-				al, err := NewArrayList(1, 2)
-				require.NoError(t, err)
-
-				return al
-			},
-			expectedError: liberr.TypeMismatchError("int", "int32"),
-		},
-		{
-			name: "test return error when old and new item has different type",
-			actualResult: func() (error, List) {
-				al, err := NewArrayList(1, 2)
-				require.NoError(t, err)
-
-				return al.Replace('a', 'b'), al
-			},
-			expectedResult: func() List {
-				al, err := NewArrayList(1, 2)
-				require.NoError(t, err)
-
-				return al
-			},
-			expectedError: liberr.TypeMismatchError("int", "int32"),
-		},
-		{
-			name: "test return error when list is empty",
-			actualResult: func() (error, List) {
-				al, err := NewArrayList()
-				require.NoError(t, err)
+			name: "should return error when list is empty",
+			actualResult: func() (error, List[int]) {
+				al := NewArrayList[int]()
 
 				return al.Replace(1, 2), al
 			},
-			expectedResult: func() List {
-				al, err := NewArrayList()
-				require.NoError(t, err)
-
-				return al
-			},
-			expectedError: errors.New("list is empty"),
+			expectedResult: NewArrayList[int](),
+			expectedError:  errors.New("list is empty"),
 		},
 	}
 
@@ -1848,8 +1206,8 @@ func TestArrayListReplace(t *testing.T) {
 		t.Run(testCase.name, func(t *testing.T) {
 			err, res := testCase.actualResult()
 
-			assert.Equal(t, testCase.expectedError, err)
-			assert.Equal(t, testCase.expectedResult(), res)
+			internal.AssertErrorEquals(t, testCase.expectedError, err)
+			assert.Equal(t, testCase.expectedResult, res)
 		})
 	}
 }
@@ -1857,64 +1215,28 @@ func TestArrayListReplace(t *testing.T) {
 func TestArrayListReplaceAll(t *testing.T) {
 	testCases := []struct {
 		name           string
-		actualResult   func() (error, List)
-		expectedResult func() List
+		actualResult   func() List[int]
+		expectedResult List[int]
 		expectedError  error
 	}{
 		{
-			name: "test replace all on integer List with increment operator",
-			actualResult: func() (error, List) {
-				al, err := NewArrayList(1, 2, 3, 4)
-				require.NoError(t, err)
+			name: "should replace all on integer list with increment operator",
+			actualResult: func() List[int] {
+				al := NewArrayList[int](1, 2, 3, 4)
 
-				return al.ReplaceAll(testIntIncOperator{}), al
-			},
-			expectedResult: func() List {
-				al, err := NewArrayList(2, 3, 4, 5)
-				require.NoError(t, err)
+				al.ReplaceAll(testIntIncOperator{})
 
 				return al
 			},
-		},
-		{
-			name: "test replace all on string List with concat operator",
-			actualResult: func() (error, List) {
-				al, err := NewArrayList("a", "b")
-				require.NoError(t, err)
-
-				return al.ReplaceAll(testStringConcatOperator{}), al
-			},
-			expectedResult: func() List {
-				al, err := NewArrayList("aa", "ba")
-				require.NoError(t, err)
-
-				return al
-			},
-		},
-		{
-			name: "test replace all fails when operator return invalid data",
-			actualResult: func() (error, List) {
-				al, err := NewArrayList(1, 2)
-				require.NoError(t, err)
-
-				return al.ReplaceAll(testInvalidOperator{}), al
-			},
-			expectedResult: func() List {
-				al, err := NewArrayList(1, 2)
-				require.NoError(t, err)
-
-				return al
-			},
-			expectedError: liberr.TypeMismatchError("int", "string"),
+			expectedResult: NewArrayList[int](2, 3, 4, 5),
 		},
 	}
 
 	for _, testCase := range testCases {
 		t.Run(testCase.name, func(t *testing.T) {
-			err, res := testCase.actualResult()
+			res := testCase.actualResult()
 
-			assert.Equal(t, testCase.expectedError, err)
-			assert.Equal(t, testCase.expectedResult(), res)
+			assert.Equal(t, testCase.expectedResult, res)
 		})
 	}
 }
@@ -1922,97 +1244,34 @@ func TestArrayListReplaceAll(t *testing.T) {
 func TestArrayListRetainAll(t *testing.T) {
 	testCases := []struct {
 		name           string
-		actualResult   func() (List, int, error)
-		expectedResult func() List
-		expectedSize   int
+		actualResult   func() (List[int64], int64, error)
+		expectedResult List[int64]
+		expectedSize   int64
 		expectedError  error
 	}{
 		{
-			name: "test retain all from integer list",
-			actualResult: func() (List, int, error) {
-				al, err := NewArrayList(1, 2, 3, 4)
-				require.NoError(t, err)
+			name: "should retain given values from integer list",
+			actualResult: func() (List[int64], int64, error) {
+				al := NewArrayList[int64](1, 2, 3, 4)
 
-				ok, err := al.RetainAll(2, 4)
-				require.True(t, ok)
+				err := al.RetainAll(2, 4)
 
 				return al, al.Size(), err
 			},
-			expectedResult: func() List {
-				al, err := NewArrayList(2, 4)
-				require.NoError(t, err)
-
-				return al
-			},
-			expectedSize: 2,
+			expectedResult: NewArrayList[int64](2, 4),
+			expectedSize:   2,
 		},
 		{
-			name: "test retain all from integer list",
-			actualResult: func() (List, int, error) {
-				data := make([]interface{}, 22)
-				for i := 0; i < 22; i++ {
-					data[i] = i
-				}
+			name: "should retain given values from integer list second scenario",
+			actualResult: func() (List[int64], int64, error) {
+				al := NewArrayList[int64](internal.SliceGenerator{Size: 22}.Generate()...)
 
-				al, err := NewArrayList(data...)
-				require.NoError(t, err)
-
-				ret := make([]interface{}, 11)
-				for i := 0; i < 11; i++ {
-					ret[i] = i
-				}
-
-				ok, err := al.RetainAll(ret...)
-				require.True(t, ok)
+				err := al.RetainAll(internal.SliceGenerator{Size: 11}.Generate()...)
 
 				return al, al.Size(), err
 			},
-			expectedResult: func() List {
-				al, err := NewArrayList(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10)
-				require.NoError(t, err)
-
-				return al
-			},
-			expectedSize: 11,
-		},
-		{
-			name: "test retain all from string list",
-			actualResult: func() (List, int, error) {
-				al, err := NewArrayList("a", "b", "c", "d")
-				require.NoError(t, err)
-
-				ok, err := al.RetainAll("b", "d")
-				require.True(t, ok)
-
-				return al, al.Size(), err
-			},
-			expectedResult: func() List {
-				al, err := NewArrayList("b", "d")
-				require.NoError(t, err)
-
-				return al
-			},
-			expectedSize: 2,
-		},
-		{
-			name: "test retain all from string list",
-			actualResult: func() (List, int, error) {
-				al, err := NewArrayList(1, 2, 3, 4)
-				require.NoError(t, err)
-
-				ok, err := al.RetainAll(2, "c")
-				require.False(t, ok)
-
-				return al, al.Size(), err
-			},
-			expectedResult: func() List {
-				al, err := NewArrayList(1, 2, 3, 4)
-				require.NoError(t, err)
-
-				return al
-			},
-			expectedSize:  4,
-			expectedError: liberr.TypeMismatchError("int", "string"),
+			expectedResult: NewArrayList[int64](0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10),
+			expectedSize:   11,
 		},
 	}
 
@@ -2022,7 +1281,7 @@ func TestArrayListRetainAll(t *testing.T) {
 
 			assert.Equal(t, testCase.expectedError, err)
 			assert.Equal(t, testCase.expectedSize, sz)
-			assert.Equal(t, testCase.expectedResult(), res)
+			assert.Equal(t, testCase.expectedResult, res)
 		})
 	}
 }
@@ -2030,106 +1289,70 @@ func TestArrayListRetainAll(t *testing.T) {
 func TestArrayListSubList(t *testing.T) {
 	testCases := []struct {
 		name           string
-		actualResult   func() (List, error)
-		expectedResult func() List
+		actualResult   func() (List[int], error)
+		expectedResult List[int]
 		expectedError  error
 	}{
 		{
-			name: "test get sublist from index 1 to 4",
-			actualResult: func() (List, error) {
-				al, err := NewArrayList(1, 2, 3, 4, 5, 6, 7)
-				require.NoError(t, err)
+			name: "should get sublist from index 1 to 4",
+			actualResult: func() (List[int], error) {
+				al := NewArrayList[int](1, 2, 3, 4, 5, 6, 7)
 
 				return al.SubList(1, 4)
 			},
-			expectedResult: func() List {
-				al, err := NewArrayList(2, 3, 4)
-				require.NoError(t, err)
-
-				return al
-			},
+			expectedResult: NewArrayList[int](2, 3, 4, 5),
 		},
 		{
-			name: "test get sublist from index 0 to 0",
-			actualResult: func() (List, error) {
-				al, err := NewArrayList(1, 2, 3, 4, 5, 6, 7)
-				require.NoError(t, err)
+			name: "should get sublist from index 0 to 0",
+			actualResult: func() (List[int], error) {
+				al := NewArrayList[int](1, 2, 3, 4, 5, 6, 7)
 
 				return al.SubList(0, 0)
 			},
-			expectedResult: func() List {
-				al, err := NewArrayList()
-				require.NoError(t, err)
-
-				return al
-			},
+			expectedResult: NewArrayList[int](1),
 		},
 		{
-			name: "test get sublist from index 0 to 4",
-			actualResult: func() (List, error) {
-				al, err := NewArrayList(1, 2, 3, 4, 5, 6, 7)
-				require.NoError(t, err)
+			name: "should get sublist from index 0 to 2",
+			actualResult: func() (List[int], error) {
+				al := NewArrayList[int](1, 2, 3, 4, 5, 6, 7)
 
 				return al.SubList(0, 2)
 			},
-			expectedResult: func() List {
-				al, err := NewArrayList(1, 2)
-				require.NoError(t, err)
-
-				return al
-			},
+			expectedResult: NewArrayList[int](1, 2, 3),
 		},
 		{
-			name: "test get sublist from index 4 to 6",
-			actualResult: func() (List, error) {
-				al, err := NewArrayList(1, 2, 3, 4, 5, 6, 7)
-				require.NoError(t, err)
+			name: "should get sublist from index 4 to 6",
+			actualResult: func() (List[int], error) {
+				al := NewArrayList[int](1, 2, 3, 4, 5, 6, 7)
 
 				return al.SubList(4, 6)
 			},
-			expectedResult: func() List {
-				al, err := NewArrayList(5, 6)
-				require.NoError(t, err)
-
-				return al
-			},
+			expectedResult: NewArrayList[int](5, 6, 7),
 		},
 		{
-			name: "test get sublist return error for invalid start index",
-			actualResult: func() (List, error) {
-				al, err := NewArrayList(1, 2, 3, 4, 5, 6, 7)
-				require.NoError(t, err)
+			name: "should return error for invalid start index",
+			actualResult: func() (List[int], error) {
+				al := NewArrayList[int](1, 2, 3, 4, 5, 6, 7)
 
 				return al.SubList(-1, 6)
 			},
-			expectedResult: func() List {
-				return nil
-			},
-			expectedError: liberr.IndexOutOfBoundError(-1),
+			expectedError: fmt.Errorf("invalid index %d", -1),
 		},
 		{
-			name: "test get sublist return error for invalid end index",
-			actualResult: func() (List, error) {
-				al, err := NewArrayList(1, 2, 3, 4, 5, 6, 7)
-				require.NoError(t, err)
+			name: "should return error for invalid end index",
+			actualResult: func() (List[int], error) {
+				al := NewArrayList[int](1, 2, 3, 4, 5, 6, 7)
 
-				return al.SubList(0, 10)
+				return al.SubList(0, 7)
 			},
-			expectedResult: func() List {
-				return nil
-			},
-			expectedError: liberr.IndexOutOfBoundError(10),
+			expectedError: fmt.Errorf("invalid index %d", 7),
 		},
 		{
-			name: "test get sublist return error when end is less than start",
-			actualResult: func() (List, error) {
-				ll, err := NewArrayList(1, 2, 3, 4, 5, 6, 7)
-				require.NoError(t, err)
+			name: "should return error when end is less than start",
+			actualResult: func() (List[int], error) {
+				ll := NewArrayList[int](1, 2, 3, 4, 5, 6, 7)
 
 				return ll.SubList(4, 2)
-			},
-			expectedResult: func() List {
-				return nil
 			},
 			expectedError: errors.New("end cannot be smaller than start"),
 		},
@@ -2139,8 +1362,8 @@ func TestArrayListSubList(t *testing.T) {
 		t.Run(testCase.name, func(t *testing.T) {
 			res, err := testCase.actualResult()
 
-			assert.Equal(t, testCase.expectedError, err)
-			assert.Equal(t, testCase.expectedResult(), res)
+			internal.AssertErrorEquals(t, testCase.expectedError, err)
+			assert.Equal(t, testCase.expectedResult, res)
 		})
 	}
 }

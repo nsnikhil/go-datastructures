@@ -10,4 +10,4 @@
 *.out
 
 vendor/
-playground.*
+playground/

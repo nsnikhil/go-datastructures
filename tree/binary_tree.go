@@ -12,24 +12,24 @@ import (
 	"github.com/nsnikhil/go-datastructures/utils"
 )
 
-type binaryNode struct {
-	data interface{}
+type binaryNode[T comparable] struct {
+	data T
 	//level  int // NOT IMPLEMENTED
 	hd     int
-	left   *binaryNode
-	right  *binaryNode
-	parent *binaryNode
+	left   *binaryNode[T]
+	right  *binaryNode[T]
+	parent *binaryNode[T]
 }
 
-func (bn *binaryNode) String() string {
+func (bn *binaryNode[T]) String() string {
 	return fmt.Sprint(bn.data)
 }
 
-func (bn *binaryNode) isLeaf() bool {
+func (bn *binaryNode[T]) isLeaf() bool {
 	return bn.left == nil && bn.right == nil
 }
 
-func (bn *binaryNode) childCount() int {
+func (bn *binaryNode[T]) childCount() int {
 	c := 0
 	if bn.left != nil {
 		c++
@@ -40,8 +40,8 @@ func (bn *binaryNode) childCount() int {
 	return c
 }
 
-func (bn *binaryNode) clone() *binaryNode {
-	return &binaryNode{
+func (bn *binaryNode[T]) clone() *binaryNode[T] {
+	return &binaryNode[T]{
 		data:   bn.data,
 		hd:     bn.hd,
 		left:   bn.left,
@@ -50,7 +50,7 @@ func (bn *binaryNode) clone() *binaryNode {
 	}
 }
 
-func (bn *binaryNode) detach() {
+func (bn *binaryNode[T]) detach() {
 	p := bn.parent
 
 	if p == nil {
@@ -66,37 +66,29 @@ func (bn *binaryNode) detach() {
 	bn.parent = nil
 }
 
-func newBinaryNode(data interface{}) *binaryNode {
-	return &binaryNode{data: data}
+func newBinaryNode[T comparable](data T) *binaryNode[T] {
+	return &binaryNode[T]{data: data}
 }
 
-type BinaryTree struct {
+type BinaryTree[T comparable] struct {
 	typeURL string
 	count   int
-	root    *binaryNode
+	root    *binaryNode[T]
 }
 
-func NewBinaryTree(e ...interface{}) (*BinaryTree, error) {
-	bt := &BinaryTree{
+func NewBinaryTree[T comparable](e ...T) (*BinaryTree[T], error) {
+	bt := &BinaryTree[T]{
 		typeURL: utils.NA,
 		count:   utils.Naught,
 	}
 
-	sz := len(e)
+	sz := int64(len(e))
 
 	if sz == 0 {
 		return bt, nil
 	}
 
-	et := utils.GetTypeName(e[0])
-
-	for i := 1; i < sz; i++ {
-		if et != utils.GetTypeName(e[i]) {
-			return nil, errors.New("all elements must be of same type")
-		}
-	}
-
-	for i := 0; i < sz; i++ {
+	for i := int64(0); i < sz; i++ {
 		if err := bt.Insert(e[i]); err != nil {
 			return nil, err
 		}
@@ -105,7 +97,7 @@ func NewBinaryTree(e ...interface{}) (*BinaryTree, error) {
 	return bt, nil
 }
 
-func (bt *BinaryTree) Insert(e interface{}) error {
+func (bt *BinaryTree[T]) Insert(e T) error {
 	et := utils.GetTypeName(e)
 
 	if bt.typeURL == utils.NA {
@@ -126,39 +118,36 @@ func (bt *BinaryTree) Insert(e interface{}) error {
 
 	curr := bt.root
 
-	q, err := queue.NewLinkedQueue()
-	if err != nil {
-		return err
-	}
+	q := queue.NewLinkedQueue[*binaryNode[T]]()
 
 	if err := q.Add(curr); err != nil {
 		return err
 	}
 
-	err = func() error {
+	err := func() error {
 		for !q.Empty() {
 			sz := q.Size()
 
-			for i := 0; i < sz; i++ {
+			for i := int64(0); i < sz; i++ {
 				f, _ := q.Remove()
 
-				if f.(*binaryNode).left == nil {
-					f.(*binaryNode).left = t
-					t.parent = f.(*binaryNode)
+				if f.left == nil {
+					f.left = t
+					t.parent = f
 					return nil
 				}
 
-				if f.(*binaryNode).right == nil {
-					f.(*binaryNode).right = t
-					t.parent = f.(*binaryNode)
+				if f.right == nil {
+					f.right = t
+					t.parent = f
 					return nil
 				}
 
-				if err := q.Add(f.(*binaryNode).left); err != nil {
+				if err := q.Add(f.left); err != nil {
 					return err
 				}
 
-				if err := q.Add(f.(*binaryNode).right); err != nil {
+				if err := q.Add(f.right); err != nil {
 					return err
 				}
 			}
@@ -176,7 +165,7 @@ func (bt *BinaryTree) Insert(e interface{}) error {
 	return nil
 }
 
-func (bt *BinaryTree) InsertCompare(e interface{}, c comparator.Comparator) error {
+func (bt *BinaryTree[T]) InsertCompare(e T, c comparator.Comparator[T]) error {
 	et := utils.GetTypeName(e)
 
 	if bt.typeURL == utils.NA {
@@ -198,10 +187,7 @@ func (bt *BinaryTree) InsertCompare(e interface{}, c comparator.Comparator) erro
 	curr := bt.root
 
 	for {
-		i, err := c.Compare(curr.data, t.data)
-		if err != nil {
-			return err
-		}
+		i := c.Compare(curr.data, t.data)
 
 		if i > 0 {
 			if curr.left != nil {
@@ -219,10 +205,7 @@ func (bt *BinaryTree) InsertCompare(e interface{}, c comparator.Comparator) erro
 
 	}
 
-	i, err := c.Compare(curr.data, t.data)
-	if err != nil {
-		return err
-	}
+	i := c.Compare(curr.data, t.data)
 
 	if i > 0 {
 		curr.left = t
@@ -236,7 +219,7 @@ func (bt *BinaryTree) InsertCompare(e interface{}, c comparator.Comparator) erro
 	return nil
 }
 
-func (bt *BinaryTree) Delete(e interface{}) error {
+func (bt *BinaryTree[T]) Delete(e T) error {
 	if bt.Empty() {
 		return errors.New("tree is empty")
 	}
@@ -269,15 +252,15 @@ func (bt *BinaryTree) Delete(e interface{}) error {
 	return nil
 }
 
-func (bt *BinaryTree) DeleteCompare(e interface{}, c comparator.Comparator) error {
-	var deleteNode func(e interface{}, c comparator.Comparator, n *binaryNode) error
+func (bt *BinaryTree[T]) DeleteCompare(e T, c comparator.Comparator[T]) error {
+	var deleteNode func(e T, c comparator.Comparator[T], n *binaryNode[T]) error
 
-	deleteNode = func(e interface{}, c comparator.Comparator, n *binaryNode) error {
+	deleteNode = func(e T, c comparator.Comparator[T], n *binaryNode[T]) error {
 		if n == nil {
 			return fmt.Errorf("%v not found in the tree", e)
 		}
 
-		i, _ := c.Compare(n.data, e)
+		i := c.Compare(n.data, e)
 
 		if i > 0 {
 			return deleteNode(e, c, n.left)
@@ -322,7 +305,7 @@ func (bt *BinaryTree) DeleteCompare(e interface{}, c comparator.Comparator) erro
 	return nil
 }
 
-func (bt *BinaryTree) Search(e interface{}) (bool, error) {
+func (bt *BinaryTree[T]) Search(e T) (bool, error) {
 	if bt.Empty() {
 		return false, errors.New("tree is empty")
 	}
@@ -340,7 +323,7 @@ func (bt *BinaryTree) Search(e interface{}) (bool, error) {
 	return true, nil
 }
 
-func (bt *BinaryTree) SearchCompare(e interface{}, c comparator.Comparator) (bool, error) {
+func (bt *BinaryTree[T]) SearchCompare(e T, c comparator.Comparator[T]) (bool, error) {
 	if bt.Empty() {
 		return false, errors.New("tree is empty")
 	}
@@ -357,10 +340,7 @@ func (bt *BinaryTree) SearchCompare(e interface{}, c comparator.Comparator) (boo
 			return true, nil
 		}
 
-		res, err := c.Compare(curr.data, e)
-		if err != nil {
-			return false, err
-		}
+		res := c.Compare(curr.data, e)
 
 		if res > 0 {
 			curr = curr.left
@@ -372,38 +352,38 @@ func (bt *BinaryTree) SearchCompare(e interface{}, c comparator.Comparator) (boo
 	return false, fmt.Errorf("%v not found in the tree", e)
 }
 
-func (bt *BinaryTree) Count() int {
+func (bt *BinaryTree[T]) Count() int {
 	return bt.count
 }
 
-func (bt *BinaryTree) Height() int {
+func (bt *BinaryTree[T]) Height() int {
 	return calculateHeight(bt.root, nil)
 }
 
-func (bt *BinaryTree) Diameter() int {
+func (bt *BinaryTree[T]) Diameter() int {
 	d := utils.Naught
 	calculateHeight(bt.root, &d)
 	return d
 }
 
-func (bt *BinaryTree) Empty() bool {
+func (bt *BinaryTree[T]) Empty() bool {
 	return bt.count == utils.Naught
 }
 
-func (bt *BinaryTree) Clear() {
+func (bt *BinaryTree[T]) Clear() {
 	bt.root = nil
 	bt.count = utils.Naught
 }
 
-func (bt *BinaryTree) Clone() Tree {
-	return &BinaryTree{
+func (bt *BinaryTree[T]) Clone() Tree[T] {
+	return &BinaryTree[T]{
 		typeURL: bt.typeURL,
 		count:   bt.count,
 		root:    cloneNodes(bt.root, nil),
 	}
 }
 
-func (bt *BinaryTree) Mirror() (bool, error) {
+func (bt *BinaryTree[T]) Mirror() (bool, error) {
 	if bt.Empty() {
 		return false, errors.New("tree is empty")
 	}
@@ -411,7 +391,7 @@ func (bt *BinaryTree) Mirror() (bool, error) {
 	return bt.MirrorAt(bt.root.data)
 }
 
-func (bt *BinaryTree) MirrorAt(e interface{}) (bool, error) {
+func (bt *BinaryTree[T]) MirrorAt(e T) (bool, error) {
 	if bt.Empty() {
 		return false, errors.New("tree is empty")
 	}
@@ -433,7 +413,7 @@ func (bt *BinaryTree) MirrorAt(e interface{}) (bool, error) {
 	return true, nil
 }
 
-func (bt *BinaryTree) RotateLeft() error {
+func (bt *BinaryTree[T]) RotateLeft() error {
 	if bt.Empty() {
 		return errors.New("tree is empty")
 	}
@@ -442,7 +422,7 @@ func (bt *BinaryTree) RotateLeft() error {
 	return nil
 }
 
-func (bt *BinaryTree) RotateRight() error {
+func (bt *BinaryTree[T]) RotateRight() error {
 	if bt.Empty() {
 		return errors.New("tree is empty")
 	}
@@ -451,7 +431,7 @@ func (bt *BinaryTree) RotateRight() error {
 	return nil
 }
 
-func (bt *BinaryTree) RotateLeftAt(e interface{}) error {
+func (bt *BinaryTree[T]) RotateLeftAt(e T) error {
 	if bt.Empty() {
 		return errors.New("tree is empty")
 	}
@@ -470,7 +450,7 @@ func (bt *BinaryTree) RotateLeftAt(e interface{}) error {
 	return nil
 }
 
-func (bt *BinaryTree) RotateRightAt(e interface{}) error {
+func (bt *BinaryTree[T]) RotateRightAt(e T) error {
 	if bt.Empty() {
 		return errors.New("tree is empty")
 	}
@@ -489,16 +469,18 @@ func (bt *BinaryTree) RotateRightAt(e interface{}) error {
 	return nil
 }
 
-func (bt *BinaryTree) IsBalanced() bool {
+func (bt *BinaryTree[T]) IsBalanced() bool {
 	return isBalancedAt(bt.root)
 }
 
-func (bt *BinaryTree) IsFull() bool {
+func (bt *BinaryTree[T]) IsFull() bool {
 	it := newBtLvOrderIterator(bt)
-	it.(*btLvOrderIterator).v = true
+
+	it.(*btLvOrderIterator[T]).v = true
 
 	for it.HasNext() {
-		if it.Next().(*binaryNode).childCount() == 1 {
+		v, _ := it.Next()
+		if v.childCount() == 1 {
 			return false
 		}
 	}
@@ -506,9 +488,9 @@ func (bt *BinaryTree) IsFull() bool {
 	return true
 }
 
-func (bt *BinaryTree) IsPerfect() bool {
+func (bt *BinaryTree[T]) IsPerfect() bool {
 	curr := bt.root
-	q, _ := queue.NewLinkedQueue()
+	q := queue.NewLinkedQueue[*binaryNode[T]]()
 	_ = q.Add(curr)
 	c := 0
 	fl := -1
@@ -516,10 +498,10 @@ func (bt *BinaryTree) IsPerfect() bool {
 	for !q.Empty() {
 		sz := q.Size()
 
-		for i := 0; i < sz; i++ {
+		for i := int64(0); i < sz; i++ {
 			e, _ := q.Remove()
 
-			if e.(*binaryNode).isLeaf() {
+			if e.isLeaf() {
 				if fl == -1 {
 					fl = c
 				}
@@ -528,12 +510,12 @@ func (bt *BinaryTree) IsPerfect() bool {
 				}
 			}
 
-			if e.(*binaryNode).left != nil {
-				_ = q.Add(e.(*binaryNode).left)
+			if e.left != nil {
+				_ = q.Add(e.left)
 			}
 
-			if e.(*binaryNode).right != nil {
-				_ = q.Add(e.(*binaryNode).right)
+			if e.right != nil {
+				_ = q.Add(e.right)
 			}
 		}
 		c++
@@ -542,41 +524,35 @@ func (bt *BinaryTree) IsPerfect() bool {
 	return true
 }
 
-func (bt *BinaryTree) IsComplete() bool {
+func (bt *BinaryTree[T]) IsComplete() bool {
 	h := 0
 	res := true
 	isComplete(bt.root, &h, &res)
 	return res
 }
 
-func (bt *BinaryTree) LowestCommonAncestor(a, b interface{}) (interface{}, error) {
+func (bt *BinaryTree[T]) LowestCommonAncestor(a, b T) (T, error) {
 	an, err := search(a, bt.root)
 	if err != nil {
-		return nil, err
+		return *new(T), err
 	}
 
 	bn, err := search(b, bt.root)
 	if err != nil {
-		return nil, err
+		return *new(T), err
 	}
 
 	return lowestCommonAncestor(an, bn, bt.root).data, nil
 }
 
-func (bt *BinaryTree) Paths() (list.List, error) {
+func (bt *BinaryTree[T]) Paths() (list.List[T], error) {
 	if bt.Empty() {
 		return nil, errors.New("tree is empty")
 	}
 
-	temp, err := list.NewLinkedList()
-	if err != nil {
-		return nil, err
-	}
+	temp := list.NewLinkedList[T]()
 
-	res, err := list.NewArrayList()
-	if err != nil {
-		return nil, err
-	}
+	res := list.NewArrayList[T]()
 
 	if err := paths(bt.root, temp, res); err != nil {
 		return nil, err
@@ -585,22 +561,19 @@ func (bt *BinaryTree) Paths() (list.List, error) {
 	return res, nil
 }
 
-func (bt *BinaryTree) Mode() (list.List, error) {
+func (bt *BinaryTree[T]) Mode() (list.List[T], error) {
 	if bt.Empty() {
 		return nil, errors.New("tree is empty")
 	}
 
-	res, err := list.NewArrayList()
-	if err != nil {
-		return nil, err
-	}
+	res := list.NewArrayList[T]()
 
 	cm := 0
 	m := 0
-	var p interface{}
+	var p T
 
-	var mode func(n *binaryNode, l list.List, cm, m *int, p *interface{}) error
-	mode = func(n *binaryNode, l list.List, cm, m *int, p *interface{}) error {
+	var mode func(n *binaryNode[T], l list.List[T], cm, m *int, p *T) error
+	mode = func(n *binaryNode[T], l list.List[T], cm, m *int, p *T) error {
 		if n == nil {
 			return nil
 		}
@@ -642,15 +615,15 @@ func (bt *BinaryTree) Mode() (list.List, error) {
 	return res, nil
 }
 
-func (bt *BinaryTree) Equal(t Tree) (bool, error) {
-	_, ok := t.(*BinaryTree)
+func (bt *BinaryTree[T]) Equal(t Tree[T]) (bool, error) {
+	_, ok := t.(*BinaryTree[T])
 	if !ok {
 		return false, errors.New("TODO")
 	}
 
-	var equal func(a, b *binaryNode) bool
+	var equal func(a, b *binaryNode[T]) bool
 
-	equal = func(a, b *binaryNode) bool {
+	equal = func(a, b *binaryNode[T]) bool {
 		if a == nil && b == nil {
 			return true
 		}
@@ -660,13 +633,13 @@ func (bt *BinaryTree) Equal(t Tree) (bool, error) {
 		return equal(a.left, b.left) && equal(a.right, b.right)
 	}
 
-	return equal(bt.root, t.(*BinaryTree).root), nil
+	return equal(bt.root, t.root), nil
 }
 
-func (bt *BinaryTree) Symmetric() bool {
-	var symmetric func(a, b *binaryNode) bool
+func (bt *BinaryTree[T]) Symmetric() bool {
+	var symmetric func(a, b *binaryNode[T]) bool
 
-	symmetric = func(a, b *binaryNode) bool {
+	symmetric = func(a, b *binaryNode[T]) bool {
 		if a == nil && b == nil {
 			return true
 		}
@@ -681,10 +654,10 @@ func (bt *BinaryTree) Symmetric() bool {
 	return symmetric(bt.root.left, bt.root.right)
 }
 
-func (bt *BinaryTree) Invert() {
-	var inverter func(n *binaryNode) *binaryNode
+func (bt *BinaryTree[T]) Invert() {
+	var inverter func(n *binaryNode[T]) *binaryNode
 
-	inverter = func(n *binaryNode) *binaryNode {
+	inverter = func(n *binaryNode[T]) *binaryNode {
 		if n == nil {
 			return nil
 		}
@@ -700,7 +673,7 @@ func (bt *BinaryTree) Invert() {
 	bt.root = inverter(bt.root)
 }
 
-func (bt *BinaryTree) PreOrderSuccessor(e interface{}) (interface{}, error) {
+func (bt *BinaryTree[T]) PreOrderSuccessor(e T) (T, error) {
 	st, err := stack.NewStack()
 	if err != nil {
 		return nil, err
@@ -727,7 +700,7 @@ func (bt *BinaryTree) PreOrderSuccessor(e interface{}) (interface{}, error) {
 
 		if !st.Empty() {
 			top, _ := st.Pop()
-			curr = top.(*binaryNode)
+			curr = top.(*binaryNode[T])
 		}
 
 	}
@@ -739,7 +712,7 @@ func (bt *BinaryTree) PreOrderSuccessor(e interface{}) (interface{}, error) {
 	return nil, fmt.Errorf("%v not found in the tree", e)
 }
 
-func (bt *BinaryTree) PostOrderSuccessor(e interface{}) (interface{}, error) {
+func (bt *BinaryTree[T]) PostOrderSuccessor(e T) (T, error) {
 	st, err := stack.NewStack()
 	if err != nil {
 		return nil, err
@@ -757,7 +730,7 @@ func (bt *BinaryTree) PostOrderSuccessor(e interface{}) (interface{}, error) {
 
 		if !st.Empty() {
 			top, _ := st.Peek()
-			curr = top.(*binaryNode)
+			curr = top.(*binaryNode[T])
 		}
 
 		if curr == nil {
@@ -786,7 +759,7 @@ func (bt *BinaryTree) PostOrderSuccessor(e interface{}) (interface{}, error) {
 	return nil, fmt.Errorf("%v not found in the tree", e)
 }
 
-func (bt *BinaryTree) InOrderSuccessor(e interface{}) (interface{}, error) {
+func (bt *BinaryTree[T]) InOrderSuccessor(e T) (T, error) {
 	st, err := stack.NewStack()
 	if err != nil {
 		return nil, err
@@ -804,7 +777,7 @@ func (bt *BinaryTree) InOrderSuccessor(e interface{}) (interface{}, error) {
 
 		if !st.Empty() {
 			top, _ := st.Pop()
-			curr = top.(*binaryNode)
+			curr = top.(*binaryNode[T])
 		}
 
 		if curr == nil {
@@ -826,34 +799,34 @@ func (bt *BinaryTree) InOrderSuccessor(e interface{}) (interface{}, error) {
 	return nil, fmt.Errorf("%v not found in the tree", e)
 }
 
-func (bt *BinaryTree) LevelOrderSuccessor(e interface{}) (interface{}, error) {
+func (bt *BinaryTree[T]) LevelOrderSuccessor(e T) (T, error) {
 	q, err := queue.NewLinkedQueue()
 	if err != nil {
 		return nil, err
 	}
 
-	var prev *binaryNode
+	var prev *binaryNode[T]
 	_ = q.Add(bt.root)
 
 	for !q.Empty() {
 
 		sz := q.Size()
 
-		for i := 0; i < sz; i++ {
+		for i := int64(0); i < sz; i++ {
 			f, _ := q.Remove()
 
 			if prev != nil && prev.data == e {
-				return f.(*binaryNode).data, nil
+				return f.data, nil
 			}
 
-			prev = f.(*binaryNode)
+			prev = f
 
-			if f.(*binaryNode).left != nil {
-				_ = q.Add(f.(*binaryNode).left)
+			if f.left != nil {
+				_ = q.Add(f.left)
 			}
 
-			if f.(*binaryNode).right != nil {
-				_ = q.Add(f.(*binaryNode).right)
+			if f.right != nil {
+				_ = q.Add(f.right)
 			}
 		}
 	}
@@ -865,32 +838,32 @@ func (bt *BinaryTree) LevelOrderSuccessor(e interface{}) (interface{}, error) {
 	return nil, fmt.Errorf("%v not found in the tree", e)
 }
 
-func (bt *BinaryTree) PreOrderIterator() iterator.Iterator {
-	return newBtPreOrderIterator(bt)
+func (bt *BinaryTree[T]) PreOrderIterator() iterator.Iterator[T] {
+	return newBtPreOrderIterator[T](bt)
 }
 
-type btPreOrderIterator struct {
-	curr *binaryNode
-	s    *stack.Stack
+type btPreOrderIterator[T comparable] struct {
+	curr *binaryNode[T]
+	s    *stack.Stack[T]
 	v    bool
 }
 
-func newBtPreOrderIterator(bt *BinaryTree) *btPreOrderIterator {
-	s, _ := stack.NewStack()
-	return &btPreOrderIterator{
+func newBtPreOrderIterator[T comparable](bt *BinaryTree[T]) *btPreOrderIterator[T] {
+	s := stack.NewStack()
+	return &btPreOrderIterator[T]{
 		curr: bt.root,
 		s:    s,
 	}
 }
 
-func (bti *btPreOrderIterator) HasNext() bool {
+func (bti *btPreOrderIterator[T]) HasNext() bool {
 	return bti.curr != nil || !bti.s.Empty()
 }
 
-func (bti *btPreOrderIterator) Next() interface{} {
+func (bti *btPreOrderIterator[T]) Next() (T, error) {
 	if bti.curr == nil {
 		n, _ := bti.s.Pop()
-		bti.curr = n.(*binaryNode)
+		bti.curr = n.(*binaryNode[T])
 	}
 
 	temp := bti.curr
@@ -908,18 +881,18 @@ func (bti *btPreOrderIterator) Next() interface{} {
 	return temp.data
 }
 
-func (bt *BinaryTree) PostOrderIterator() iterator.Iterator {
+func (bt *BinaryTree[T]) PostOrderIterator() iterator.Iterator[T] {
 	return newBtPostOrderIterator(bt)
 }
 
-type btPostOrderIterator struct {
-	curr *binaryNode
-	last *binaryNode
-	s    *stack.Stack
+type btPostOrderIterator[T comparable] struct {
+	curr *binaryNode[T]
+	last *binaryNode[T]
+	s    *stack.Stack[T]
 	v    bool
 }
 
-func newBtPostOrderIterator(bt *BinaryTree) *btPostOrderIterator {
+func newBtPostOrderIterator[T comparable](bt *BinaryTree[T]) *btPostOrderIterator[T] {
 	s, _ := stack.NewStack()
 	return &btPostOrderIterator{
 		curr: bt.root,
@@ -927,12 +900,12 @@ func newBtPostOrderIterator(bt *BinaryTree) *btPostOrderIterator {
 	}
 }
 
-func (bto *btPostOrderIterator) HasNext() bool {
+func (bto *btPostOrderIterator[T]) HasNext() bool {
 	return bto.curr != nil || !bto.s.Empty()
 }
 
-func (bto *btPostOrderIterator) Next() interface{} {
-	get := func() interface{} {
+func (bto *btPostOrderIterator[T]) Next() (T, error) {
+	get := func() T {
 		_, _ = bto.s.Pop()
 
 		temp := bto.curr
@@ -954,7 +927,7 @@ func (bto *btPostOrderIterator) Next() interface{} {
 
 		top, _ := bto.s.Peek()
 
-		bto.curr = top.(*binaryNode)
+		bto.curr = top.(*binaryNode[T])
 
 		if bto.curr.right != nil && bto.curr.right != bto.last {
 			bto.curr = bto.curr.right
@@ -971,7 +944,7 @@ func (bto *btPostOrderIterator) Next() interface{} {
 
 		if !bto.s.Empty() {
 			top, _ := bto.s.Peek()
-			bto.curr = top.(*binaryNode)
+			bto.curr = top.(*binaryNode[T])
 		}
 	}
 
@@ -989,17 +962,17 @@ func (bto *btPostOrderIterator) Next() interface{} {
 	return get()
 }
 
-func (bt *BinaryTree) InOrderIterator() iterator.Iterator {
+func (bt *BinaryTree[T]) InOrderIterator() iterator.Iterator[T] {
 	return newBtInOrderIterator(bt)
 }
 
-type btInOrderIterator struct {
-	curr *binaryNode
-	s    *stack.Stack
+type btInOrderIterator[T comparable] struct {
+	curr *binaryNode[T]
+	s    *stack.Stack[T]
 	v    bool
 }
 
-func newBtInOrderIterator(bt *BinaryTree) *btInOrderIterator {
+func newBtInOrderIterator[T comparable](bt *BinaryTree[T]) *btInOrderIterator[T] {
 	s, _ := stack.NewStack()
 	return &btInOrderIterator{
 		curr: bt.root,
@@ -1007,11 +980,11 @@ func newBtInOrderIterator(bt *BinaryTree) *btInOrderIterator {
 	}
 }
 
-func (bti *btInOrderIterator) HasNext() bool {
+func (bti *btInOrderIterator[T]) HasNext() bool {
 	return bti.curr != nil || !bti.s.Empty()
 }
 
-func (bti *btInOrderIterator) Next() interface{} {
+func (bti *btInOrderIterator[T]) Next() (T, error) {
 	for bti.curr != nil {
 		_ = bti.s.Push(bti.curr)
 		bti.curr = bti.curr.left
@@ -1019,7 +992,7 @@ func (bti *btInOrderIterator) Next() interface{} {
 
 	if !bti.s.Empty() {
 		top, _ := bti.s.Pop()
-		bti.curr = top.(*binaryNode)
+		bti.curr = top.(*binaryNode[T])
 	}
 
 	if bti.curr == nil {
@@ -1037,17 +1010,17 @@ func (bti *btInOrderIterator) Next() interface{} {
 	return temp.data
 }
 
-func (bt *BinaryTree) LevelOrderIterator() iterator.Iterator {
+func (bt *BinaryTree[T]) LevelOrderIterator() iterator.Iterator[T] {
 	return newBtLvOrderIterator(bt)
 }
 
-type btLvOrderIterator struct {
-	curr *binaryNode
-	q    queue.Queue
+type btLvOrderIterator[T comparable] struct {
+	curr *binaryNode[T]
+	q    queue.Queue[T]
 	v    bool
 }
 
-func newBtLvOrderIterator(bt *BinaryTree) iterator.Iterator {
+func newBtLvOrderIterator[T comparable](bt *BinaryTree[T]) iterator.Iterator[T] {
 	q, _ := queue.NewLinkedQueue()
 	_ = q.Add(bt.root)
 
@@ -1057,67 +1030,67 @@ func newBtLvOrderIterator(bt *BinaryTree) iterator.Iterator {
 	}
 }
 
-func (blv *btLvOrderIterator) HasNext() bool {
+func (blv *btLvOrderIterator[T]) HasNext() bool {
 	return !blv.q.Empty()
 }
 
-func (blv *btLvOrderIterator) Next() interface{} {
+func (blv *btLvOrderIterator[T]) Next() (T, error) {
 	curr, _ := blv.q.Remove()
 
-	if curr.(*binaryNode).left != nil {
-		_ = blv.q.Add(curr.(*binaryNode).left)
+	if curr.(*binaryNode[T]).left != nil {
+		_ = blv.q.Add(curr.(*binaryNode[T]).left)
 	}
 
-	if curr.(*binaryNode).right != nil {
-		_ = blv.q.Add(curr.(*binaryNode).right)
+	if curr.(*binaryNode[T]).right != nil {
+		_ = blv.q.Add(curr.(*binaryNode[T]).right)
 	}
 
 	if blv.v {
 		return curr
 	}
 
-	return curr.(*binaryNode).data
+	return curr.(*binaryNode[T]).data
 }
 
 //TODO FIX EXPENSIVE IMPLEMENTATION
-func (bt *BinaryTree) VerticalViewIterator() iterator.Iterator {
+func (bt *BinaryTree[T]) VerticalViewIterator() iterator.Iterator[T] {
 	return newBtVerticalVOrderIterator(bt)
 }
 
-type btVerticalVOrderIterator struct {
-	it iterator.Iterator
+type btVerticalVOrderIterator[T comparable] struct {
+	it iterator.Iterator[T]
 	v  bool
 }
 
-func newBtVerticalVOrderIterator(bt *BinaryTree) iterator.Iterator {
+func newBtVerticalVOrderIterator[T comparable](bt *BinaryTree[T]) iterator.Iterator[T] {
 	return &btVerticalVOrderIterator{
 		it: horizontalIterator(bt, 2),
 	}
 }
 
-func (btv *btVerticalVOrderIterator) HasNext() bool {
+func (btv *btVerticalVOrderIterator[T]) HasNext() bool {
 	return btv.it.HasNext()
 }
 
-func (btv *btVerticalVOrderIterator) Next() interface{} {
+func (btv *btVerticalVOrderIterator[T]) Next() (T, error) {
 	if btv.v {
 		return btv.it.Next()
 	}
 
-	return btv.it.Next().(*binaryNode).data
+	return btv.it.Next().(*binaryNode[T]).data
 }
 
-func (bt *BinaryTree) LeftViewIterator() iterator.Iterator {
+func (bt *BinaryTree[T]) LeftViewIterator() iterator.Iterator[T] {
 	return newBtLeftVOrderIterator(bt)
 }
 
-type btLeftVOrderIterator struct {
-	curr *binaryNode
-	q    queue.Queue
+type btLeftVOrderIterator[T comparable] struct {
+	curr *binaryNode[T]
+	q    queue.Queue[T]
 	v    bool
 }
 
-func newBtLeftVOrderIterator(bt *BinaryTree) iterator.Iterator {
+func newBtLeftVOrderIterator[T comparable](bt *BinaryTree[T]) iterator.Iterator[T] {
 	q, _ := queue.NewLinkedQueue()
 	_ = q.Add(bt.root)
 
@@ -1127,28 +1100,28 @@ func newBtLeftVOrderIterator(bt *BinaryTree) iterator.Iterator {
 	}
 }
 
-func (bfv *btLeftVOrderIterator) HasNext() bool {
+func (bfv *btLeftVOrderIterator[T]) HasNext() bool {
 	return !bfv.q.Empty()
 }
 
-func (bfv *btLeftVOrderIterator) Next() interface{} {
+func (bfv *btLeftVOrderIterator[T]) Next() (T, error) {
 	sz := bfv.q.Size()
 
 	var res *binaryNode = nil
 
-	for i := 0; i < sz; i++ {
+	for i := int64(0); i < sz; i++ {
 		curr, _ := bfv.q.Remove()
 
 		if res == nil {
-			res = curr.(*binaryNode)
+			res = curr.(*binaryNode[T])
 		}
 
-		if curr.(*binaryNode).left != nil {
-			_ = bfv.q.Add(curr.(*binaryNode).left)
+		if curr.(*binaryNode[T]).left != nil {
+			_ = bfv.q.Add(curr.(*binaryNode[T]).left)
 		}
 
-		if curr.(*binaryNode).right != nil {
-			_ = bfv.q.Add(curr.(*binaryNode).right)
+		if curr.(*binaryNode[T]).right != nil {
+			_ = bfv.q.Add(curr.(*binaryNode[T]).right)
 		}
 
 	}
@@ -1160,17 +1133,17 @@ func (bfv *btLeftVOrderIterator) Next() interface{} {
 	return res.data
 }
 
-func (bt *BinaryTree) RightViewIterator() iterator.Iterator {
+func (bt *BinaryTree[T]) RightViewIterator() iterator.Iterator[T] {
 	return newBtRightVOrderIterator(bt)
 }
 
-type btRightVOrderIterator struct {
-	curr *binaryNode
-	q    queue.Queue
+type btRightVOrderIterator[T comparable] struct {
+	curr *binaryNode[T]
+	q    queue.Queue[T]
 	v    bool
 }
 
-func newBtRightVOrderIterator(bt *BinaryTree) iterator.Iterator {
+func newBtRightVOrderIterator[T comparable](bt *BinaryTree[T]) iterator.Iterator[T] {
 	q, _ := queue.NewLinkedQueue()
 	_ = q.Add(bt.root)
 
@@ -1180,28 +1153,28 @@ func newBtRightVOrderIterator(bt *BinaryTree) iterator.Iterator {
 	}
 }
 
-func (brv *btRightVOrderIterator) HasNext() bool {
+func (brv *btRightVOrderIterator[T]) HasNext() bool {
 	return !brv.q.Empty()
 }
 
-func (brv *btRightVOrderIterator) Next() interface{} {
+func (brv *btRightVOrderIterator[T]) Next() (T, error) {
 	sz := brv.q.Size()
 
 	var res *binaryNode = nil
 
-	for i := 0; i < sz; i++ {
+	for i := int64(0); i < sz; i++ {
 		curr, _ := brv.q.Remove()
 
 		if res == nil {
-			res = curr.(*binaryNode)
+			res = curr.(*binaryNode[T])
 		}
 
-		if curr.(*binaryNode).right != nil {
-			_ = brv.q.Add(curr.(*binaryNode).right)
+		if curr.(*binaryNode[T]).right != nil {
+			_ = brv.q.Add(curr.(*binaryNode[T]).right)
 		}
 
-		if curr.(*binaryNode).left != nil {
-			_ = brv.q.Add(curr.(*binaryNode).left)
+		if curr.(*binaryNode[T]).left != nil {
+			_ = brv.q.Add(curr.(*binaryNode[T]).left)
 		}
 	}
 
@@ -1213,67 +1186,67 @@ func (brv *btRightVOrderIterator) Next() interface{} {
 }
 
 //TODO FIX EXPENSIVE IMPLEMENTATION
-func (bt *BinaryTree) TopViewIterator() iterator.Iterator {
+func (bt *BinaryTree[T]) TopViewIterator() iterator.Iterator[T] {
 	return newBtTopVOrderIterator(bt.Clone().(*BinaryTree))
 }
 
-type btTopVOrderIterator struct {
-	it iterator.Iterator
+type btTopVOrderIterator[T comparable] struct {
+	it iterator.Iterator[T]
 	v  bool
 }
 
-func newBtTopVOrderIterator(bt *BinaryTree) iterator.Iterator {
+func newBtTopVOrderIterator[T comparable](bt *BinaryTree[T]) iterator.Iterator[T] {
 	return &btTopVOrderIterator{
 		it: horizontalIterator(bt, 0),
 	}
 }
 
-func (btv *btTopVOrderIterator) HasNext() bool {
+func (btv *btTopVOrderIterator[T]) HasNext() bool {
 	return btv.it.HasNext()
 }
 
-func (btv *btTopVOrderIterator) Next() interface{} {
+func (btv *btTopVOrderIterator[T]) Next() (T, error) {
 	if btv.v {
 		return btv.it.Next()
 	}
 
-	return btv.it.Next().(*binaryNode).data
+	return btv.it.Next().(*binaryNode[T]).data
 }
 
 //TODO FIX EXPENSIVE IMPLEMENTATION
-func (bt *BinaryTree) BottomViewIterator() iterator.Iterator {
+func (bt *BinaryTree[T]) BottomViewIterator() iterator.Iterator[T] {
 	return newBtBottomVOrderIterator(bt.Clone().(*BinaryTree))
 }
 
-type btBottomVOrderIterator struct {
-	it iterator.Iterator
+type btBottomVOrderIterator[T comparable] struct {
+	it iterator.Iterator[T]
 	v  bool
 }
 
-func newBtBottomVOrderIterator(bt *BinaryTree) iterator.Iterator {
+func newBtBottomVOrderIterator[T comparable](bt *BinaryTree[T]) iterator.Iterator[T] {
 	return &btBottomVOrderIterator{
 		it: horizontalIterator(bt, 1),
 	}
 }
 
-func (brv *btBottomVOrderIterator) HasNext() bool {
+func (brv *btBottomVOrderIterator[T]) HasNext() bool {
 	return brv.it.HasNext()
 }
 
-func (brv *btBottomVOrderIterator) Next() interface{} {
+func (brv *btBottomVOrderIterator[T]) Next() (T, error) {
 	if brv.v {
 		return brv.it.Next()
 	}
 
-	return brv.it.Next().(*binaryNode).data
+	return brv.it.Next().(*binaryNode[T]).data
 }
 
-func lastNode(bt *BinaryTree) (*binaryNode, *binaryNode) {
+func lastNode[T comparable](bt *BinaryTree[T]) (*binaryNode[T], *binaryNode[T]) {
 	if bt.root == nil {
 		return nil, nil
 	}
 
-	var prev *binaryNode = nil
+	var prev *binaryNode[T] = nil
 	curr := bt.root
 
 	for {
@@ -1292,7 +1265,7 @@ func lastNode(bt *BinaryTree) (*binaryNode, *binaryNode) {
 }
 
 //noinspection GoNilness
-func mirrorAt(n *binaryNode) error {
+func mirrorAt[T comparable](n *binaryNode[T]) error {
 	curr := n
 	st, _ := stack.NewStack()
 	var prev *binaryNode
@@ -1306,7 +1279,7 @@ func mirrorAt(n *binaryNode) error {
 
 		if !st.Empty() {
 			top, _ := st.Peek()
-			curr = top.(*binaryNode)
+			curr = top.(*binaryNode[T])
 		}
 
 		if curr.right != nil && curr.right != prev {
@@ -1334,7 +1307,7 @@ func max(a, b int) int {
 	return b
 }
 
-func calculateHeight(n *binaryNode, diameter *int) int {
+func calculateHeight[T comparable](n *binaryNode[T], diameter *int) int {
 	if n == nil {
 		return 0
 	}
@@ -1358,14 +1331,14 @@ func absDiff(a, b int) int {
 	return diff
 }
 
-func isBalancedAt(n *binaryNode) bool {
+func isBalancedAt[T comparable](n *binaryNode[T]) bool {
 	if n == nil {
 		return true
 	}
 	return absDiff(calculateHeight(n.left, nil), calculateHeight(n.right, nil)) <= 1 && isBalancedAt(n.left) && isBalancedAt(n.right)
 }
 
-func search(e interface{}, curr *binaryNode) (*binaryNode, error) {
+func search[T comparable](e T, curr *binaryNode[T]) (*binaryNode[T], error) {
 	if curr == nil {
 		return nil, fmt.Errorf("%v not found in the tree", e)
 	}
@@ -1381,7 +1354,7 @@ func search(e interface{}, curr *binaryNode) (*binaryNode, error) {
 	return search(e, curr.right)
 }
 
-func rotateRight(n, p *binaryNode, bt *BinaryTree) {
+func rotateRight[T comparable](n, p *binaryNode[T], bt *BinaryTree[T]) {
 	if n.isLeaf() || n.left == nil {
 		return
 	}
@@ -1410,7 +1383,7 @@ func rotateRight(n, p *binaryNode, bt *BinaryTree) {
 	}
 }
 
-func rotateLeft(n, p *binaryNode, bt *BinaryTree) {
+func rotateLeft[T comparable](n, p *binaryNode[T], bt *BinaryTree[T]) {
 	if n.isLeaf() || n.right == nil {
 		return
 	}
@@ -1439,7 +1412,7 @@ func rotateLeft(n, p *binaryNode, bt *BinaryTree) {
 	}
 }
 
-func isComplete(n *binaryNode, h *int, res *bool) {
+func isComplete[T comparable](n *binaryNode[T], h *int, res *bool) {
 	if n == nil {
 		return
 	}
@@ -1463,7 +1436,7 @@ func isComplete(n *binaryNode, h *int, res *bool) {
 	*h = 1 + max(lh, rh)
 }
 
-func lowestCommonAncestor(a, b, r *binaryNode) *binaryNode {
+func lowestCommonAncestor[T comparable](a, b, r *binaryNode[T]) *binaryNode[T] {
 	if r == nil {
 		return nil
 	}
@@ -1486,7 +1459,7 @@ func lowestCommonAncestor(a, b, r *binaryNode) *binaryNode {
 	return rt
 }
 
-func paths(n *binaryNode, temp *list.LinkedList, res list.List) error {
+func paths[T comparable](n *binaryNode[T], temp *list.LinkedList[T], res list.List[T]) error {
 	if n == nil {
 		return nil
 	}
@@ -1522,7 +1495,7 @@ func paths(n *binaryNode, temp *list.LinkedList, res list.List) error {
 	return nil
 }
 
-func cloneNodes(n *binaryNode, p *binaryNode) *binaryNode {
+func cloneNodes[T comparable](n *binaryNode[T], p *binaryNode[T]) *binaryNode[T] {
 	if n == nil {
 		return nil
 	}
@@ -1537,44 +1510,44 @@ func cloneNodes(n *binaryNode, p *binaryNode) *binaryNode {
 }
 
 //TODO FIX EXPENSIVE IMPLEMENTATION
-func horizontalIterator(bt *BinaryTree, kind int) iterator.Iterator {
+func horizontalIterator[T comparable](bt *BinaryTree[T], kind int) iterator.Iterator[T] {
 	q, _ := queue.NewLinkedQueue()
 	_ = q.Add(bt.root)
 
 	chd := 0
 	bt.root.hd = chd
 
-	m := make(map[int][]interface{})
+	m := make(map[int][]T)
 	keys, _ := list.NewArrayList()
 
 	for !q.Empty() {
 
 		t, _ := q.Remove()
 
-		if m[t.(*binaryNode).hd] == nil {
-			_ = keys.Add(t.(*binaryNode).hd)
-			m[t.(*binaryNode).hd] = append(m[t.(*binaryNode).hd], t.(*binaryNode))
+		if m[t.(*binaryNode[T]).hd] == nil {
+			_ = keys.Add(t.(*binaryNode[T]).hd)
+			m[t.(*binaryNode[T]).hd] = append(m[t.(*binaryNode[T]).hd], t.(*binaryNode[T]))
 		} else {
 
 			if kind == 1 {
-				_ = keys.Add(t.(*binaryNode).hd)
-				m[t.(*binaryNode).hd] = []interface{}{t.(*binaryNode)}
+				_ = keys.Add(t.(*binaryNode[T]).hd)
+				m[t.(*binaryNode[T]).hd] = []T{t.(*binaryNode[T])}
 			} else if kind == 2 {
-				_ = keys.Add(t.(*binaryNode).hd)
-				m[t.(*binaryNode).hd] = append(m[t.(*binaryNode).hd], t.(*binaryNode))
+				_ = keys.Add(t.(*binaryNode[T]).hd)
+				m[t.(*binaryNode[T]).hd] = append(m[t.(*binaryNode[T]).hd], t.(*binaryNode[T]))
 			}
 
 		}
 
-		if t.(*binaryNode).left != nil {
-			l := t.(*binaryNode).left
-			l.hd = t.(*binaryNode).hd - 1
+		if t.(*binaryNode[T]).left != nil {
+			l := t.(*binaryNode[T]).left
+			l.hd = t.(*binaryNode[T]).hd - 1
 			_ = q.Add(l)
 		}
 
-		if t.(*binaryNode).right != nil {
-			l := t.(*binaryNode).right
-			l.hd = t.(*binaryNode).hd + 1
+		if t.(*binaryNode[T]).right != nil {
+			l := t.(*binaryNode[T]).right
+			l.hd = t.(*binaryNode[T]).hd + 1
 			_ = q.Add(l)
 		}
 
@@ -1584,7 +1557,7 @@ func horizontalIterator(bt *BinaryTree, kind int) iterator.Iterator {
 	keys.Sort(comparator.NewIntegerComparator())
 
 	it := keys.Iterator()
-	s := make(map[interface{}]bool)
+	s := make(map[T]bool)
 
 	for it.HasNext() {
 		e := it.Next()
@@ -1602,7 +1575,7 @@ func horizontalIterator(bt *BinaryTree, kind int) iterator.Iterator {
 	return l.Iterator()
 }
 
-func inOrderSuccessor(n *binaryNode) *binaryNode {
+func inOrderSuccessor[T comparable](n *binaryNode[T]) *binaryNode[T] {
 	c := n
 	for c != nil && c.left != nil {
 		c = c.left

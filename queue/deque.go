@@ -1,29 +1,24 @@
 package queue
 
-type Deque struct {
-	*LinkedQueue
+type Deque[T comparable] struct {
+	*LinkedQueue[T]
 }
 
-func NewDeque() (*Deque, error) {
-	lq, err := NewLinkedQueue()
-	if err != nil {
-		return nil, err
+func NewDeque[T comparable]() *Deque[T] {
+	return &Deque[T]{
+		NewLinkedQueue[T](),
 	}
-
-	return &Deque{
-		lq,
-	}, nil
 }
 
-func (dq *Deque) AddFirst(e interface{}) error {
+func (dq *Deque[T]) AddFirst(e T) error {
 	return dq.ll.AddFirst(e)
 }
 
-func (dq *Deque) RemoveLast() (interface{}, error) {
+func (dq *Deque[T]) RemoveLast() (T, error) {
 	return dq.ll.RemoveLast()
 }
 
-func (dq *Deque) PeekLast() (interface{}, error) {
+func (dq *Deque[T]) PeekLast() (T, error) {
 	//TODO CHECK IF EMPTY QUEUE SHOULD RETURN ERROR
-	return dq.ll.GetLast(), nil
+	return dq.ll.GetLast()
 }

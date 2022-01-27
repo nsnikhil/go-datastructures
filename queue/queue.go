@@ -1,13 +1,13 @@
 package queue
 
-type Queue interface {
-	Add(e interface{}) error
+type Queue[T comparable] interface {
+	Add(e T) error
 
-	Remove() (interface{}, error)
+	Remove() (T, error)
 
-	Peek() (interface{}, error)
+	Peek() (T, error)
 
 	Empty() bool
-	Size() int
+	Size() int64
 	Clear()
 }

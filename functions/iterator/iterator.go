@@ -1,6 +1,6 @@
 package iterator
 
-type Iterator interface {
+type Iterator[T any] interface {
 	HasNext() bool
-	Next() interface{}
+	Next() (T, error)
 }

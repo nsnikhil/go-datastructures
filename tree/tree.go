@@ -5,10 +5,10 @@ import (
 	"github.com/nsnikhil/go-datastructures/list"
 )
 
-type Tree interface {
-	Insert(e interface{}) error
-	Delete(e interface{}) error
-	Search(e interface{}) (bool, error)
+type Tree[T comparable] interface {
+	Insert(e T) error
+	Delete(e T) error
+	Search(e T) (bool, error)
 
 	Count() int
 	Height() int
@@ -16,15 +16,15 @@ type Tree interface {
 	Empty() bool
 
 	Clear()
-	Clone() Tree
+	Clone() Tree[T]
 
 	//Mirror() (bool, error)
-	//MirrorAt(e interface{}) (bool, error)
+	//MirrorAt(e T) (bool, error)
 	//
 	//RotateLeft() error
 	//RotateRight() error
-	//RotateLeftAt(e interface{}) error
-	//RotateRightAt(e interface{}) error
+	//RotateLeftAt(e T) error
+	//RotateRightAt(e T) error
 
 	IsFull() bool
 	IsBalanced() bool
@@ -33,29 +33,29 @@ type Tree interface {
 
 	//Balance() error
 
-	LowestCommonAncestor(a, b interface{}) (interface{}, error)
+	LowestCommonAncestor(a, b T) (T, error)
 
-	Paths() (list.List, error)
+	Paths() (list.List[T], error)
 
 	// TEMPORARY
-	Mode() (list.List, error)
-	Equal(t Tree) (bool, error)
+	Mode() (list.List[T], error)
+	Equal(t Tree[T]) (bool, error)
 	//Symmetric() bool
 	//Invert()
 
-	InOrderSuccessor(e interface{}) (interface{}, error)
-	PreOrderSuccessor(e interface{}) (interface{}, error)
-	PostOrderSuccessor(e interface{}) (interface{}, error)
-	LevelOrderSuccessor(e interface{}) (interface{}, error)
+	InOrderSuccessor(e T) (T, error)
+	PreOrderSuccessor(e T) (T, error)
+	PostOrderSuccessor(e T) (T, error)
+	LevelOrderSuccessor(e T) (T, error)
 
-	PreOrderIterator() iterator.Iterator
-	PostOrderIterator() iterator.Iterator
-	InOrderIterator() iterator.Iterator
-	LevelOrderIterator() iterator.Iterator
+	PreOrderIterator() iterator.Iterator[T]
+	PostOrderIterator() iterator.Iterator[T]
+	InOrderIterator() iterator.Iterator[T]
+	LevelOrderIterator() iterator.Iterator[T]
 
-	VerticalViewIterator() iterator.Iterator
-	LeftViewIterator() iterator.Iterator
-	RightViewIterator() iterator.Iterator
-	TopViewIterator() iterator.Iterator
-	BottomViewIterator() iterator.Iterator
+	VerticalViewIterator() iterator.Iterator[T]
+	LeftViewIterator() iterator.Iterator[T]
+	RightViewIterator() iterator.Iterator[T]
+	TopViewIterator() iterator.Iterator[T]
+	BottomViewIterator() iterator.Iterator[T]
 }

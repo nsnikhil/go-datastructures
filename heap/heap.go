@@ -2,26 +2,26 @@ package heap
 
 import "github.com/nsnikhil/go-datastructures/functions/iterator"
 
-type Heap interface {
+type Heap[T comparable] interface {
 	/*
 
 	 */
-	Add(e ...interface{}) error
-
-	/*
-
-	 */
-	Extract() (interface{}, error)
+	Add(e ...T) error
 
 	/*
 
 	 */
-	Update(prev, new interface{}) error
+	Extract() (T, error)
 
 	/*
 
 	 */
-	UpdateFunc(prev interface{}, op func(interface{}) interface{}) error
+	Update(prev, new T) error
+
+	/*
+
+	 */
+	UpdateFunc(prev T, op func(T) T) error
 
 	/*
 
@@ -31,7 +31,7 @@ type Heap interface {
 	/*
 
 	 */
-	Iterator() iterator.Iterator
+	Iterator() iterator.Iterator[T]
 
 	/*
 

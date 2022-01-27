@@ -1,20 +1,19 @@
 package stack
 
 import (
-	"github.com/nsnikhil/go-datastructures/liberr"
+	"errors"
+	"github.com/nsnikhil/go-datastructures/internal"
 	"github.com/nsnikhil/go-datastructures/list"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"math"
 	"testing"
 )
 
 func TestCreateNewStack(t *testing.T) {
-	actualResult, err := NewStack()
-	require.NoError(t, err)
+	actualResult := NewStack[int64]()
 
-	ll, err := list.NewLinkedList()
-	require.NoError(t, err)
-	expectedResult := &Stack{ll}
+	expectedResult := &Stack[int64]{list.NewLinkedList[int64]()}
 
 	assert.Equal(t, expectedResult, actualResult)
 }
@@ -22,71 +21,48 @@ func TestCreateNewStack(t *testing.T) {
 func TestStackPush(t *testing.T) {
 	testCases := []struct {
 		name           string
-		actualResult   func() (error, *Stack)
-		expectedResult func() *Stack
+		actualResult   func() *Stack[int64]
+		expectedResult func() *Stack[int64]
 		expectedError  error
 	}{
 		{
-			name: "insert an element into Empty Stack",
-			actualResult: func() (error, *Stack) {
-				s, err := NewStack()
-				require.NoError(t, err)
+			name: "should insert an element into stack",
+			actualResult: func() *Stack[int64] {
+				s := NewStack[int64]()
+				s.Push(1)
 
-				return s.Push(1), s
+				return s
 			},
-			expectedResult: func() *Stack {
-				ll, err := list.NewLinkedList(1)
-				require.NoError(t, err)
+			expectedResult: func() *Stack[int64] {
+				ll := list.NewLinkedList[int64](1)
 
-				return &Stack{ll}
-			},
-		},
-		{
-			name: "insert two element into Empty Stack",
-			actualResult: func() (error, *Stack) {
-				s, err := NewStack()
-				require.NoError(t, err)
-
-				err = s.Push(1)
-				if err != nil {
-					return err, s
-				}
-
-				return s.Push(2), s
-			},
-			expectedResult: func() *Stack {
-				ll, err := list.NewLinkedList(2, 1)
-				require.NoError(t, err)
-
-				return &Stack{ll}
+				return &Stack[int64]{ll}
 			},
 		},
 		{
-			name: "return error when inserting different type of elements",
-			actualResult: func() (error, *Stack) {
-				s, err := NewStack()
-				require.NoError(t, err)
+			name: "should insert math.MaxInt8 elements into stack",
+			actualResult: func() *Stack[int64] {
+				s := NewStack[int64]()
 
-				err = s.Push(1)
-				if err != nil {
-					return err, s
+				data := internal.SliceGenerator{Size: math.MaxInt8}.Generate()
+				for _, e := range data {
+					s.Push(e)
 				}
 
-				return s.Push("a"), s
+				return s
 			},
-			expectedError: liberr.TypeMismatchError("int", "string"),
+			expectedResult: func() *Stack[int64] {
+				ll := list.NewLinkedList[int64](internal.SliceGenerator{Size: math.MaxInt8, Reverse: true}.Generate()...)
+
+				return &Stack[int64]{ll}
+			},
 		},
 	}
 
 	for _, testCase := range testCases {
 		t.Run(testCase.name, func(t *testing.T) {
-			err, res := testCase.actualResult()
-			assert.Equal(t, testCase.expectedError, err)
-
-			if testCase.expectedError == nil {
-				assert.Equal(t, testCase.expectedResult(), res)
-			}
-
+			res := testCase.actualResult()
+			assert.Equal(t, testCase.expectedResult(), res)
 		})
 	}
 }
@@ -94,99 +70,73 @@ func TestStackPush(t *testing.T) {
 func TestStackPop(t *testing.T) {
 	testCases := []struct {
 		name             string
-		actualResult     func() (error, []interface{}, *Stack)
-		expectedElements []interface{}
-		expectedResult   func() *Stack
+		actualResult     func() (error, []int64, *Stack[int64])
+		expectedElements []int64
+		expectedResult   func() *Stack[int64]
 		expectedError    error
 	}{
 		{
-			name: "Pop one element from to make Stack Empty",
-			actualResult: func() (error, []interface{}, *Stack) {
-				s, err := NewStack()
-				require.NoError(t, err)
+			name: "should pop one element from stack to make the stack empty",
+			actualResult: func() (error, []int64, *Stack[int64]) {
+				s := NewStack[int64]()
 
-				require.NoError(t, s.Push(1))
+				s.Push(1)
 
 				e, err := s.Pop()
 
-				return err, []interface{}{e}, s
+				return err, []int64{e}, s
 			},
-			expectedElements: []interface{}{1},
-			expectedResult: func() *Stack {
-				ll, err := list.NewLinkedList(1)
-				require.NoError(t, err)
-				ll.Clear()
+			expectedElements: []int64{1},
+			expectedResult: func() *Stack[int64] {
+				ll := list.NewLinkedList[int64]()
 
-				return &Stack{ll}
+				return &Stack[int64]{ll}
 			},
 		},
 		{
-			name: "Pop one element from Stack",
-			actualResult: func() (error, []interface{}, *Stack) {
-				s, err := NewStack()
-				require.NoError(t, err)
-
-				require.NoError(t, s.Push(1))
-				require.NoError(t, s.Push(2))
+			name: "should pop one element from stack",
+			actualResult: func() (error, []int64, *Stack[int64]) {
+				s := NewStack[int64]()
+				s.Push(1)
+				s.Push(2)
 
 				e, err := s.Pop()
 
-				return err, []interface{}{e}, s
+				return err, []int64{e}, s
 			},
-			expectedElements: []interface{}{2},
-			expectedResult: func() *Stack {
-				ll, err := list.NewLinkedList(1)
-				require.NoError(t, err)
+			expectedElements: []int64{2},
+			expectedResult: func() *Stack[int64] {
+				ll := list.NewLinkedList[int64](1)
 
-				return &Stack{ll}
+				return &Stack[int64]{ll}
 			},
 		},
 		{
-			name: "Pop four elements from Stack",
-			actualResult: func() (error, []interface{}, *Stack) {
-				s, err := NewStack()
-				require.NoError(t, err)
+			name: "should pop four elements from stack",
+			actualResult: func() (error, []int64, *Stack[int64]) {
+				s := NewStack[int64]()
 
-				require.NoError(t, s.Push(1))
-				require.NoError(t, s.Push(2))
-				require.NoError(t, s.Push(3))
-				require.NoError(t, s.Push(4))
-				require.NoError(t, s.Push(5))
-
-				var res []interface{}
-
-				e, err := s.Pop()
-				if err != nil {
-					return err, res, s
+				data := internal.SliceGenerator{Size: 5}.Generate()
+				for _, e := range data {
+					s.Push(e)
 				}
-				res = append(res, e)
 
-				e, err = s.Pop()
-				if err != nil {
-					return err, res, s
+				var res []int64
+
+				for i := 0; i < 4; i++ {
+					e, err := s.Pop()
+					//TODO: IS ASSERTION HERE THE CORRECT THING?
+					require.NoError(t, err)
+					res = append(res, e)
 				}
-				res = append(res, e)
 
-				e, err = s.Pop()
-				if err != nil {
-					return err, res, s
-				}
-				res = append(res, e)
-
-				e, err = s.Pop()
-				if err != nil {
-					return err, res, s
-				}
-				res = append(res, e)
-
-				return err, res, s
+				return nil, res, s
 			},
-			expectedElements: []interface{}{5, 4, 3, 2},
-			expectedResult: func() *Stack {
-				ll, err := list.NewLinkedList(1)
-				require.NoError(t, err)
+			expectedElements: []int64{4, 3, 2, 1},
+			expectedResult: func() *Stack[int64] {
+				ll := list.NewLinkedList[int64](0)
 
-				return &Stack{ll}
+				return &Stack[int64]{ll}
 			},
 		},
 	}
@@ -195,13 +145,9 @@ func TestStackPop(t *testing.T) {
 		t.Run(testCase.name, func(t *testing.T) {
 			err, e, s := testCase.actualResult()
 
-			assert.Equal(t, testCase.expectedError, err)
-
-			if testCase.expectedError == nil {
-				assert.Equal(t, testCase.expectedElements, e)
-				assert.Equal(t, testCase.expectedResult(), s)
-			}
-
+			internal.AssertErrorEquals(t, testCase.expectedError, err)
+			assert.Equal(t, testCase.expectedElements, e)
+			assert.Equal(t, testCase.expectedResult(), s)
 		})
 	}
 }
@@ -209,74 +155,60 @@ func TestStackPop(t *testing.T) {
 func TestStackPeek(t *testing.T) {
 	testCases := []struct {
 		name             string
-		actualResult     func() (error, interface{}, *Stack)
-		expectedElements interface{}
-		expectedResult   func() *Stack
+		actualResult     func() (error, int64, *Stack[int64])
+		expectedElements int64
+		expectedResult   func() *Stack[int64]
 		expectedError    error
 	}{
 		{
-			name: "Peek top element from Stack of size 1",
-			actualResult: func() (error, interface{}, *Stack) {
-				s, err := NewStack()
-				require.NoError(t, err)
-
-				require.NoError(t, s.Push(1))
+			name: "should peek top element from stack of size 1",
+			actualResult: func() (error, int64, *Stack[int64]) {
+				s := NewStack[int64]()
+				s.Push(1)
 
 				e, err := s.Peek()
 
 				return err, e, s
 			},
 			expectedElements: 1,
-			expectedResult: func() *Stack {
-				ll, err := list.NewLinkedList(1)
-				require.NoError(t, err)
+			expectedResult: func() *Stack[int64] {
+				ll := list.NewLinkedList[int64](1)
 
-				return &Stack{ll}
+				return &Stack[int64]{ll}
 			},
 		},
 		{
-			name: "Peek first element from Stack of size 2",
-			actualResult: func() (error, interface{}, *Stack) {
-				s, err := NewStack()
-				require.NoError(t, err)
+			name: "should peek first element from Stack of size 2",
+			actualResult: func() (error, int64, *Stack[int64]) {
+				s := NewStack[int64]()
 
-				require.NoError(t, s.Push(1))
-				require.NoError(t, s.Push(2))
+				s.Push(1)
+				s.Push(2)
 
 				e, err := s.Peek()
 
 				return err, e, s
 			},
 			expectedElements: 2,
-			expectedResult: func() *Stack {
-				ll, err := list.NewLinkedList(2, 1)
-				require.NoError(t, err)
+			expectedResult: func() *Stack[int64] {
+				ll := list.NewLinkedList[int64](2, 1)
 
-				return &Stack{ll}
+				return &Stack[int64]{ll}
 			},
 		},
 		{
-			name: "Peek first element from Stack of size 5",
-			actualResult: func() (error, interface{}, *Stack) {
-				s, err := NewStack()
-				require.NoError(t, err)
-
-				require.NoError(t, s.Push(1))
-				require.NoError(t, s.Push(2))
-				require.NoError(t, s.Push(3))
-				require.NoError(t, s.Push(4))
-				require.NoError(t, s.Push(5))
+			name: "should return error when stack is empty",
+			actualResult: func() (error, int64, *Stack[int64]) {
+				s := NewStack[int64]()
 
 				e, err := s.Peek()
 
 				return err, e, s
 			},
-			expectedElements: 5,
-			expectedResult: func() *Stack {
-				ll, err := list.NewLinkedList(5, 4, 3, 2, 1)
-				require.NoError(t, err)
-
-				return &Stack{ll}
+			expectedError: errors.New("stack is empty"),
+			expectedResult: func() *Stack[int64] {
+				ll := list.NewLinkedList[int64]()
+				return &Stack[int64]{ll}
 			},
 		},
 	}
@@ -285,13 +217,9 @@ func TestStackPeek(t *testing.T) {
 		t.Run(testCase.name, func(t *testing.T) {
 			err, e, s := testCase.actualResult()
 
-			assert.Equal(t, testCase.expectedError, err)
-
-			if testCase.expectedError == nil {
-				assert.Equal(t, testCase.expectedElements, e)
-				assert.Equal(t, testCase.expectedResult(), s)
-			}
-
+			internal.AssertErrorEquals(t, testCase.expectedError, err)
+			assert.Equal(t, testCase.expectedElements, e)
+			assert.Equal(t, testCase.expectedResult(), s)
 		})
 	}
 }
@@ -303,22 +231,20 @@ func TestStackEmpty(t *testing.T) {
 		expectedResult bool
 	}{
 		{
-			name: "return true when Stack is Empty",
+			name: "should return true when stack is Empty",
 			actualResult: func() bool {
-				s, err := NewStack()
-				require.NoError(t, err)
+				s := NewStack[int64]()
 
 				return s.Empty()
 			},
 			expectedResult: true,
 		},
 		{
-			name: "return false when Stack is not Empty",
+			name: "should return false when stack is not Empty",
 			actualResult: func() bool {
-				s, err := NewStack()
-				require.NoError(t, err)
+				s := NewStack[int64]()
 
-				require.NoError(t, s.Push(1))
+				s.Push(1)
 
 				return s.Empty()
 			},
@@ -333,46 +259,48 @@ func TestStackEmpty(t *testing.T) {
 	}
 }
 
-func TestStackCount(t *testing.T) {
+func TestStackSize(t *testing.T) {
 	testCases := []struct {
 		name           string
-		actualResult   func() int
-		expectedResult int
+		actualResult   func() int64
+		expectedResult int64
 	}{
 		{
-			name: "return Size 0 when Stack is Empty",
-			actualResult: func() int {
-				s, err := NewStack()
-				require.NoError(t, err)
+			name: "should return size 0 when stack is empty",
+			actualResult: func() int64 {
+				s := NewStack[int64]()
 
-				require.NoError(t, s.Push(1))
+				s.Push(1)
 
 				return s.Size()
 			},
 			expectedResult: 1,
 		},
 		{
-			name: "return Size 1 when Stack has 1 element",
-			actualResult: func() int {
-				s, err := NewStack()
-				require.NoError(t, err)
+			name: "should return size 1 when stack has one element",
+			actualResult: func() int64 {
+				s := NewStack[int64]()
 
-				require.NoError(t, s.Push(1))
-				require.NoError(t, s.Push(2))
+				s.Push(1)
+				s.Push(2)
 
 				return s.Size()
 			},
 			expectedResult: 2,
 		},
 		{
-			name: "return Size 1 when Stack has 2 elements",
-			actualResult: func() int {
-				s, err := NewStack()
-				require.NoError(t, err)
+			name: "should return size MaxInt8 when stack has MaxInt8 element",
+			actualResult: func() int64 {
+				s := NewStack[int64]()
+
+				data := internal.SliceGenerator{Size: math.MaxInt8}.Generate()
+				for _, e := range data {
+					s.Push(e)
+				}
 
 				return s.Size()
 			},
-			expectedResult: 0,
+			expectedResult: math.MaxInt8,
 		},
 	}
 
@@ -385,113 +313,35 @@ func TestStackCount(t *testing.T) {
 
 func TestStackClear(t *testing.T) {
 	testCases := []struct {
-		name           string
-		actualResult   func() bool
-		expectedResult bool
+		name         string
+		actualResult func() *Stack[int64]
 	}{
 		{
-			name: "should return true for Empty call after clearing Stack",
-			actualResult: func() bool {
-				s, err := NewStack()
-				require.NoError(t, err)
+			name: "should clear an empty stack",
+			actualResult: func() *Stack[int64] {
+				s := NewStack[int64]()
 
 				s.Clear()
 
-				return s.Empty()
+				return s
 			},
-			expectedResult: true,
 		},
 		{
-			name: "should return true for Empty call after clearing Stack two",
-			actualResult: func() bool {
-				s, err := NewStack()
-				require.NoError(t, err)
-
-				require.NoError(t, s.Push(1))
+			name: "should clear an stack with elements",
+			actualResult: func() *Stack[int64] {
+				s := NewStack[int64]()
+				s.Push(1)
 
 				s.Clear()
 
-				return s.Empty()
+				return s
 			},
-			expectedResult: true,
 		},
 	}
 
 	for _, testCase := range testCases {
 		t.Run(testCase.name, func(t *testing.T) {
-			assert.Equal(t, testCase.expectedResult, testCase.actualResult())
-		})
-	}
-}
-
-func TestStackSearch(t *testing.T) {
-	testCases := []struct {
-		name           string
-		actualResult   func() (int, error)
-		expectedResult int
-		expectedError  error
-	}{
-		{
-			name: "return index of element in Stack",
-			actualResult: func() (int, error) {
-				s, err := NewStack()
-				require.NoError(t, err)
-
-				require.NoError(t, s.Push(1))
-				require.NoError(t, s.Push(2))
-
-				return s.Search(2)
-			},
-			expectedResult: 0,
-		},
-		{
-			name: "return index of element in Stack two",
-			actualResult: func() (int, error) {
-				s, err := NewStack()
-				require.NoError(t, err)
-
-				require.NoError(t, s.Push(1))
-				require.NoError(t, s.Push(2))
-				require.NoError(t, s.Push(3))
-				require.NoError(t, s.Push(4))
-
-				return s.Search(1)
-			},
-			expectedResult: 3,
-		},
-		{
-			name: "return -1 when element is not present in Stack",
-			actualResult: func() (int, error) {
-				s, err := NewStack()
-				require.NoError(t, err)
-
-				require.NoError(t, s.Push(1))
-				require.NoError(t, s.Push(2))
-
-				return s.Search(3)
-			},
-			expectedResult: -1,
-		},
-		{
-			name: "return -1 when searching in Empty Stack",
-			actualResult: func() (int, error) {
-				s, err := NewStack()
-				require.NoError(t, err)
-
-				return s.Search(1)
-			},
-			expectedResult: -1,
-		},
-	}
-
-	for _, testCase := range testCases {
-		t.Run(testCase.name, func(t *testing.T) {
-			i, _ := testCase.actualResult()
-
-			//TODO FIX ERROR MESSAGE AND UNCOMMENT THE ASSERTION
-			//assert.Equal(t, testCase.expectedError, err)
-			assert.Equal(t, testCase.expectedResult, i)
-
+			assert.Equal(t, NewStack[int64](), testCase.actualResult())
 		})
 	}
 }

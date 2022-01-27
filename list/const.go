@@ -6,4 +6,5 @@ const (
 	scalingFactor   = 2
 	initialCapacity = 16
 	nought          = 0
+	invalidIndex    = -1
 )

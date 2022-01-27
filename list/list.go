@@ -6,7 +6,7 @@ import (
 	"github.com/nsnikhil/go-datastructures/functions/operator"
 )
 
-type List interface {
+type List[T comparable] interface {
 	/*
 		adds an element in the list
 		if the list is empty and the type was never set then the
@@ -19,7 +19,7 @@ type List interface {
 		error: returns type mismatch error when the element to add is of different
 		then what was set for list.
 	*/
-	Add(e interface{}) error
+	Add(e T)
 
 	/*
 		adds an element at an specified index in the list
@@ -36,7 +36,7 @@ type List interface {
 		type mismatch error when the element to add is of different
 		then what was set for list.
 	*/
-	AddAt(i int, e interface{}) error
+	AddAt(i int64, e T) error
 
 	/*
 		adds all the element specified in the list
@@ -51,7 +51,7 @@ type List interface {
 		type mismatch error when the any of the element to add is of different
 		then what was set for list.
 	*/
-	AddAll(l ...interface{}) error
+	AddAll(l ...T)
 
 	/*
 		clears the content of list.
@@ -61,7 +61,7 @@ type List interface {
 	/*
 		return an new object that is the clone of current list or an error if the clone fails.
 	*/
-	Clone() (List, error)
+	Clone() List[T]
 
 	/*
 		use to check if the element is present in the list.
@@ -75,7 +75,7 @@ type List interface {
 		type mismatch error when the element to search is of different
 		then what was set for list.
 	*/
-	Contains(e interface{}) (bool, error)
+	Contains(e T) bool
 
 	/*
 		use to check if multiple elements are present in the list.
@@ -90,7 +90,7 @@ type List interface {
 		then what was set for list.
 
 	*/
-	ContainsAll(l ...interface{}) (bool, error)
+	ContainsAll(l ...T) bool
 
 	/*
 		returns an element at a specified index.
@@ -101,7 +101,7 @@ type List interface {
 		returns:
 		interface: returns the element at the specified index if the index is valid.
 	*/
-	Get(i int) interface{}
+	Get(i int64) (T, error)
 
 	/*
 		returns the index of an specified element.
@@ -116,7 +116,7 @@ type List interface {
 		set for the list, or generic error if the element is not found.
 
 	*/
-	IndexOf(e interface{}) (int, error)
+	IndexOf(e T) int64
 
 	/*
 		returns true if the list is empty else false.
@@ -126,7 +126,12 @@ type List interface {
 	/*
 		returns an iterator for the list.
 	*/
-	Iterator() iterator.Iterator
+	Iterator() iterator.Iterator[T]
+
+	/*
+		returns a descending iterator for the list.
+	*/
+	DescendingIterator() iterator.Iterator[T]
 
 	/*
 		returns the last index for the element.
@@ -140,7 +145,7 @@ type List interface {
 		or type mismatch error if the element to be searched is of different type than what was
 		set for the list, or generic error if the element is not found.
 	*/
-	LastIndexOf(e interface{}) (int, error)
+	LastIndexOf(e T) int64
 
 	/*
 		use to remove and element from the list.
@@ -154,7 +159,7 @@ type List interface {
 		type mismatch error if the element to be removed is of different type than what was set
 		for the list, or generic error if the element was not found in the list.
 	*/
-	Remove(e interface{}) (bool, error)
+	Remove(e T) error
 
 	/*
 		use to remove and element at a specified index.
@@ -167,7 +172,7 @@ type List interface {
 		error: generic error is the list is empty or,
 		indexOutOfBound error if the specified index is invalid.
 	*/
-	RemoveAt(i int) (interface{}, error)
+	RemoveAt(i int64) (T, error)
 
 	/*
 		use to remove all the elements specified, if the element is not present in the list
@@ -181,7 +186,7 @@ type List interface {
 		error: returns generic error if the list is empty, or
 		type mismatch error if any element is of different type then what was set for the list.
 	*/
-	RemoveAll(l ...interface{}) (bool, error)
+	RemoveAll(l ...T) error
 
 	/*
 		replace and given value with another one.
@@ -191,7 +196,7 @@ type List interface {
 		new: the value to replace with.
 		error: return error if the list is empty or if the element is not found or if type mismatch.
 	*/
-	Replace(old, new interface{}) error
+	Replace(old, new T) error
 
 	/*
 		runs and function over all the element in the list, eg inc operator to increment all the
@@ -199,10 +204,8 @@ type List interface {
 
 		params:
 		uo: the function to be applied on every element of the list.
-		error: returns error if the function outputs element is different then the one set for
-		the list.
 	*/
-	ReplaceAll(uo operator.UnaryOperator) error
+	ReplaceAll(uo operator.UnaryOperator[T])
 
 	/*
 		use to retain all the elements specified, other elements are removed for the list,
@@ -216,7 +219,7 @@ type List interface {
 		error: returns generic error if the list is empty, or
 		type mismatch error if any element is of different type then what was set for the list.
 	*/
-	RetainAll(l ...interface{}) (bool, error)
+	RetainAll(l ...T) error
 
 	/*
 		use to set an given element at a specified index.
@@ -231,17 +234,17 @@ type List interface {
 		return indexOutOfBound error if the specified index is invalid or,
 		return type mismatch error if the elements type is different than one set for the list.
 	*/
-	Set(i int, e interface{}) (interface{}, error)
+	Set(i int64, e T) (T, error)
 
 	/*
 		returns the count of number of elements in the list.
 	*/
-	Size() int
+	Size() int64
 
 	/*
 		sorts the list based on the comparator specified.
 	*/
-	Sort(c comparator.Comparator)
+	Sort(c comparator.Comparator[T])
 
 	/*
 		returns an sublist starting for index s to index e-1
@@ -256,5 +259,5 @@ type List interface {
 		returns indexOutOfBound error if either s or e is invalid index or,
 		returns error if creation or adding to list fails
 	*/
-	SubList(s int, e int) (List, error)
+	SubList(s int64, e int64) (List[T], error)
 }
