@@ -416,27 +416,14 @@ func getValues[K comparable, V comparable](hm *HashMap[K, V]) (list.List[V], err
 }
 
 func (hm *HashMap[K, V]) resizeUp() {
-	var data []*Pair[K, V]
-
-	it := hm.Iterator()
-
-	for it.HasNext() {
-		p, _ := it.Next()
-		data = append(data, p)
-	}
-
-	newCap := hm.capacity * hm.scalingFactor
-
-	hm.Clear()
-
-	hm.capacity = newCap
-
-	hm.data = make([]*list.LinkedList[*Pair[K, V]], hm.capacity)
-
-	hm.insertAll(data...)
+	resize(hm, hm.capacity*hm.scalingFactor)
 }
 
 func (hm *HashMap[K, V]) resizeDown() {
+	resize(hm, hm.capacity/hm.scalingFactor)
+}
+
+func resize[K comparable, V comparable](hm *HashMap[K, V], newCap int64) {
 	var data []*Pair[K, V]
 
 	it := hm.Iterator()
@@ -445,8 +432,6 @@ func (hm *HashMap[K, V]) resizeDown() {
 		e, _ := it.Next()
 		data = append(data, e)
 	}
-
-	newCap := hm.capacity / hm.scalingFactor
 
 	hm.Clear()
 
