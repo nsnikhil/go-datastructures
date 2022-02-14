@@ -5,6 +5,7 @@ import (
 	"github.com/nsnikhil/go-datastructures/functions/iterator"
 	"github.com/nsnikhil/go-datastructures/functions/operator"
 	"github.com/nsnikhil/go-datastructures/functions/predicate"
+	"github.com/nsnikhil/go-datastructures/internal"
 )
 
 type factors struct {
@@ -101,6 +102,31 @@ func (al *ArrayList[T]) Get(index int64) (T, error) {
 	}
 
 	return al.data[index], nil
+}
+
+func (al *ArrayList[T]) Filter(predicate predicate.Predicate[T]) List[T] {
+	var elements []T
+	for i := int64(0); i < al.size; i++ {
+		if ok := predicate.Test(al.data[i]); ok {
+			elements = append(elements, al.data[i])
+		}
+	}
+
+	return NewArrayList[T](elements...)
+}
+
+func (al *ArrayList[T]) FindFirst(predicate predicate.Predicate[T]) (T, error) {
+	if al.IsEmpty() {
+		return internal.ZeroValueOf[T](), emptyListError("ArrayList.FindFirst")
+	}
+
+	for i := int64(0); i < al.size; i++ {
+		if ok := predicate.Test(al.data[i]); ok {
+			return al.data[i], nil
+		}
+	}
+
+	return internal.ZeroValueOf[T](), noElementMatchFilterError("ArrayList.FindFirst")
 }
 
 func (al *ArrayList[T]) IndexOf(element T) int64 {

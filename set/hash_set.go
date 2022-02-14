@@ -205,7 +205,7 @@ func (hsi *hashSetIterator) HasNext() bool {
 }
 
 func (hsi *hashSetIterator) Next() interface{} {
-	return hsi.it.Next().(*gmap.Pair).GetKey()
+	return hsi.it.Next().(*gmap.Pair).First()
 }
 
 func newHashSet(data gmap.Map) *HashSet {

@@ -12,24 +12,24 @@ import (
 	"github.com/nsnikhil/go-datastructures/functions/supplier"
 )
 
-type Stream interface {
-	AllMatch(p predicate.Predicate) bool
+type Stream[T comparable] interface {
+	AllMatch(p predicate.Predicate[T]) bool
 
-	AnyMatch(p predicate.Predicate) bool
+	AnyMatch(p predicate.Predicate[T]) bool
 
-	Collect(c collector.Collector) interface{}
+	Collect(c collector.Collector[T]) interface{}
 
 	Count() int
 
 	Distinct() Stream
 
-	DropWhile(p predicate.Predicate) Stream
+	DropWhile(p predicate.Predicate[T]) Stream
 
-	TakeWhile(p predicate.Predicate) Stream
+	TakeWhile(p predicate.Predicate[T]) Stream
 
 	Empty() bool
 
-	Filter(p predicate.Predicate) Stream
+	Filter(p predicate.Predicate[T]) Stream
 
 	Iterator() iterator.Iterator
 

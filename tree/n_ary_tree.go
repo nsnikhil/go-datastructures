@@ -90,7 +90,7 @@ func (nt *NAryTree[T]) IsComplete() bool {
 }
 
 func (nt *NAryTree[T]) LowestCommonAncestor(a, b T) (T, error) {
-	return nil, nil
+	return *new(T), nil
 }
 
 func (nt *NAryTree[T]) Paths() (list.List[T], error) {
@@ -114,19 +114,19 @@ func (nt *NAryTree[T]) Invert() {
 }
 
 func (nt *NAryTree[T]) InOrderSuccessor(e T) (T, error) {
-	return nil, nil
+	return *new(T), nil
 }
 
 func (nt *NAryTree[T]) PreOrderSuccessor(e T) (T, error) {
-	return nil, nil
+	return *new(T), nil
 }
 
 func (nt *NAryTree[T]) PostOrderSuccessor(e T) (T, error) {
-	return nil, nil
+	return *new(T), nil
 }
 
 func (nt *NAryTree[T]) LevelOrderSuccessor(e T) (T, error) {
-	return nil, nil
+	return *new(T), nil
 }
 
 func (nt *NAryTree[T]) PreOrderIterator() iterator.Iterator[T] {

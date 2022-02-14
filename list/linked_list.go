@@ -4,6 +4,8 @@ import (
 	"github.com/nsnikhil/go-datastructures/functions/comparator"
 	"github.com/nsnikhil/go-datastructures/functions/iterator"
 	"github.com/nsnikhil/go-datastructures/functions/operator"
+	"github.com/nsnikhil/go-datastructures/functions/predicate"
+	"github.com/nsnikhil/go-datastructures/internal"
 )
 
 type node[T comparable] struct {
@@ -51,12 +53,12 @@ func (ll *LinkedList[T]) AddAll(elements ...T) {
 	return
 }
 
-func (ll *LinkedList[T]) AddFirst(element T) error {
-	return ll.addAt(element, 0)
+func (ll *LinkedList[T]) AddFirst(element T) {
+	ll.addAt(element, 0)
 }
 
-func (ll *LinkedList[T]) AddLast(element T) error {
-	return ll.addAt(element, ll.size)
+func (ll *LinkedList[T]) AddLast(element T) {
+	ll.addAt(element, ll.size)
 }
 
 func (ll *LinkedList[T]) Clear() {
@@ -128,6 +130,38 @@ func (ll *LinkedList[T]) GetLast() (T, error) {
 	}
 
 	return ll.last.element, nil
+}
+
+func (ll *LinkedList[T]) Filter(predicate predicate.Predicate[T]) List[T] {
+	curr := ll.first
+	var elements []T
+
+	for curr != nil {
+		if ok := predicate.Test(curr.element); ok {
+			elements = append(elements, curr.element)
+		}
+		curr = curr.next
+	}
+
+	return NewLinkedList[T](elements...)
+}
+
+//TODO: ADD TEST
+func (ll *LinkedList[T]) FindFirst(predicate predicate.Predicate[T]) (T, error) {
+	if ll.IsEmpty() {
+		return internal.ZeroValueOf[T](), emptyListError("LinkedList.FindFirst")
+	}
+
+	curr := ll.first
+
+	for curr != nil {
+		if ok := predicate.Test(curr.element); ok {
+			return curr.element, nil
+		}
+		curr = curr.next
+	}
+
+	return internal.ZeroValueOf[T](), noElementMatchFilterError("LinkedList.FindFirst")
 }
 
 func (ll *LinkedList[T]) IndexOf(element T) int64 {

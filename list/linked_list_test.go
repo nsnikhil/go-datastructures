@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/nsnikhil/go-datastructures/functions/comparator"
+	"github.com/nsnikhil/go-datastructures/functions/predicate"
 	"github.com/nsnikhil/go-datastructures/internal"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -232,25 +233,28 @@ func TestLinkedListAddAt(t *testing.T) {
 func TestLinkedListAddFirst(t *testing.T) {
 	testCases := []struct {
 		name           string
-		actualResult   func() (error, List[int64])
+		actualResult   func() List[int64]
 		expectedResult List[int64]
-		expectedError  error
 	}{
 		{
 			name: "should add element to start of list",
-			actualResult: func() (error, List[int64]) {
+			actualResult: func() List[int64] {
 				ll := NewLinkedList[int64](2, 3, 4)
 
-				return ll.AddFirst(1), ll
+				ll.AddFirst(1)
+
+				return ll
 			},
 			expectedResult: NewLinkedList[int64](1, 2, 3, 4),
 		},
 		{
 			name: "should add element to start of new list",
-			actualResult: func() (error, List[int64]) {
+			actualResult: func() List[int64] {
 				ll := NewLinkedList[int64]()
 
-				return ll.AddFirst(1), ll
+				ll.AddFirst(1)
+
+				return ll
 			},
 			expectedResult: NewLinkedList[int64](1),
 		},
@@ -258,8 +262,7 @@ func TestLinkedListAddFirst(t *testing.T) {
 
 	for _, testCase := range testCases {
 		t.Run(testCase.name, func(t *testing.T) {
-			err, res := testCase.actualResult()
-			internal.AssertErrorEquals(t, testCase.expectedError, err)
+			res := testCase.actualResult()
 			assert.Equal(t, testCase.expectedResult, res)
 		})
 	}
@@ -268,36 +271,28 @@ func TestLinkedListAddFirst(t *testing.T) {
 func TestLinkedListAddLast(t *testing.T) {
 	testCases := []struct {
 		name           string
-		actualResult   func() (error, List[int64])
+		actualResult   func() List[int64]
 		expectedResult List[int64]
-		expectedError  error
 	}{
 		{
 			name: "test add element to end of list",
-			actualResult: func() (error, List[int64]) {
+			actualResult: func() List[int64] {
 				ll := NewLinkedList[int64](1, 2, 3)
 
-				return ll.AddLast(4), ll
+				ll.AddLast(4)
+
+				return ll
 			},
 			expectedResult: NewLinkedList[int64](1, 2, 3, 4),
 		},
 		{
 			name: "test add element to end of new list",
-			actualResult: func() (error, List[int64]) {
+			actualResult: func() List[int64] {
 				ll := NewLinkedList[int64]()
 
-				return ll.AddLast(1), ll
-			},
-			expectedResult: NewLinkedList[int64](1),
-		},
-		{
-			name: "test add element to start of empty list",
-			actualResult: func() (error, List[int64]) {
-				ll := NewLinkedList[int64](1, 2)
+				ll.AddLast(1)
 
-				ll.Clear()
-
-				return ll.AddLast(1), ll
+				return ll
 			},
 			expectedResult: NewLinkedList[int64](1),
 		},
@@ -305,8 +300,7 @@ func TestLinkedListAddLast(t *testing.T) {
 
 	for _, testCase := range testCases {
 		t.Run(testCase.name, func(t *testing.T) {
-			err, res := testCase.actualResult()
-			internal.AssertErrorEquals(t, testCase.expectedError, err)
+			res := testCase.actualResult()
 			assert.Equal(t, testCase.expectedResult, res)
 		})
 	}
@@ -358,6 +352,65 @@ func TestLinkedListAllAdd(t *testing.T) {
 		t.Run(testCase.name, func(t *testing.T) {
 			l := testCase.actualResult()
 			assert.Equal(t, testCase.expectedResult, l)
+		})
+	}
+}
+
+func TestLinkedListFilter(t *testing.T) {
+	testCases := map[string]struct {
+		inputFilter    predicate.Predicate[int64]
+		inputList      List[int64]
+		expectedResult List[int64]
+	}{
+		"should filter even numbers": {
+			inputFilter:    evenFilter{},
+			inputList:      NewLinkedList[int64](internal.SliceGenerator{Size: 10}.Generate()...),
+			expectedResult: NewLinkedList[int64](0, 2, 4, 6, 8),
+		},
+		"should filter no elements when all elements matches filter": {
+			inputFilter:    evenFilter{},
+			inputList:      NewLinkedList[int64](0, 2, 4, 6, 8),
+			expectedResult: NewLinkedList[int64](0, 2, 4, 6, 8),
+		},
+		"should filter all elements when no element matches filter": {
+			inputFilter:    evenFilter{},
+			inputList:      NewLinkedList[int64](1, 3, 5, 7, 9),
+			expectedResult: NewLinkedList[int64](),
+		},
+	}
+
+	for name, testCase := range testCases {
+		t.Run(name, func(t *testing.T) {
+			res := testCase.inputList.Filter(testCase.inputFilter)
+			assert.Equal(t, testCase.expectedResult, res)
+		})
+	}
+}
+
+func TestLinkedListFindFirst(t *testing.T) {
+	testCases := map[string]struct {
+		inputFilter    predicate.Predicate[int64]
+		inputList      List[int64]
+		expectedResult int64
+		expectedError  error
+	}{
+		"should return first even number": {
+			inputFilter:    evenFilter{},
+			inputList:      NewLinkedList[int64](internal.SliceGenerator{Size: 10}.Generate()...),
+			expectedResult: 0,
+		},
+		"should return error when no element matches filter": {
+			inputFilter:   evenFilter{},
+			inputList:     NewLinkedList[int64](1, 3, 5, 7, 9),
+			expectedError: errors.New("no element match the provided filter"),
+		},
+	}
+
+	for name, testCase := range testCases {
+		t.Run(name, func(t *testing.T) {
+			res, err := testCase.inputList.FindFirst(testCase.inputFilter)
+			internal.AssertErrorEquals(t, testCase.expectedError, err)
+			assert.Equal(t, testCase.expectedResult, res)
 		})
 	}
 }

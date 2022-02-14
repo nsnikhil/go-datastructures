@@ -1,5 +1,5 @@
 package function
 
-type Function interface {
-	Apply(e interface{}) interface{}
+type Function[T comparable, R comparable] interface {
+	Apply(e T) R
 }

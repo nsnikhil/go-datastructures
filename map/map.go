@@ -6,40 +6,40 @@ import (
 	"github.com/nsnikhil/go-datastructures/list"
 )
 
-type Map interface {
-	Put(k interface{}, v interface{}) (interface{}, error)
+type Map[K comparable, V comparable] interface {
+	Put(key K, value V) V
 
-	PutAll(values ...*Pair) error
+	PutAll(values ...*Pair[K, V])
 
-	Get(k interface{}) (interface{}, error)
+	Get(key K) (V, error)
 
-	GetOrDefault(k, d interface{}) interface{}
+	GetOrDefault(key K, defaultValue V) V
 
-	Remove(k interface{}) (interface{}, error)
+	Remove(key K) (V, error)
 
-	RemoveWithVal(k interface{}, v interface{}) (interface{}, error)
+	RemoveWithVal(key K, value V) (V, error)
 
-	Replace(k interface{}, nv interface{}) error
+	Replace(key K, newValue V) error
 
-	ReplaceWithVal(k interface{}, ov interface{}, nv interface{}) error
+	ReplaceWithVal(key K, oldValue V, newValue V) error
 
-	ReplaceAll(f function.BiFunction) error
+	ReplaceAll(f function.BiFunction[K, V, V]) error
 
-	Compute(k interface{}, f function.BiFunction) (interface{}, error)
+	Compute(key K, f function.BiFunction[K, V, V]) (V, error)
 
-	ContainsKey(k interface{}) bool
+	ContainsKey(key K) bool
 
-	ContainsValue(v interface{}) bool
+	ContainsValue(value V) bool
 
-	Size() int
+	Size() int64
 
-	Keys() (list.List, error)
+	Keys() (list.List[K], error)
 
-	Values() (list.List, error)
+	Values() (list.List[V], error)
 
 	Clear()
 
 	IsEmpty() bool
 
-	Iterator() iterator.Iterator
+	Iterator() iterator.Iterator[*Pair[K, V]]
 }

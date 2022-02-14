@@ -8,28 +8,16 @@ import (
 type testType struct{}
 
 func TestCreateNewPair(t *testing.T) {
-	testCases := []struct {
-		name           string
-		actualResult   *Pair
-		expectedResult *Pair
-	}{
-		{
-			name:           "return pair of int and int32",
-			actualResult:   NewPair(1, 'a'),
-			expectedResult: &Pair{1, 'a'},
-		},
-		{
-			name:           "return pair of int32 and struct",
-			actualResult:   NewPair('t', testType{}),
-			expectedResult: &Pair{'t', testType{}},
-		},
-	}
+	type object struct{ data int }
 
-	for _, testCase := range testCases {
-		t.Run(testCase.name, func(t *testing.T) {
-			assert.Equal(t, testCase.expectedResult, testCase.actualResult)
-		})
-	}
+	intRunePair := NewPair[int, rune](1, 'a')
+
+	assert.Equal(t, &Pair[int, rune]{1, 'a'}, intRunePair)
+
+	stringObject := NewPair[string, object]("a", object{data: 1})
+
+	assert.Equal(t, &Pair[string, object]{"a", object{data: 1}}, stringObject)
+
 }
 
 func TestPairGetKey(t *testing.T) {
@@ -40,12 +28,12 @@ func TestPairGetKey(t *testing.T) {
 	}{
 		{
 			name:           "return key as 1",
-			actualResult:   NewPair(1, 'a').GetKey(),
+			actualResult:   NewPair(1, 'a').First(),
 			expectedResult: 1,
 		},
 		{
 			name:           "return key as t",
-			actualResult:   NewPair('t', testType{}).GetKey(),
+			actualResult:   NewPair('t', testType{}).First(),
 			expectedResult: 't',
 		},
 	}
@@ -65,12 +53,12 @@ func TestPairGetValue(t *testing.T) {
 	}{
 		{
 			name:           "return value as 1",
-			actualResult:   NewPair(1, 'a').GetValue(),
+			actualResult:   NewPair(1, 'a').Second(),
 			expectedResult: 'a',
 		},
 		{
 			name:           "return key as testType",
-			actualResult:   NewPair('t', testType{}).GetValue(),
+			actualResult:   NewPair('t', testType{}).Second(),
 			expectedResult: testType{},
 		},
 	}

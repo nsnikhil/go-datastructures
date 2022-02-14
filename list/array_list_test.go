@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/nsnikhil/go-datastructures/functions/comparator"
+	"github.com/nsnikhil/go-datastructures/functions/predicate"
 	"github.com/nsnikhil/go-datastructures/internal"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -140,6 +141,65 @@ func TestArrayListAdd(t *testing.T) {
 
 		assert.Equal(t, testCase.expectedSize, size)
 		assert.Equal(t, testCase.expectedResult, res)
+	}
+}
+
+func TestArrayListFilter(t *testing.T) {
+	testCases := map[string]struct {
+		inputFilter    predicate.Predicate[int64]
+		inputList      List[int64]
+		expectedResult List[int64]
+	}{
+		"should filter even numbers": {
+			inputFilter:    evenFilter{},
+			inputList:      NewArrayList[int64](internal.SliceGenerator{Size: 10}.Generate()...),
+			expectedResult: NewArrayList[int64](0, 2, 4, 6, 8),
+		},
+		"should filter no elements when all elements matches filter": {
+			inputFilter:    evenFilter{},
+			inputList:      NewArrayList[int64](0, 2, 4, 6, 8),
+			expectedResult: NewArrayList[int64](0, 2, 4, 6, 8),
+		},
+		"should filter all elements when no element matches filter": {
+			inputFilter:    evenFilter{},
+			inputList:      NewArrayList[int64](1, 3, 5, 7, 9),
+			expectedResult: NewArrayList[int64](),
+		},
+	}
+
+	for name, testCase := range testCases {
+		t.Run(name, func(t *testing.T) {
+			res := testCase.inputList.Filter(testCase.inputFilter)
+			assert.Equal(t, testCase.expectedResult, res)
+		})
+	}
+}
+
+func TestArrayListFindFirst(t *testing.T) {
+	testCases := map[string]struct {
+		inputFilter    predicate.Predicate[int64]
+		inputList      List[int64]
+		expectedResult int64
+		expectedError  error
+	}{
+		"should return first even number": {
+			inputFilter:    evenFilter{},
+			inputList:      NewArrayList[int64](internal.SliceGenerator{Size: 10}.Generate()...),
+			expectedResult: 0,
+		},
+		"should return error when no element matches filter": {
+			inputFilter:   evenFilter{},
+			inputList:     NewArrayList[int64](1, 3, 5, 7, 9),
+			expectedError: errors.New("no element match the provided filter"),
+		},
+	}
+
+	for name, testCase := range testCases {
+		t.Run(name, func(t *testing.T) {
+			res, err := testCase.inputList.FindFirst(testCase.inputFilter)
+			internal.AssertErrorEquals(t, testCase.expectedError, err)
+			assert.Equal(t, testCase.expectedResult, res)
+		})
 	}
 }
 

@@ -1,5 +1,5 @@
 package operator
 
-type BinaryOperator interface {
-	Apply(t interface{}, u interface{}) interface{}
+type BinaryOperator[T comparable, U comparable, R comparable] interface {
+	Apply(t T, u U) R
 }

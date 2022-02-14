@@ -1,21 +1,21 @@
 package gmap
 
-type Pair struct {
-	k interface{}
-	v interface{}
+type Pair[F comparable, S comparable] struct {
+	first  F
+	second S
 }
 
-func NewPair(k, v interface{}) *Pair {
-	return &Pair{
-		k: k,
-		v: v,
+func NewPair[F comparable, S comparable](first F, second S) *Pair[F, S] {
+	return &Pair[F, S]{
+		first:  first,
+		second: second,
 	}
 }
 
-func (p Pair) GetKey() interface{} {
-	return p.k
+func (p Pair[F, S]) First() F {
+	return p.first
 }
 
-func (p Pair) GetValue() interface{} {
-	return p.v
+func (p Pair[F, S]) Second() S {
+	return p.second
 }

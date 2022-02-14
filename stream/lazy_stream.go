@@ -14,21 +14,14 @@ import (
 	"github.com/nsnikhil/go-datastructures/utils"
 )
 
-type LazyStream struct {
-	operations queue.Queue
+type LazyStream[T comparable] struct {
+	operations queue.Queue[T]
 }
 
-func NewLazyStream() (Stream, error) {
-	q, err := queue.NewDeque()
-	if err != nil {
-		return nil, err
+func NewLazyStream[T comparable]() Stream[T] {
+	return &LazyStream{
+		operations: queue.NewDeque[T](),
 	}
-
-	ls := &LazyStream{
-		operations: q,
-	}
-
-	return ls, nil
 }
 
 func (ls *LazyStream) AllMatch(p predicate.Predicate) bool {

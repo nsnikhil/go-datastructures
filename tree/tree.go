@@ -35,7 +35,7 @@ type Tree[T comparable] interface {
 
 	LowestCommonAncestor(a, b T) (T, error)
 
-	Paths() (list.List[T], error)
+	Paths() (list.List[list.List[T]], error)
 
 	// TEMPORARY
 	Mode() (list.List[T], error)

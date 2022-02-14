@@ -46,3 +46,12 @@ var elementNotFoundError = func(element interface{}, operation erx.Operation) *e
 		fmt.Errorf("element %v not found in the list", element),
 	)
 }
+
+//TODO: RENAME AND REMOVE INTERFACE FROM HERE
+var noElementMatchFilterError = func(operation erx.Operation) *erx.Erx {
+	return erx.WithArgs(
+		erx.Kind("noElementMatchFilterError"),
+		operation,
+		errors.New("no element match the provided filter"),
+	)
+}

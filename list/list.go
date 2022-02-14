@@ -4,6 +4,7 @@ import (
 	"github.com/nsnikhil/go-datastructures/functions/comparator"
 	"github.com/nsnikhil/go-datastructures/functions/iterator"
 	"github.com/nsnikhil/go-datastructures/functions/operator"
+	"github.com/nsnikhil/go-datastructures/functions/predicate"
 )
 
 type List[T comparable] interface {
@@ -102,6 +103,10 @@ type List[T comparable] interface {
 		interface: returns the element at the specified index if the index is valid.
 	*/
 	Get(i int64) (T, error)
+
+	Filter(predicate predicate.Predicate[T]) List[T]
+
+	FindFirst(predicate predicate.Predicate[T]) (T, error)
 
 	/*
 		returns the index of an specified element.

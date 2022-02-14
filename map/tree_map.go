@@ -1,105 +1,105 @@
 package gmap
 
-import (
-	"github.com/nsnikhil/go-datastructures/functions/comparator"
-	"github.com/nsnikhil/go-datastructures/functions/function"
-	"github.com/nsnikhil/go-datastructures/functions/iterator"
-	"github.com/nsnikhil/go-datastructures/list"
-	"github.com/nsnikhil/go-datastructures/tree"
-	"hash"
-)
-
-type TreeMap struct {
-	h hash.Hash
-
-	*typeURL
-	*factors
-	*counter
-
-	data tree.Tree
-}
-
-func NewTreeMap(c comparator.Comparator, values ...*Pair) (Map, error) {
-	bst, err := tree.NewBinarySearchTree(c)
-	if err != nil {
-		return nil, err
-	}
-
-	tm := &TreeMap{
-		data: bst,
-	}
-
-	return tm, nil
-}
-
-func (tm *TreeMap) Put(k interface{}, v interface{}) (interface{}, error) {
-	return nil, nil
-}
-
-func (tm *TreeMap) PutAll(values ...*Pair) error {
-	return nil
-}
-
-func (tm *TreeMap) Get(k interface{}) (interface{}, error) {
-	return nil, nil
-}
-
-func (tm *TreeMap) GetOrDefault(k, d interface{}) interface{} {
-	return nil
-}
-
-func (tm *TreeMap) Remove(k interface{}) (interface{}, error) {
-	return nil, nil
-}
-
-func (tm *TreeMap) RemoveWithVal(k interface{}, v interface{}) (interface{}, error) {
-	return nil, nil
-}
-
-func (tm *TreeMap) Replace(k interface{}, nv interface{}) error {
-	return nil
-}
-
-func (tm *TreeMap) ReplaceWithVal(k interface{}, ov interface{}, nv interface{}) error {
-	return nil
-}
-
-func (tm *TreeMap) ReplaceAll(f function.BiFunction) error {
-	return nil
-}
-
-func (tm *TreeMap) Compute(k interface{}, f function.BiFunction) (interface{}, error) {
-	return nil, nil
-}
-
-func (tm *TreeMap) ContainsKey(k interface{}) bool {
-	return false
-}
-
-func (tm *TreeMap) ContainsValue(v interface{}) bool {
-	return false
-}
-
-func (tm *TreeMap) Size() int {
-	return 0
-}
-
-func (tm *TreeMap) Keys() (list.List, error) {
-	return nil, nil
-}
-
-func (tm *TreeMap) Values() (list.List, error) {
-	return nil, nil
-}
-
-func (tm *TreeMap) Clear() {
-
-}
-
-func (tm *TreeMap) IsEmpty() bool {
-	return false
-}
-
-func (tm *TreeMap) Iterator() iterator.Iterator {
-	return nil
-}
+//
+//import (
+//	"github.com/nsnikhil/go-datastructures/functions/comparator"
+//	"github.com/nsnikhil/go-datastructures/functions/function"
+//	"github.com/nsnikhil/go-datastructures/functions/iterator"
+//	"github.com/nsnikhil/go-datastructures/list"
+//	"hash"
+//)
+//
+//type TreeMap[K comparable, V comparable] struct {
+//	h hash.Hash
+//
+//	*factors
+//	*counter
+//
+//	//data tree.Tree
+//}
+//
+//func NewTreeMap[K comparable, V comparable](c comparator.Comparator[K], values ...*Pair[K, V]) Map[K, V] {
+//	return nil
+//	//bst, err := tree.NewBinarySearchTree(c)
+//	//if err != nil {
+//	//	return nil, err
+//	//}
+//	//
+//	//tm := &TreeMap{
+//	//	data: bst,
+//	//}
+//	//
+//	//return tm, nil
+//}
+//
+//func (tm *TreeMap[K, V]) Put(k interface{}, v interface{}) (interface{}, error) {
+//	return nil, nil
+//}
+//
+//func (tm *TreeMap[K, V]) PutAll(values ...*Pair[K, V]) error {
+//	return nil
+//}
+//
+//func (tm *TreeMap[K, V]) Get(k interface{}) (interface{}, error) {
+//	return nil, nil
+//}
+//
+//func (tm *TreeMap[K, V]) GetOrDefault(k, d interface{}) interface{} {
+//	return nil
+//}
+//
+//func (tm *TreeMap[K, V]) Remove(k interface{}) (interface{}, error) {
+//	return nil, nil
+//}
+//
+//func (tm *TreeMap[K, V]) RemoveWithVal(k interface{}, v interface{}) (interface{}, error) {
+//	return nil, nil
+//}
+//
+//func (tm *TreeMap[K, V]) Replace(k interface{}, nv interface{}) error {
+//	return nil
+//}
+//
+//func (tm *TreeMap[K, V]) ReplaceWithVal(k interface{}, ov interface{}, nv interface{}) error {
+//	return nil
+//}
+//
+//func (tm *TreeMap[K, V]) ReplaceAll(f function.BiFunction) error {
+//	return nil
+//}
+//
+//func (tm *TreeMap[K, V]) Compute(k interface{}, f function.BiFunction) (interface{}, error) {
+//	return nil, nil
+//}
+//
+//func (tm *TreeMap[K, V]) ContainsKey(k interface{}) bool {
+//	return false
+//}
+//
+//func (tm *TreeMap[K, V]) ContainsValue(v interface{}) bool {
+//	return false
+//}
+//
+//func (tm *TreeMap[K, V]) Size() int {
+//	return 0
+//}
+//
+//func (tm *TreeMap[K, V]) Keys() (list.List[K], error) {
+//	return nil, nil
+//}
+//
+//func (tm *TreeMap[K, V]) Values() (list.List[V], error) {
+//	return nil, nil
+//}
+//
+//func (tm *TreeMap[K, V]) Clear() {
+//
+//}
+//
+//func (tm *TreeMap[K, V]) IsEmpty() bool {
+//	return false
+//}
+//
+//func (tm *TreeMap[K, V]) Iterator() iterator.Iterator[Pair[K, V]] {
+//	return nil
+//}
