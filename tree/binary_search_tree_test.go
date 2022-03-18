@@ -1,7 +1,6 @@
 package tree
 
 import (
-	"errors"
 	"github.com/nsnikhil/go-datastructures/functions/comparator"
 	"github.com/stretchr/testify/assert"
 	"testing"
@@ -10,18 +9,17 @@ import (
 func TestCreateNewBinarySearchTree(t *testing.T) {
 	testCases := []struct {
 		name           string
-		actualResult   func() (Tree, error)
-		expectedResult func() Tree
-		expectedError  error
+		actualResult   func() Tree[int]
+		expectedResult func() Tree[int]
 	}{
 		{
 			name: "test create new empty binary search tree",
-			actualResult: func() (Tree, error) {
+			actualResult: func() Tree[int] {
 				return NewBinarySearchTree(comparator.NewIntegerComparator())
 			},
-			expectedResult: func() Tree {
-				bt := &BinaryTree{count: 0, typeURL: "na"}
-				return &BinarySearchTree{
+			expectedResult: func() Tree[int] {
+				bt := &BinaryTree[int]{count: 0}
+				return &BinarySearchTree[int]{
 					c:          comparator.NewIntegerComparator(),
 					BinaryTree: bt,
 				}
@@ -29,16 +27,15 @@ func TestCreateNewBinarySearchTree(t *testing.T) {
 		},
 		{
 			name: "test create new empty binary search tree with one element",
-			actualResult: func() (Tree, error) {
+			actualResult: func() Tree[int] {
 				return NewBinarySearchTree(comparator.NewIntegerComparator(), 1)
 			},
-			expectedResult: func() Tree {
-				bt := &BinaryTree{
-					count:   1,
-					typeURL: "int",
-					root:    newBinaryNode(1),
+			expectedResult: func() Tree[int] {
+				bt := &BinaryTree[int]{
+					count: 1,
+					root:  newBinaryNode(1),
 				}
-				return &BinarySearchTree{
+				return &BinarySearchTree[int]{
 					c:          comparator.NewIntegerComparator(),
 					BinaryTree: bt,
 				}
@@ -46,13 +43,12 @@ func TestCreateNewBinarySearchTree(t *testing.T) {
 		},
 		{
 			name: "test create new empty binary search tree with multiple element",
-			actualResult: func() (Tree, error) {
+			actualResult: func() Tree[int] {
 				return NewBinarySearchTree(comparator.NewIntegerComparator(), 2, 1, 3, 4)
 			},
-			expectedResult: func() Tree {
-				bt := &BinaryTree{
-					count:   4,
-					typeURL: "int",
+			expectedResult: func() Tree[int] {
+				bt := &BinaryTree[int]{
+					count: 4,
 				}
 				bt.root = newBinaryNode(2)
 
@@ -65,29 +61,18 @@ func TestCreateNewBinarySearchTree(t *testing.T) {
 				bt.root.right.right = newBinaryNode(4)
 				bt.root.right.right.parent = bt.root.right
 
-				return &BinarySearchTree{
+				return &BinarySearchTree[int]{
 					c:          comparator.NewIntegerComparator(),
 					BinaryTree: bt,
 				}
 			},
 		},
-		{
-			name: "test create new return error when element are of different type",
-			actualResult: func() (Tree, error) {
-				return NewBinarySearchTree(comparator.NewIntegerComparator(), 1, 'a')
-			},
-			expectedResult: func() Tree {
-				return (*BinarySearchTree)(nil)
-			},
-			expectedError: errors.New("all elements must be of same type"),
-		},
 	}
 
 	for _, testCase := range testCases {
 		t.Run(testCase.name, func(t *testing.T) {
-			res, err := testCase.actualResult()
+			res := testCase.actualResult()
 
-			assert.Equal(t, testCase.expectedError, err)
 			assert.Equal(t, testCase.expectedResult(), res)
 		})
 	}

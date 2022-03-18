@@ -6,7 +6,7 @@ import (
 )
 
 type Tree[T comparable] interface {
-	Insert(e T) error
+	Insert(e T)
 	Delete(e T) error
 	Search(e T) (bool, error)
 
@@ -35,7 +35,7 @@ type Tree[T comparable] interface {
 
 	LowestCommonAncestor(a, b T) (T, error)
 
-	Paths() (list.List[list.List[T]], error)
+	Paths() ([][]T, error)
 
 	// TEMPORARY
 	Mode() (list.List[T], error)
