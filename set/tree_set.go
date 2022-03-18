@@ -1,83 +1,63 @@
 package set
 
 import (
-	"github.com/nsnikhil/go-datastructures/functions/comparator"
 	"github.com/nsnikhil/go-datastructures/functions/iterator"
-	gmap "github.com/nsnikhil/go-datastructures/map"
 	"github.com/nsnikhil/go-datastructures/utils"
 )
 
-type TreeSet struct {
-	c    comparator.Comparator
-	data gmap.Map
+type TreeSet[T comparable] struct {
 }
 
-func NewTreeSet(c comparator.Comparator, e ...interface{}) (Set, error) {
-	tm, err := gmap.NewTreeMap(c)
-	if err != nil {
-		return nil, err
-	}
-
-	ts := &TreeSet{
-		c:    c,
-		data: tm,
-	}
-
-	return ts, nil
+func (ts *TreeSet[T]) Add(e T) {
 }
 
-func (ts *TreeSet) Add(e interface{}) error {
-	return nil
+func (ts *TreeSet[T]) AddAll(e ...T) {
 }
 
-func (ts *TreeSet) AddAll(e ...interface{}) error {
-	return nil
-}
-
-func (ts *TreeSet) Clear() {
+func (ts *TreeSet[T]) Clear() {
 
 }
 
-func (ts *TreeSet) Contains(e interface{}) bool {
+func (ts *TreeSet[T]) Contains(e T) bool {
 	return false
 }
 
-func (ts *TreeSet) ContainsAll(e ...interface{}) bool {
+func (ts *TreeSet[T]) ContainsAll(e ...T) bool {
 	return false
 }
 
-func (ts *TreeSet) Copy() Set {
+func (ts *TreeSet[T]) Copy() Set[T] {
 	return nil
 }
 
-func (ts *TreeSet) IsEmpty() bool {
+func (ts *TreeSet[T]) IsEmpty() bool {
 	return false
 }
 
-func (ts *TreeSet) Size() int {
+func (ts *TreeSet[T]) Size() int {
 	return utils.InvalidIndex
 }
 
-func (ts *TreeSet) Remove(e interface{}) error {
+func (ts *TreeSet[T]) Remove(e T) error {
 	return nil
 }
 
-func (ts *TreeSet) RemoveAll(e ...interface{}) error {
+func (ts *TreeSet[T]) RemoveAll(e ...T) error {
 	return nil
 }
 
-func (ts *TreeSet) RetainAll(e ...interface{}) error {
+func (ts *TreeSet[T]) RetainAll(e ...T) error {
 	return nil
 }
 
-func (ts *TreeSet) Iterator() iterator.Iterator {
+func (ts *TreeSet[T]) Iterator() iterator.Iterator[T] {
 	return nil
 }
 
-func (ts *TreeSet) Union(s Set) (Set, error) {
+func (ts *TreeSet[T]) Union(s Set[T]) (Set[T], error) {
 	return nil, nil
 }
 
-func (ts *TreeSet) Intersection(s Set) (Set, error) {
+func (ts *TreeSet[T]) Intersection(s Set[T]) (Set[T], error) {
 	return nil, nil
 }

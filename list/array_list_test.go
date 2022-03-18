@@ -80,7 +80,7 @@ func TestArrayListSize(t *testing.T) {
 		{
 			name: "should return size as 0 for empty list",
 			actualSize: func() int64 {
-				list := NewArrayList[any]()
+				list := NewArrayList[int]()
 
 				return list.Size()
 			},

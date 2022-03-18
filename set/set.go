@@ -2,32 +2,32 @@ package set
 
 import "github.com/nsnikhil/go-datastructures/functions/iterator"
 
-type Set interface {
-	Add(e interface{}) error
+type Set[T comparable] interface {
+	Add(e T)
 
-	AddAll(e ...interface{}) error
+	AddAll(e ...T)
 
 	Clear()
 
-	Contains(e interface{}) bool
+	Contains(e T) bool
 
-	ContainsAll(e ...interface{}) bool
+	ContainsAll(e ...T) bool
 
-	Copy() Set
+	Copy() Set[T]
 
 	IsEmpty() bool
 
-	Size() int
+	Size() int64
 
-	Remove(e interface{}) error
+	Remove(e T) error
 
-	RemoveAll(e ...interface{}) error
+	RemoveAll(e ...T) error
 
-	RetainAll(e ...interface{}) error
+	RetainAll(e ...T) error
 
-	Iterator() iterator.Iterator
+	Iterator() iterator.Iterator[T]
 
-	Union(s Set) (Set, error)
+	Union(s Set[T]) (Set[T], error)
 
-	Intersection(s Set) (Set, error)
+	Intersection(s Set[T]) (Set[T], error)
 }

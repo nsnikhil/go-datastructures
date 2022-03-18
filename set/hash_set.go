@@ -2,119 +2,99 @@ package set
 
 import (
 	"errors"
-	"fmt"
+	"github.com/nsnikhil/erx"
 	"github.com/nsnikhil/go-datastructures/functions/iterator"
-	"github.com/nsnikhil/go-datastructures/liberr"
+	"github.com/nsnikhil/go-datastructures/internal"
 	gmap "github.com/nsnikhil/go-datastructures/map"
-	"github.com/nsnikhil/go-datastructures/utils"
 )
 
 var errorDifferentTypes = errors.New("all elements must be of same type")
 
 type present struct{}
 
-type HashSet struct {
-	data gmap.Map
+type HashSet[T comparable] struct {
+	data gmap.Map[T, present]
 }
 
-func NewHashSet(e ...interface{}) (Set, error) {
-	hm, err := gmap.NewHashMap()
-	if err != nil {
-		return nil, err
-	}
+func NewHashSet[T comparable](e ...T) *HashSet[T] {
+	hm := gmap.NewHashMap[T, present]()
 
-	hs := newHashSet(hm)
+	hs := newHashSet[T](hm)
 
 	if len(e) == 0 {
-		return hs, nil
+		return hs
 	}
 
-	err = insert(hs, e...)
-	if err != nil {
-		return nil, err
-	}
+	hs.insert(e...)
 
-	return hs, nil
+	return hs
 }
 
-func (hs *HashSet) Add(e interface{}) error {
-	return insert(hs, e)
+func (hs *HashSet[T]) Add(e T) {
+	hs.insert(e)
 }
 
-func (hs *HashSet) AddAll(e ...interface{}) error {
-	return insert(hs, e...)
+//TODO: SHOULD IT THROW ERRO IF ARGS ARE EMPTY?
+func (hs *HashSet[T]) AddAll(e ...T) {
+	hs.insert(e...)
 }
 
-func (hs *HashSet) Clear() {
+func (hs *HashSet[T]) Clear() {
 	hs.data.Clear()
 }
 
-func (hs *HashSet) Contains(e interface{}) bool {
-	return contains(hs, e)
+func (hs *HashSet[T]) Contains(e T) bool {
+	return hs.contains(e)
 }
 
-func (hs *HashSet) ContainsAll(e ...interface{}) bool {
-	return contains(hs, e...)
+func (hs *HashSet[T]) ContainsAll(e ...T) bool {
+	return hs.contains(e...)
 }
 
-func (hs *HashSet) Copy() Set {
-	dt := make([]interface{}, 0)
+func (hs *HashSet[T]) Copy() Set[T] {
+	dt := make([]T, 0)
 
 	it := hs.Iterator()
 	for it.HasNext() {
-		dt = append(dt, it.Next())
+		v, _ := it.Next()
+		dt = append(dt, v)
 	}
 
-	cs, _ := NewHashSet(dt...)
-	return cs
+	return NewHashSet(dt...)
 }
 
-func (hs *HashSet) IsEmpty() bool {
+func (hs *HashSet[T]) IsEmpty() bool {
 	return hs.data.IsEmpty()
 }
 
-func (hs *HashSet) Size() int {
+func (hs *HashSet[T]) Size() int64 {
 	return hs.data.Size()
 }
 
-func (hs *HashSet) Remove(e interface{}) error {
-	return remove(hs, false, e)
+func (hs *HashSet[T]) Remove(e T) error {
+	return hs.remove(false, e)
 }
 
-func (hs *HashSet) RemoveAll(e ...interface{}) error {
-	return remove(hs, true, e...)
+func (hs *HashSet[T]) RemoveAll(e ...T) error {
+	return hs.remove(true, e...)
 }
 
-func (hs *HashSet) RetainAll(e ...interface{}) error {
+func (hs *HashSet[T]) RetainAll(e ...T) error {
 	if hs.IsEmpty() {
 		return errors.New("set is empty")
 	}
 
-	kt, err := validaTypes(e...)
-	if err != nil && err == errorDifferentTypes {
-		return err
-	}
-
-	tm := make(map[interface{}]bool)
+	tm := make(map[T]bool)
 
 	for _, k := range e {
 		tm[k] = true
 	}
 
-	validated := false
-	dl := make([]interface{}, 0)
+	dl := make([]T, 0)
 
 	it := hs.Iterator()
 	for it.HasNext() {
-		e := it.Next()
-
-		if !validated {
-			ct := utils.GetTypeName(e)
-			if kt != utils.NA && kt != ct {
-				return liberr.TypeMismatchError(ct, kt)
-			}
-			validated = true
-		}
+		e, _ := it.Next()
 
 		if !tm[e] {
 			dl = append(dl, e)
@@ -125,102 +105,86 @@ func (hs *HashSet) RetainAll(e ...interface{}) error {
 		return nil
 	}
 
-	return remove(hs, false, dl...)
+	return hs.remove(false, dl...)
 }
 
-func (hs *HashSet) Iterator() iterator.Iterator {
-	return newHashIterator(hs.data.Iterator())
+func (hs *HashSet[T]) Iterator() iterator.Iterator[T] {
+	return newHashIterator[T](hs.data.Iterator())
 }
 
-func (hs *HashSet) Union(s Set) (Set, error) {
-	ns, err := NewHashSet()
-	if err != nil {
+func (hs *HashSet[T]) Union(s Set[T]) (Set[T], error) {
+	ns := NewHashSet[T]()
+
+	if err := ns.union(hs); err != nil {
 		return nil, err
 	}
 
-	if err = union(ns.(*HashSet), hs); err != nil {
-		return nil, err
-	}
-
-	if err = union(ns.(*HashSet), s.(*HashSet)); err != nil {
+	if err := ns.union(s.(*HashSet[T])); err != nil {
 		return nil, err
 	}
 
 	return ns, nil
 }
 
-func (hs *HashSet) Intersection(s Set) (Set, error) {
-	ns, err := NewHashSet()
-	if err != nil {
-		return nil, err
-	}
+func (hs *HashSet[T]) Intersection(s Set[T]) (Set[T], error) {
+	ns := NewHashSet[T]()
 
-	var kt string
-	tm := make(map[interface{}]bool)
+	tm := make(map[T]bool)
 	it := hs.Iterator()
 	for it.HasNext() {
-		e := it.Next()
-		if len(kt) == 0 {
-			kt = utils.GetTypeName(e)
-		}
+		e, _ := it.Next()
 
 		tm[e] = true
 	}
 
-	var ct string
 	it = s.Iterator()
 	for it.HasNext() {
-		e := it.Next()
-		if len(ct) == 0 {
-			ct := utils.GetTypeName(e)
-
-			if kt != ct {
-				return nil, liberr.TypeMismatchError(kt, ct)
-			}
-		}
+		e, _ := it.Next()
 
 		if tm[e] {
-			if err := ns.Add(e); err != nil {
-				return nil, err
-			}
-
+			ns.Add(e)
 		}
 	}
 
 	return ns, nil
 }
 
-type hashSetIterator struct {
-	it iterator.Iterator
+type hashSetIterator[T comparable] struct {
+	it iterator.Iterator[*gmap.Pair[T, present]]
 }
 
-func newHashIterator(it iterator.Iterator) *hashSetIterator {
-	return &hashSetIterator{
+func newHashIterator[T comparable](it iterator.Iterator[*gmap.Pair[T, present]]) *hashSetIterator[T] {
+	return &hashSetIterator[T]{
 		it: it,
 	}
 }
 
-func (hsi *hashSetIterator) HasNext() bool {
+func (hsi *hashSetIterator[T]) HasNext() bool {
 	return hsi.it.HasNext()
 }
 
-func (hsi *hashSetIterator) Next() interface{} {
-	return hsi.it.Next().(*gmap.Pair).First()
-}
-
-func newHashSet(data gmap.Map) *HashSet {
-	return &HashSet{data: data}
-}
-
-func insert(hs *HashSet, e ...interface{}) error {
-	if len(e) == 0 {
-		return errors.New("argument list is empty")
+func (hsi *hashSetIterator[T]) Next() (T, error) {
+	if !hsi.it.HasNext() {
+		return internal.ZeroValueOf[T](), errors.New("FILL IT") //TODO: FILL IT
 	}
 
-	return hs.data.PutAll(toPairs(e...)...)
+	v, err := hsi.it.Next()
+	if err != nil {
+		return internal.ZeroValueOf[T](), err
+	}
+
+	return v.First(), nil
 }
 
-func remove(hs *HashSet, ignore bool, e ...interface{}) error {
+func newHashSet[T comparable](data gmap.Map[T, present]) *HashSet[T] {
+	return &HashSet[T]{data: data}
+}
+
+func (hs *HashSet[T]) insert(e ...T) {
+	hs.data.PutAll(toPairs(e...)...)
+}
+
+func (hs *HashSet[T]) remove(ignore bool, e ...T) error {
 	if hs.IsEmpty() {
 		return errors.New("set is empty")
 	}
@@ -230,20 +194,16 @@ func remove(hs *HashSet, ignore bool, e ...interface{}) error {
 		return errors.New("argument list is empty")
 	}
 
-	//TODO OPTIMIZE TWO PASS
-	kt := utils.GetTypeName(e[0])
-	for i := 1; i < sz; i++ {
-		ct := utils.GetTypeName(e[i])
-		if kt != ct {
-			return liberr.TypeMismatchError(kt, ct)
-		}
-	}
-
 	for i := 0; i < sz; i++ {
 		_, err := hs.data.Remove(e[i])
 		if err != nil {
-			if ignore && err.Error() == fmt.Sprintf("no value found against the key: %v", e[i]) {
-				continue
+			//TODO: REFACTOR
+			if ignore {
+				if ex, ok := err.(*erx.Erx); ok {
+					if ex.Kind() == "keyNotFoundError" {
+						continue
+					}
+				}
 			}
 
 			return err
@@ -253,7 +213,7 @@ func remove(hs *HashSet, ignore bool, e ...interface{}) error {
 	return nil
 }
 
-func contains(hs *HashSet, e ...interface{}) bool {
+func (hs *HashSet[T]) contains(e ...T) bool {
 	for _, k := range e {
 		if !hs.data.ContainsKey(k) {
 			return false
@@ -263,43 +223,25 @@ func contains(hs *HashSet, e ...interface{}) bool {
 	return true
 }
 
-func union(a, b *HashSet) error {
+func (hs *HashSet[T]) union(b *HashSet[T]) error {
 	it := b.Iterator()
 	for it.HasNext() {
-		if err := a.Add(it.Next()); err != nil {
-			return err
-		}
+		v, _ := it.Next()
+		hs.Add(v)
 	}
 
 	return nil
 }
 
-func toPairs(e ...interface{}) []*gmap.Pair {
-	pr := func(k interface{}) *gmap.Pair { return gmap.NewPair(k, present{}) }
+func toPairs[T comparable](e ...T) []*gmap.Pair[T, present] {
+	pr := func(k T) *gmap.Pair[T, present] { return gmap.NewPair[T, present](k, present{}) }
 
 	sz := len(e)
-	res := make([]*gmap.Pair, sz)
+	res := make([]*gmap.Pair[T, present], sz)
 
 	for i := 0; i < sz; i++ {
 		res[i] = pr(e[i])
 	}
 
 	return res
-}
-
-func validaTypes(e ...interface{}) (string, error) {
-	if len(e) == 0 {
-		return utils.NA, errors.New("empty slice")
-	}
-
-	kt := utils.GetTypeName(e[0])
-	sz := len(e)
-	for i := 1; i < sz; i++ {
-		ct := utils.GetTypeName(e[i])
-		if kt != ct {
-			return utils.NA, errorDifferentTypes
-		}
-	}
-
-	return kt, nil
 }
