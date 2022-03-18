@@ -425,12 +425,12 @@ func TestMinHeapClear(t *testing.T) {
 func TestMaxHeapSize(t *testing.T) {
 	testCases := []struct {
 		name           string
-		actualResult   func() int
-		expectedResult int
+		actualResult   func() int64
+		expectedResult int64
 	}{
 		{
 			name: "get Size of empty Heap as 0",
-			actualResult: func() int {
+			actualResult: func() int64 {
 				h := NewMaxHeap(comparator.NewIntegerComparator())
 
 				return h.Size()
@@ -438,7 +438,7 @@ func TestMaxHeapSize(t *testing.T) {
 		},
 		{
 			name: "get Size of empty Heap as 2",
-			actualResult: func() int {
+			actualResult: func() int64 {
 				h := NewMaxHeap(comparator.NewIntegerComparator(), 1, 2)
 
 				return h.Size()
@@ -457,12 +457,12 @@ func TestMaxHeapSize(t *testing.T) {
 func TestMinHeapSize(t *testing.T) {
 	testCases := []struct {
 		name           string
-		actualResult   func() int
-		expectedResult int
+		actualResult   func() int64
+		expectedResult int64
 	}{
 		{
 			name: "get Size of empty Heap as 0",
-			actualResult: func() int {
+			actualResult: func() int64 {
 				h := NewMinHeap(comparator.NewIntegerComparator())
 
 				return h.Size()
@@ -470,7 +470,7 @@ func TestMinHeapSize(t *testing.T) {
 		},
 		{
 			name: "get Size of empty Heap as 2",
-			actualResult: func() int {
+			actualResult: func() int64 {
 				h := NewMinHeap(comparator.NewIntegerComparator(), 1, 2)
 
 				return h.Size()
