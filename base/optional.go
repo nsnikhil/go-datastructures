@@ -6,18 +6,18 @@ import (
 	"github.com/nsnikhil/go-datastructures/functions/supplier"
 )
 
-type Optional interface {
+type Optional[T comparable] interface {
 	Empty() bool
 
-	Get() (interface{}, error)
+	Get() (T, error)
 
-	IfPresent(c consumer.Consumer)
+	IfPresent(c consumer.Consumer[T])
 
-	IfPresentOrElse(c consumer.Consumer, r runnable.Runnable)
+	IfPresentOrElse(c consumer.Consumer[T], r runnable.Runnable)
 
 	IsPresent() bool
 
-	OrElse(e interface{}) interface{}
+	OrElse(e T) T
 
-	OrElseGet(s supplier.Supplier) interface{}
+	OrElseGet(s supplier.Supplier[T]) T
 }

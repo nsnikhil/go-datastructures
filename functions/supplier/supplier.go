@@ -1,5 +1,5 @@
 package supplier
 
-type Supplier interface {
-	Get() interface{}
+type Supplier[T any] interface {
+	Get() T
 }

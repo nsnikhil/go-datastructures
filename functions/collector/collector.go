@@ -6,8 +6,8 @@ import (
 	"github.com/nsnikhil/go-datastructures/functions/supplier"
 )
 
-type Collector[T comparable] interface {
-	Accumulator() consumer.BiConsumer[T]
-	Combiner() operator.BinaryOperator[T]
+type Collector[T any, K any, R any] interface {
+	Accumulator() consumer.BiConsumer[T, K]
+	Combiner() operator.BinaryOperator[T, K, R]
 	Supplier() supplier.Supplier[T]
 }

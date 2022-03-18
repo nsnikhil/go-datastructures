@@ -4,30 +4,27 @@ import (
 	"github.com/nsnikhil/go-datastructures/functions/comparator"
 )
 
-func heapify[T comparable](curr int, c comparator.Comparator[T], maxHeapify bool, data []T, indexes map[T]int) error {
-	return heapUtil(curr, c, maxHeapify, data, indexes)
+func heapify[T comparable](curr int, c comparator.Comparator[T], maxHeapify bool, data []T) {
+	heapUtil(curr, c, maxHeapify, data)
 }
 
-func heapUtil[T comparable](curr int, c comparator.Comparator[T], maxHeapify bool, data []T, indexes map[T]int) error {
+func heapUtil[T comparable](curr int, c comparator.Comparator[T], maxHeapify bool, data []T) {
 	if curr == len(data)-1 {
-		return shiftUp(curr, c, maxHeapify, data, indexes)
+		shiftUp(curr, c, maxHeapify, data)
+	} else {
+		shiftDown(curr, c, maxHeapify, data)
 	}
-	return shiftDown(curr, c, maxHeapify, data, indexes)
 }
 
-func shiftUp[T comparable](curr int, c comparator.Comparator[T], maxHeapify bool, data []T, indexes map[T]int) error {
+func shiftUp[T comparable](curr int, c comparator.Comparator[T], maxHeapify bool, data []T) {
 	if curr == 0 {
-		return nil
+		return
 	}
 
-	shouldSwap, parent, err := shouldSwapWithParent(curr, c, maxHeapify, data)
-	if err != nil {
-		return err
-	}
+	shouldSwap, parent := shouldSwapWithParent(curr, c, maxHeapify, data)
 
 	for curr > 0 && shouldSwap {
 		data[curr], data[parent] = data[parent], data[curr]
-		indexes[data[curr]], indexes[data[parent]] = indexes[data[parent]], indexes[data[curr]]
 
 		curr = parent
 
@@ -35,28 +32,20 @@ func shiftUp[T comparable](curr int, c comparator.Comparator[T], maxHeapify bool
 			break
 		}
 
-		shouldSwap, parent, err = shouldSwapWithParent(curr, c, maxHeapify, data)
-		if err != nil {
-			return err
-		}
+		shouldSwap, parent = shouldSwapWithParent(curr, c, maxHeapify, data)
 	}
 
-	return nil
 }
 
-func shiftDown[T comparable](curr int, c comparator.Comparator[T], maxHeapify bool, data []T, indexes map[T]int) error {
+func shiftDown[T comparable](curr int, c comparator.Comparator[T], maxHeapify bool, data []T) {
 	if curr >= len(data)/2 {
-		return nil
+		return
 	}
 
-	shouldSwap, child, err := shouldSwapWithChild(curr, c, maxHeapify, data)
-	if err != nil {
-		return err
-	}
+	shouldSwap, child := shouldSwapWithChild(curr, c, maxHeapify, data)
 
 	for curr < len(data)/2 && shouldSwap {
 		data[curr], data[child] = data[child], data[curr]
-		indexes[data[curr]], indexes[data[child]] = indexes[data[child]], indexes[data[curr]]
 
 		curr = child
 
@@ -64,18 +53,13 @@ func shiftDown[T comparable](curr int, c comparator.Comparator[T], maxHeapify bo
 			break
 		}
 
-		shouldSwap, child, err = shouldSwapWithChild(curr, c, maxHeapify, data)
-		if err != nil {
-			return err
-		}
+		shouldSwap, child = shouldSwapWithChild(curr, c, maxHeapify, data)
 	}
-
-	return nil
 }
 
-func shouldSwapWithParent[T comparable](curr int, c comparator.Comparator[T], maxHeapify bool, data []T) (bool, int, error) {
+func shouldSwapWithParent[T comparable](curr int, c comparator.Comparator[T], maxHeapify bool, data []T) (bool, int) {
 	if curr == 0 {
-		return false, invalidIndex, nil
+		return false, invalidIndex
 	}
 
 	parent := parentIndex(curr)
@@ -83,13 +67,13 @@ func shouldSwapWithParent[T comparable](curr int, c comparator.Comparator[T], ma
 	diff := c.Compare(data[parent], data[curr])
 
 	if maxHeapify {
-		return diff < 0, parent, nil
+		return diff < 0, parent
 	}
 
-	return diff > 0, parent, nil
+	return diff > 0, parent
 }
 
-func shouldSwapWithChild[T comparable](curr int, c comparator.Comparator[T], maxHeapify bool, data []T) (bool, int, error) {
+func shouldSwapWithChild[T comparable](curr int, c comparator.Comparator[T], maxHeapify bool, data []T) (bool, int) {
 	lcIndex := leftChildIndex(curr)
 	leftDiff := c.Compare(data[curr], data[lcIndex])
 
@@ -108,45 +92,45 @@ func shouldSwapWithChild[T comparable](curr int, c comparator.Comparator[T], max
 	return shouldSwapWithChildMinUtil(hasRC, leftDiff, rightDiff, lcIndex, rcIndex)
 }
 
-func shouldSwapWithChildMaxUtil(hasRC bool, leftDiff, rightDiff, lcIndex, rcIndex int) (bool, int, error) {
+func shouldSwapWithChildMaxUtil(hasRC bool, leftDiff, rightDiff, lcIndex, rcIndex int) (bool, int) {
 	if hasRC {
 		if leftDiff > 0 && rightDiff > 0 {
-			return false, invalidIndex, nil
+			return false, invalidIndex
 		}
 
 		if leftDiff < rightDiff {
-			return true, lcIndex, nil
+			return true, lcIndex
 		}
 
-		return true, rcIndex, nil
+		return true, rcIndex
 	}
 
 	if leftDiff > 0 {
-		return false, invalidIndex, nil
+		return false, invalidIndex
 	}
 
-	return true, lcIndex, nil
+	return true, lcIndex
 }
 
 //TODO MERGE WITH shouldSwapWithChildMaxUtil
-func shouldSwapWithChildMinUtil(hasRC bool, leftDiff, rightDiff, lcIndex, rcIndex int) (bool, int, error) {
+func shouldSwapWithChildMinUtil(hasRC bool, leftDiff, rightDiff, lcIndex, rcIndex int) (bool, int) {
 	if hasRC {
 		if leftDiff < 0 && rightDiff < 0 {
-			return false, invalidIndex, nil
+			return false, invalidIndex
 		}
 
 		if leftDiff > rightDiff {
-			return true, lcIndex, nil
+			return true, lcIndex
 		}
 
-		return true, rcIndex, nil
+		return true, rcIndex
 	}
 
 	if leftDiff < 0 {
-		return false, invalidIndex, nil
+		return false, invalidIndex
 	}
 
-	return true, lcIndex, nil
+	return true, lcIndex
 }
 
 func hasRightChild(curr, sz int) bool {

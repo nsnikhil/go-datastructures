@@ -1,5 +1,5 @@
 package consumer
 
-type BiConsumer interface {
-	Accept(e, f interface{})
+type BiConsumer[T any, K any] interface {
+	Accept(e T, f K)
 }

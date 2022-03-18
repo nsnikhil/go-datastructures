@@ -6,22 +6,12 @@ type Heap[T comparable] interface {
 	/*
 
 	 */
-	Add(e ...T) error
+	Add(e ...T)
 
 	/*
 
 	 */
 	Extract() (T, error)
-
-	/*
-
-	 */
-	Update(prev, new T) error
-
-	/*
-
-	 */
-	UpdateFunc(prev T, op func(T) T) error
 
 	/*
 

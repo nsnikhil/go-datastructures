@@ -1,5 +1,5 @@
 package consumer
 
-type Consumer interface {
-	Accept(e interface{})
+type Consumer[T comparable] interface {
+	Accept(e T)
 }

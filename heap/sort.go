@@ -12,10 +12,7 @@ func newHeapSort[T comparable]() *heapSort[T] {
 }
 
 func (hs *heapSort[T]) sort(c comparator.Comparator[T], isMaxHeap bool, data *[]T) error {
-	h, err := buildHeapUtil(c, isMaxHeap, data)
-	if err != nil {
-		return err
-	}
+	h := buildHeapUtil(c, isMaxHeap, data)
 
 	sz := h.Size()
 	temp := make([]T, sz)
@@ -34,7 +31,7 @@ func (hs *heapSort[T]) sort(c comparator.Comparator[T], isMaxHeap bool, data *[]
 	return nil
 }
 
-func buildHeapUtil[T comparable](c comparator.Comparator[T], isMaxHeap bool, data *[]T) (Heap[T], error) {
+func buildHeapUtil[T comparable](c comparator.Comparator[T], isMaxHeap bool, data *[]T) Heap[T] {
 	if isMaxHeap {
 		return NewMaxHeap[T](c, *data...)
 	}
