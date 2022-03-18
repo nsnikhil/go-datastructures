@@ -31,7 +31,7 @@ type Heap[T comparable] interface {
 	/*
 
 	 */
-	Size() int
+	Size() int64
 
 	/*
 

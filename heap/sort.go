@@ -17,7 +17,7 @@ func (hs *heapSort[T]) sort(c comparator.Comparator[T], isMaxHeap bool, data *[]
 	sz := h.Size()
 	temp := make([]T, sz)
 
-	for i := 0; i < sz; i++ {
+	for i := int64(0); i < sz; i++ {
 		ele, err := h.Extract()
 		if err != nil {
 			return err

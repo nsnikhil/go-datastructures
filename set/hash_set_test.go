@@ -2,6 +2,7 @@ package set
 
 import (
 	"errors"
+	"github.com/nsnikhil/go-datastructures/internal"
 	gmap "github.com/nsnikhil/go-datastructures/map"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -462,7 +463,7 @@ func TestHashSetRemove(t *testing.T) {
 		t.Run(testCase.name, func(t *testing.T) {
 			err, res := testCase.actualResult()
 
-			assert.Equal(t, testCase.expectedError, err)
+			internal.AssertErrorEquals(t, testCase.expectedError, err)
 			assert.Equal(t, testCase.expectedResult(), res)
 		})
 	}
@@ -566,7 +567,7 @@ func TestHashSetRemoveAll(t *testing.T) {
 		t.Run(testCase.name, func(t *testing.T) {
 			err, res := testCase.actualResult()
 
-			assert.Equal(t, testCase.expectedError, err)
+			internal.AssertErrorEquals(t, testCase.expectedError, err)
 			assert.Equal(t, testCase.expectedResult(), res)
 		})
 	}
@@ -656,7 +657,7 @@ func TestHashSetRetainAll(t *testing.T) {
 		t.Run(testCase.name, func(t *testing.T) {
 			err, res := testCase.actualResult()
 
-			assert.Equal(t, testCase.expectedError, err)
+			internal.AssertErrorEquals(t, testCase.expectedError, err)
 			assert.Equal(t, testCase.expectedResult(), res)
 		})
 	}
@@ -800,7 +801,7 @@ func TestHashSetUnion(t *testing.T) {
 
 			res, err := testCase.actualResult()
 
-			assert.Equal(t, testCase.expectedError, err)
+			internal.AssertErrorEquals(t, testCase.expectedError, err)
 
 			if res != nil {
 				expectedMap := toMap(res)
@@ -858,7 +859,7 @@ func TestHashSetIntersection(t *testing.T) {
 		t.Run(testCase.name, func(t *testing.T) {
 			res, err := testCase.actualResult()
 
-			assert.Equal(t, testCase.expectedError, err)
+			internal.AssertErrorEquals(t, testCase.expectedError, err)
 			assert.Equal(t, testCase.expectedResult(), res)
 		})
 	}

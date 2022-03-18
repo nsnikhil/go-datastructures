@@ -1,7 +1,7 @@
 package queue
 
 type Queue[T comparable] interface {
-	Add(e T) error
+	Add(e T)
 
 	Remove() (T, error)
 

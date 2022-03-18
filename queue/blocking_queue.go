@@ -1,7 +1,8 @@
 package queue
 
 import (
-	"errors"
+	"github.com/nsnikhil/erx"
+	"github.com/nsnikhil/go-datastructures/internal"
 	"time"
 )
 
@@ -16,16 +17,16 @@ func NewBlockingQueue[T comparable]() *BlockingQueue[T] {
 }
 
 func (bq *BlockingQueue[T]) Remove() (T, error) {
-	return removeBlocking(bq, time.Duration(max))
+	return bq.removeBlocking(time.Duration(max))
 }
 
 func (bq *BlockingQueue[T]) RemoveWithTimeout(duration time.Duration) (T, error) {
-	e, err := removeBlocking(bq, duration)
+	e, err := bq.removeBlocking(duration)
 
 	return e, err
 }
 
-func removeBlocking[T comparable](bq *BlockingQueue[T], duration time.Duration) (T, error) {
+func (bq *BlockingQueue[T]) removeBlocking(duration time.Duration) (T, error) {
 	c := make(chan T)
 	e := make(chan error)
 
@@ -36,7 +37,7 @@ func removeBlocking[T comparable](bq *BlockingQueue[T], duration time.Duration) 
 
 		v, err := bq.ll.RemoveFirst()
 		if err != nil {
-			e <- err
+			e <- erx.WithArgs(erx.Kind("BlockingQueue.removeBlocking"), err)
 			return
 		}
 
@@ -48,9 +49,9 @@ func removeBlocking[T comparable](bq *BlockingQueue[T], duration time.Duration) 
 	case v := <-c:
 		return v, nil
 	case err := <-e:
-		return *new(T), err
+		return internal.ZeroValueOf[T](), err
 	case <-time.After(duration):
-		return *new(T), errors.New("timed out")
+		return internal.ZeroValueOf[T](), blockingQueueTimedOutError("BlockingQueue.removeBlocking")
 	}
 
 }

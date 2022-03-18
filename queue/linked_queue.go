@@ -1,6 +1,8 @@
 package queue
 
 import (
+	"github.com/nsnikhil/erx"
+	"github.com/nsnikhil/go-datastructures/internal"
 	"github.com/nsnikhil/go-datastructures/list"
 )
 
@@ -14,18 +16,26 @@ func NewLinkedQueue[T comparable]() *LinkedQueue[T] {
 	}
 }
 
-func (lq *LinkedQueue[T]) Add(e T) error {
-	return lq.ll.AddLast(e)
+func (lq *LinkedQueue[T]) Add(e T) {
+	lq.ll.AddLast(e)
 }
 
 func (lq *LinkedQueue[T]) Remove() (T, error) {
-	//TODO FIX "LIST IS EMPTY ERROR"
-	return lq.ll.RemoveFirst()
+	v, err := lq.ll.RemoveFirst()
+	if err != nil {
+		return internal.ZeroValueOf[T](), erx.WithArgs(erx.Kind("LinkedQueue.Remove"), err)
+	}
+
+	return v, nil
 }
 
 func (lq *LinkedQueue[T]) Peek() (T, error) {
-	//TODO CHECK IF EMPTY QUEUE SHOULD RETURN ERROR
-	return lq.ll.GetFirst()
+	v, err := lq.ll.GetFirst()
+	if err != nil {
+		return internal.ZeroValueOf[T](), erx.WithArgs(erx.Kind("LinkedQueue.Peek"), err)
+	}
+
+	return v, nil
 }
 
 func (lq *LinkedQueue[T]) Empty() bool {

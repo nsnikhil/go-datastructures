@@ -1,58 +1,57 @@
 package queue
 
 import (
+	"github.com/nsnikhil/erx"
 	"github.com/nsnikhil/go-datastructures/functions/comparator"
 	"github.com/nsnikhil/go-datastructures/heap"
+	"github.com/nsnikhil/go-datastructures/internal"
 )
 
 type PriorityQueue[T comparable] struct {
 	h heap.Heap[T]
 }
 
-func NewPriorityQueue[T comparable](isMax bool, c comparator.Comparator[T]) (*PriorityQueue[T], error) {
+func NewPriorityQueue[T comparable](isMax bool, c comparator.Comparator[T]) *PriorityQueue[T] {
 	var h heap.Heap[T]
-	var err error
 
 	if isMax {
-		h, err = heap.NewMaxHeap[T](c)
+		h = heap.NewMaxHeap[T](c)
 	} else {
-		h, err = heap.NewMinHeap[T](c)
-	}
-
-	if err != nil {
-		return nil, err
+		h = heap.NewMinHeap[T](c)
 	}
 
 	return &PriorityQueue[T]{
 		h: h,
-	}, nil
+	}
 }
 
-func (pq *PriorityQueue[T]) Add(e T) error {
-	return pq.h.Add(e)
+func (pq *PriorityQueue[T]) Add(e T) {
+	pq.h.Add(e)
 }
 
 func (pq *PriorityQueue[T]) Remove() (T, error) {
-	return pq.h.Extract()
-}
+	v, err := pq.h.Extract()
+	if err != nil {
+		return internal.ZeroValueOf[T](), erx.WithArgs(erx.Kind("PriorityQueue.Remove"), err)
+	}
 
-func (pq *PriorityQueue[T]) Update(prev, new T) error {
-	return pq.h.Update(prev, new)
-}
-
-func (pq *PriorityQueue[T]) UpdateFunc(prev T, op func(T) T) error {
-	return pq.h.UpdateFunc(prev, op)
+	return v, nil
 }
 
 func (pq *PriorityQueue[T]) Peek() (T, error) {
-	return pq.h.Iterator().Next()
+	v, err := pq.h.Iterator().Next()
+	if err != nil {
+		return internal.ZeroValueOf[T](), erx.WithArgs(erx.Kind("PriorityQueue.Peek"), err)
+	}
+
+	return v, nil
 }
 
 func (pq *PriorityQueue[T]) Empty() bool {
 	return pq.h.IsEmpty()
 }
 
-func (pq *PriorityQueue[T]) Size() int {
+func (pq *PriorityQueue[T]) Size() int64 {
 	return pq.h.Size()
 }
 

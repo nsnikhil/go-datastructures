@@ -81,7 +81,7 @@ func (hs *HashSet[T]) RemoveAll(e ...T) error {
 
 func (hs *HashSet[T]) RetainAll(e ...T) error {
 	if hs.IsEmpty() {
-		return errors.New("set is empty")
+		return emptySetError("HashSet.RetainAll")
 	}
 
 	tm := make(map[T]bool)
@@ -115,13 +115,9 @@ func (hs *HashSet[T]) Iterator() iterator.Iterator[T] {
 func (hs *HashSet[T]) Union(s Set[T]) (Set[T], error) {
 	ns := NewHashSet[T]()
 
-	if err := ns.union(hs); err != nil {
-		return nil, err
-	}
+	ns.union(hs)
 
-	if err := ns.union(s.(*HashSet[T])); err != nil {
-		return nil, err
-	}
+	ns.union(s.(*HashSet[T]))
 
 	return ns, nil
 }
@@ -165,7 +161,7 @@ func (hsi *hashSetIterator[T]) HasNext() bool {
 
 func (hsi *hashSetIterator[T]) Next() (T, error) {
 	if !hsi.it.HasNext() {
-		return internal.ZeroValueOf[T](), errors.New("FILL IT") //TODO: FILL IT
+		return internal.ZeroValueOf[T](), emptyIteratorError("hashSetIterator.Next")
 	}
 
 	v, err := hsi.it.Next()
@@ -186,12 +182,12 @@ func (hs *HashSet[T]) insert(e ...T) {
 
 func (hs *HashSet[T]) remove(ignore bool, e ...T) error {
 	if hs.IsEmpty() {
-		return errors.New("set is empty")
+		return emptySetError("HashSet.remove")
 	}
 
 	sz := len(e)
 	if sz == 0 {
-		return errors.New("argument list is empty")
+		return emptyArgsListError("HashSet.remove")
 	}
 
 	for i := 0; i < sz; i++ {
@@ -223,14 +219,12 @@ func (hs *HashSet[T]) contains(e ...T) bool {
 	return true
 }
 
-func (hs *HashSet[T]) union(b *HashSet[T]) error {
+func (hs *HashSet[T]) union(b *HashSet[T]) {
 	it := b.Iterator()
 	for it.HasNext() {
 		v, _ := it.Next()
 		hs.Add(v)
 	}
-
-	return nil
 }
 
 func toPairs[T comparable](e ...T) []*gmap.Pair[T, present] {

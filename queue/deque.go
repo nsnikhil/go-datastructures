@@ -1,5 +1,10 @@
 package queue
 
+import (
+	"github.com/nsnikhil/erx"
+	"github.com/nsnikhil/go-datastructures/internal"
+)
+
 type Deque[T comparable] struct {
 	*LinkedQueue[T]
 }
@@ -10,15 +15,24 @@ func NewDeque[T comparable]() *Deque[T] {
 	}
 }
 
-func (dq *Deque[T]) AddFirst(e T) error {
-	return dq.ll.AddFirst(e)
+func (dq *Deque[T]) AddFirst(e T) {
+	dq.ll.AddFirst(e)
 }
 
 func (dq *Deque[T]) RemoveLast() (T, error) {
-	return dq.ll.RemoveLast()
+	v, err := dq.ll.RemoveLast()
+	if err != nil {
+		return internal.ZeroValueOf[T](), erx.WithArgs(erx.Kind("Deque.RemoveLast"), err)
+	}
+
+	return v, nil
 }
 
 func (dq *Deque[T]) PeekLast() (T, error) {
-	//TODO CHECK IF EMPTY QUEUE SHOULD RETURN ERROR
-	return dq.ll.GetLast()
+	v, err := dq.ll.GetLast()
+	if err != nil {
+		return internal.ZeroValueOf[T](), erx.WithArgs(erx.Kind("Deque.PeekLast"), err)
+	}
+
+	return v, nil
 }

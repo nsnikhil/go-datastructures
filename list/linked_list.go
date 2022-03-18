@@ -105,12 +105,12 @@ func (ll *LinkedList[T]) ContainsAll(elements ...T) bool {
 
 func (ll *LinkedList[T]) Get(index int64) (T, error) {
 	if ll.IsEmpty() {
-		return *new(T), emptyListError("LinkedList.Get")
+		return internal.ZeroValueOf[T](), emptyListError("LinkedList.Get")
 	}
 
 	curr, err := ll.traverseTo(index)
 	if err != nil {
-		return *new(T), invalidIndexError(index, "LinkedList.Get")
+		return internal.ZeroValueOf[T](), invalidIndexError(index, "LinkedList.Get")
 	}
 
 	return curr.element, nil
@@ -118,7 +118,7 @@ func (ll *LinkedList[T]) Get(index int64) (T, error) {
 
 func (ll *LinkedList[T]) GetFirst() (T, error) {
 	if ll.IsEmpty() {
-		return *new(T), emptyListError("LinkedList.GetFirst")
+		return internal.ZeroValueOf[T](), emptyListError("LinkedList.GetFirst")
 	}
 
 	return ll.first.element, nil
@@ -126,7 +126,7 @@ func (ll *LinkedList[T]) GetFirst() (T, error) {
 
 func (ll *LinkedList[T]) GetLast() (T, error) {
 	if ll.IsEmpty() {
-		return *new(T), emptyListError("LinkedList.GetLast")
+		return internal.ZeroValueOf[T](), emptyListError("LinkedList.GetLast")
 	}
 
 	return ll.last.element, nil
@@ -213,7 +213,7 @@ func (ll *LinkedList[T]) Remove(element T) error {
 func (ll *LinkedList[T]) RemoveAt(index int64) (T, error) {
 	element, err := ll.removeAt(index)
 	if err != nil {
-		return *new(T), err
+		return internal.ZeroValueOf[T](), err
 	}
 
 	return element, nil
@@ -286,16 +286,16 @@ func (ll *LinkedList[T]) RetainAll(elements ...T) error {
 
 func (ll *LinkedList[T]) Set(index int64, element T) (T, error) {
 	if ll.IsEmpty() {
-		return *new(T), emptyListError("LinkedList.Set")
+		return internal.ZeroValueOf[T](), emptyListError("LinkedList.Set")
 	}
 
 	if !ll.isValidIndex(index) {
-		return *new(T), invalidIndexError(index, "LinkedList.Set")
+		return internal.ZeroValueOf[T](), invalidIndexError(index, "LinkedList.Set")
 	}
 
 	curr, err := ll.traverseTo(index)
 	if err != nil {
-		return *new(T), err
+		return internal.ZeroValueOf[T](), err
 	}
 
 	curr.element = element
@@ -425,7 +425,7 @@ func (ll *linkedListIterator[T]) HasNext() bool {
 
 func (ll *linkedListIterator[T]) Next() (T, error) {
 	if ll.currNode == nil {
-		return *new(T), emptyIteratorError("linkedListIterator.Next")
+		return internal.ZeroValueOf[T](), emptyIteratorError("linkedListIterator.Next")
 	}
 
 	e := ll.currNode.element
@@ -452,7 +452,7 @@ func (ll *linkedListDescendingIterator[T]) HasNext() bool {
 
 func (ll *linkedListDescendingIterator[T]) Next() (T, error) {
 	if ll.currNode == nil {
-		return *new(T), emptyIteratorError("linkedListDescendingIterator.Next")
+		return internal.ZeroValueOf[T](), emptyIteratorError("linkedListDescendingIterator.Next")
 	}
 
 	e := ll.currNode.element
@@ -529,11 +529,11 @@ func (ll *LinkedList[T]) removeAt(index int64) (T, error) {
 	sz := ll.size
 
 	if sz == 0 {
-		return *new(T), emptyListError("LinkedList.removeAt")
+		return internal.ZeroValueOf[T](), emptyListError("LinkedList.removeAt")
 	}
 
 	if index < 0 || index >= sz {
-		return *new(T), invalidIndexError(index, "LinkedList.removeAt")
+		return internal.ZeroValueOf[T](), invalidIndexError(index, "LinkedList.removeAt")
 	}
 
 	if sz == 1 {
@@ -560,7 +560,7 @@ func (ll *LinkedList[T]) removeAt(index int64) (T, error) {
 
 	curr, err := ll.traverseTo(index)
 	if err != nil {
-		return *new(T), err
+		return internal.ZeroValueOf[T](), err
 	}
 
 	cp := curr.prev

@@ -1,7 +1,8 @@
 package queue
 
 import (
-	"github.com/nsnikhil/go-datastructures/liberr"
+	"errors"
+	"github.com/nsnikhil/go-datastructures/internal"
 	"github.com/nsnikhil/go-datastructures/list"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -9,13 +10,11 @@ import (
 )
 
 func TestCreateNewDeque(t *testing.T) {
-	actualResult, err := NewDeque()
-	require.NoError(t, err)
+	actualResult := NewDeque[int]()
 
-	lq, err := NewLinkedQueue()
-	require.NoError(t, err)
+	lq := NewLinkedQueue[int]()
 
-	expectedResult := &Deque{lq}
+	expectedResult := &Deque[int]{lq}
 
 	assert.Equal(t, expectedResult, actualResult)
 }
@@ -23,88 +22,55 @@ func TestCreateNewDeque(t *testing.T) {
 func TestDequeAddFirst(t *testing.T) {
 	testCases := []struct {
 		name           string
-		actualResult   func() (error, Queue)
-		expectedResult func() Queue
+		actualResult   func() Queue[int]
+		expectedResult func() Queue[int]
 		expectedError  error
 	}{
 		{
 			name: "test add item to deque",
-			actualResult: func() (error, Queue) {
-				q, err := NewDeque()
-				require.NoError(t, err)
+			actualResult: func() Queue[int] {
+				q := NewDeque[int]()
 
-				return q.AddFirst(1), q
+				q.AddFirst(1)
+				return q
 			},
-			expectedResult: func() Queue {
-				ll, err := list.NewLinkedList(1)
-				require.NoError(t, err)
+			expectedResult: func() Queue[int] {
+				ll := list.NewLinkedList[int](1)
 
-				lq := &LinkedQueue{ll: ll}
+				lq := &LinkedQueue[int]{ll: ll}
 
-				return &Deque{lq}
+				return &Deque[int]{lq}
 			},
 		},
 		{
 			name: "test add multiple items to deque",
-			actualResult: func() (error, Queue) {
-				q, err := NewDeque()
-				require.NoError(t, err)
+			actualResult: func() Queue[int] {
+				q := NewDeque[int]()
 
-				if err = q.AddFirst(1); err != nil {
-					return err, q
-				}
+				q.AddFirst(1)
 
-				if err = q.AddFirst(2); err != nil {
-					return err, q
-				}
+				q.AddFirst(2)
 
-				if err = q.AddFirst(3); err != nil {
-					return err, q
-				}
+				q.AddFirst(3)
 
-				return q.AddFirst(4), q
+				q.AddFirst(4)
+				return q
 
 			},
-			expectedResult: func() Queue {
-				ll, err := list.NewLinkedList(4, 3, 2, 1)
-				require.NoError(t, err)
+			expectedResult: func() Queue[int] {
+				ll := list.NewLinkedList[int](4, 3, 2, 1)
 
-				lq := &LinkedQueue{ll: ll}
+				lq := &LinkedQueue[int]{ll: ll}
 
-				return &Deque{lq}
+				return &Deque[int]{lq}
 			},
-		},
-		{
-			name: "test add return error when type is different",
-			actualResult: func() (error, Queue) {
-				q, err := NewDeque()
-				require.NoError(t, err)
-
-				if err = q.AddFirst(1); err != nil {
-					return err, q
-				}
-
-				return q.AddFirst("a"), q
-			},
-			expectedResult: func() Queue {
-				ll, err := list.NewLinkedList(1)
-				require.NoError(t, err)
-
-				return &LinkedQueue{ll: ll}
-			},
-			expectedError: liberr.TypeMismatchError("int", "string"),
 		},
 	}
 
 	for _, testCase := range testCases {
 		t.Run(testCase.name, func(t *testing.T) {
-			err, q := testCase.actualResult()
-
-			assert.Equal(t, testCase.expectedError, err)
-
-			if testCase.expectedError == nil {
-				assert.Equal(t, testCase.expectedResult(), q)
-			}
+			q := testCase.actualResult()
+			assert.Equal(t, testCase.expectedResult(), q)
 		})
 	}
 }
@@ -112,95 +78,83 @@ func TestDequeAddFirst(t *testing.T) {
 func TestDequeRemoveLast(t *testing.T) {
 	testCases := []struct {
 		name            string
-		actualResult    func() (interface{}, error, Queue)
-		expectedResult  func() Queue
-		expectedElement []interface{}
+		actualResult    func() ([]int, error, Queue[int])
+		expectedResult  func() Queue[int]
+		expectedElement []int
 		expectedError   error
 	}{
 		{
 			name: "test remove item from deque",
-			actualResult: func() (interface{}, error, Queue) {
-				q, err := NewDeque()
-				require.NoError(t, err)
+			actualResult: func() ([]int, error, Queue[int]) {
+				q := NewDeque[int]()
 
-				require.NoError(t, q.Add(1))
+				q.Add(1)
 
 				e, err := q.RemoveLast()
 
-				return []interface{}{e}, err, q
+				return []int{e}, err, q
 			},
-			expectedElement: []interface{}{1},
-			expectedResult: func() Queue {
-				ll, err := list.NewLinkedList(1)
-				require.NoError(t, err)
+			expectedElement: []int{1},
+			expectedResult: func() Queue[int] {
+				ll := list.NewLinkedList[int](1)
 				ll.Clear()
 
-				lq := &LinkedQueue{ll: ll}
+				lq := &LinkedQueue[int]{ll: ll}
 
-				return &Deque{lq}
+				return &Deque[int]{lq}
 			},
 		},
 		{
 			name: "test remove multiple items",
-			actualResult: func() (interface{}, error, Queue) {
-				q, err := NewDeque()
-				require.NoError(t, err)
+			actualResult: func() ([]int, error, Queue[int]) {
+				q := NewDeque[int]()
 
-				require.NoError(t, q.Add(1))
-				require.NoError(t, q.Add(2))
-				require.NoError(t, q.Add(3))
-				require.NoError(t, q.Add(4))
+				q.Add(1)
+				q.Add(2)
+				q.Add(3)
+				q.Add(4)
 
-				var res []interface{}
+				var res []int
 
 				e, err := q.RemoveLast()
-				if err != nil {
-					return e, err, q
-				}
+				require.NoError(t, err)
 				res = append(res, e)
 
 				e, err = q.RemoveLast()
-				if err != nil {
-					return e, err, q
-				}
+				require.NoError(t, err)
 				res = append(res, e)
 
 				e, err = q.RemoveLast()
-				if err != nil {
-					return e, err, q
-				}
+				require.NoError(t, err)
 				res = append(res, e)
 
 				return res, err, q
 			},
-			expectedElement: []interface{}{4, 3, 2},
-			expectedResult: func() Queue {
-				ll, err := list.NewLinkedList(1)
-				require.NoError(t, err)
+			expectedElement: []int{4, 3, 2},
+			expectedResult: func() Queue[int] {
+				ll := list.NewLinkedList[int](1)
 
-				lq := &LinkedQueue{ll: ll}
+				lq := &LinkedQueue[int]{ll: ll}
 
-				return &Deque{lq}
+				return &Deque[int]{lq}
 			},
 		},
 		{
 			name: "test return error when deque is empty",
-			actualResult: func() (interface{}, error, Queue) {
-				q, err := NewDeque()
-				require.NoError(t, err)
+			actualResult: func() ([]int, error, Queue[int]) {
+				q := NewDeque[int]()
 
-				e, err := q.RemoveLast()
+				_, err := q.RemoveLast()
 
-				return []interface{}{e}, err, q
+				return []int(nil), err, q
 			},
-			expectedElement: []interface{}{interface{}(nil)},
-			expectedResult: func() Queue {
-				ll, err := list.NewLinkedList()
-				require.NoError(t, err)
+			expectedElement: []int(nil),
+			expectedResult: func() Queue[int] {
+				ll := list.NewLinkedList[int]()
 
-				lq := &LinkedQueue{ll: ll}
+				lq := &LinkedQueue[int]{ll: ll}
 
-				return &Deque{lq}
+				return &Deque[int]{lq}
 			},
 		},
 	}
@@ -223,90 +177,58 @@ func TestDequeRemoveLast(t *testing.T) {
 func TestDequePeekLast(t *testing.T) {
 	testCases := []struct {
 		name            string
-		actualResult    func() (interface{}, error, Queue)
-		expectedResult  func() Queue
-		expectedElement interface{}
+		actualResult    func() (int, error)
+		expectedElement int
 		expectedError   error
 	}{
 		{
 			name: "test peek item",
-			actualResult: func() (interface{}, error, Queue) {
-				q, err := NewDeque()
-				require.NoError(t, err)
+			actualResult: func() (int, error) {
+				q := NewDeque[int]()
 
-				require.NoError(t, q.Add(1))
+				q.Add(1)
 
 				e, err := q.PeekLast()
 
-				return []interface{}{e}, err, q
+				return e, err
 			},
-			expectedElement: []interface{}{1},
-			expectedResult: func() Queue {
-				ll, err := list.NewLinkedList(1)
-				require.NoError(t, err)
-
-				lq := &LinkedQueue{ll: ll}
-
-				return &Deque{lq}
-			},
+			expectedElement: 1,
 		},
 		{
 			name: "test peek item two",
-			actualResult: func() (interface{}, error, Queue) {
-				q, err := NewDeque()
-				require.NoError(t, err)
+			actualResult: func() (int, error) {
+				q := NewDeque[int]()
 
-				require.NoError(t, q.Add(1))
-				require.NoError(t, q.Add(2))
-				require.NoError(t, q.Add(3))
-				require.NoError(t, q.Add(4))
+				q.Add(1)
+				q.Add(2)
+				q.Add(3)
+				q.Add(4)
 
 				e, err := q.PeekLast()
 
-				return e, err, q
+				return e, err
 			},
 			expectedElement: 4,
-			expectedResult: func() Queue {
-				ll, err := list.NewLinkedList(1, 2, 3, 4)
-				require.NoError(t, err)
-
-				lq := &LinkedQueue{ll: ll}
-
-				return &Deque{lq}
-			},
 		},
 		{
 			name: "test peek item from empty deque",
-			actualResult: func() (interface{}, error, Queue) {
-				q, err := NewDeque()
-				require.NoError(t, err)
+			actualResult: func() (int, error) {
+				q := NewDeque[int]()
 
 				e, err := q.PeekLast()
 
-				return e, err, q
+				return e, err
 			},
-			expectedElement: nil,
-			expectedResult: func() Queue {
-				ll, err := list.NewLinkedList()
-				require.NoError(t, err)
-
-				lq := &LinkedQueue{ll: ll}
-
-				return &Deque{lq}
-			},
+			expectedError: errors.New("list is empty"),
 		},
 	}
 
 	for _, testCase := range testCases {
 		t.Run(testCase.name, func(t *testing.T) {
-			e, err, q := testCase.actualResult()
+			e, err := testCase.actualResult()
 
-			assert.Equal(t, testCase.expectedError, err)
-
-			if testCase.expectedError == nil {
-				assert.Equal(t, testCase.expectedElement, e)
-				assert.Equal(t, testCase.expectedResult(), q)
-			}
+			internal.AssertErrorEquals(t, testCase.expectedError, err)
+			assert.Equal(t, testCase.expectedElement, e)
 		})
 	}
 }

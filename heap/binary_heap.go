@@ -81,8 +81,8 @@ func (bh *binaryHeap[T]) Delete() error {
 	return nil
 }
 
-func (bh *binaryHeap[T]) Size() int {
-	return len(bh.data)
+func (bh *binaryHeap[T]) Size() int64 {
+	return int64(len(bh.data))
 }
 
 func (bh *binaryHeap[T]) IsEmpty() bool {
@@ -98,7 +98,7 @@ func (bh *binaryHeap[T]) Iterator() iterator.Iterator[T] {
 }
 
 type binaryHeapIterator[T comparable] struct {
-	currentIndex int
+	currentIndex int64
 	h            *binaryHeap[T]
 }
 
