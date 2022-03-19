@@ -100,7 +100,7 @@ func (lg *listGraph[T]) bfs() {
 			for i := int64(0); i < sz; i++ {
 				n, _ := q.Remove()
 
-				fmt.Printf("%d ", n.getData())
+				fmt.Printf("%v ", n.getData())
 
 				for edge := range n.getEdges() {
 					next := edge.getNext()
@@ -436,7 +436,7 @@ func dagShortestPath[T comparable](lg *listGraph[T]) {
 	}
 
 	for curr := range lg.nodes {
-		fmt.Printf("%d : %d\n", curr.getData(), curr.costToReach)
+		fmt.Printf("%v : %d\n", curr.getData(), curr.costToReach)
 	}
 
 }
@@ -520,6 +520,6 @@ func bellmenFord[T comparable](start *node[T], lg *listGraph[T]) {
 	}
 
 	for node := range lg.nodes {
-		fmt.Printf("%d %d\n", node.getData(), node.costToReach)
+		fmt.Printf("%v %d\n", node.getData(), node.costToReach)
 	}
 }

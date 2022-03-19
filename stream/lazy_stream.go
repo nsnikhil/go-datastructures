@@ -2,10 +2,8 @@ package stream
 
 import (
 	"github.com/nsnikhil/go-datastructures/base"
-	"github.com/nsnikhil/go-datastructures/functions/collector"
 	"github.com/nsnikhil/go-datastructures/functions/comparator"
 	"github.com/nsnikhil/go-datastructures/functions/consumer"
-	"github.com/nsnikhil/go-datastructures/functions/function"
 	"github.com/nsnikhil/go-datastructures/functions/iterator"
 	"github.com/nsnikhil/go-datastructures/functions/operator"
 	"github.com/nsnikhil/go-datastructures/functions/predicate"
@@ -19,91 +17,91 @@ type LazyStream[T comparable] struct {
 }
 
 func NewLazyStream[T comparable]() Stream[T] {
-	return &LazyStream{
+	return &LazyStream[T]{
 		operations: queue.NewDeque[T](),
 	}
 }
 
-func (ls *LazyStream) AllMatch(p predicate.Predicate) bool {
+func (ls *LazyStream[T]) AllMatch(p predicate.Predicate[T]) bool {
 	return false
 }
 
-func (ls *LazyStream) AnyMatch(p predicate.Predicate) bool {
+func (ls *LazyStream[T]) AnyMatch(p predicate.Predicate[T]) bool {
 	return false
 }
 
-func (ls *LazyStream) Collect(c collector.Collector) interface{} {
-	return nil
-}
+//func (ls *LazyStream[T]) Collect(c collector.Collector[T]) T {
+//	return nil
+//}
 
-func (ls *LazyStream) Count() int {
+func (ls *LazyStream[T]) Count() int {
 	return utils.InvalidIndex
 }
 
-func (ls *LazyStream) Distinct() Stream {
+func (ls *LazyStream[T]) Distinct() Stream[T] {
 	return nil
 }
 
-func (ls *LazyStream) DropWhile(p predicate.Predicate) Stream {
+func (ls *LazyStream[T]) DropWhile(p predicate.Predicate[T]) Stream[T] {
 	return nil
 }
 
-func (ls *LazyStream) TakeWhile(p predicate.Predicate) Stream {
+func (ls *LazyStream[T]) TakeWhile(p predicate.Predicate[T]) Stream[T] {
 	return nil
 }
 
-func (ls *LazyStream) Empty() bool {
+func (ls *LazyStream[T]) Empty() bool {
 	return false
 }
 
-func (ls *LazyStream) Filter(p predicate.Predicate) Stream {
+func (ls *LazyStream[T]) Filter(p predicate.Predicate[T]) Stream[T] {
 	return nil
 }
 
-func (ls *LazyStream) Iterator() iterator.Iterator {
+func (ls *LazyStream[T]) Iterator() iterator.Iterator[T] {
 	return nil
 }
 
-func (ls *LazyStream) Generate(s supplier.Supplier) Stream {
+func (ls *LazyStream[T]) Generate(s supplier.Supplier[T]) Stream[T] {
 	return nil
 }
 
-func (ls *LazyStream) Iterate(s interface{}, uo operator.UnaryOperator) Stream {
+func (ls *LazyStream[T]) Iterate(s T, uo operator.UnaryOperator[T]) Stream[T] {
 	return nil
 }
 
-func (ls *LazyStream) Limit(c int) Stream {
+func (ls *LazyStream[T]) Limit(c int) Stream[T] {
 	return nil
 }
 
-func (ls *LazyStream) Map(f function.Function) Stream {
+//func (ls *LazyStream[T]) Map(f function.Function[T]) Stream[T] {
+//	return nil
+//}
+
+func (ls *LazyStream[T]) Max(c comparator.Comparator[T]) base.Optional[T] {
 	return nil
 }
 
-func (ls *LazyStream) Max(c comparator.Comparator) base.Optional {
+func (ls *LazyStream[T]) Min(c comparator.Comparator[T]) base.Optional[T] {
 	return nil
 }
 
-func (ls *LazyStream) Min(c comparator.Comparator) base.Optional {
+func (ls *LazyStream[T]) Of(e ...T) Stream[T] {
 	return nil
 }
 
-func (ls *LazyStream) Of(e ...interface{}) Stream {
+func (ls *LazyStream[T]) Peek(c consumer.Consumer[T]) Stream[T] {
 	return nil
 }
 
-func (ls *LazyStream) Peek(c consumer.Consumer) Stream {
+//func (ls *LazyStream[T]) Reduce(bo operator.BinaryOperator) base.Optional[T] {
+//	return nil
+//}
+
+func (ls *LazyStream[T]) Skip(n int) Stream[T] {
 	return nil
 }
 
-func (ls *LazyStream) Reduce(bo operator.BinaryOperator) base.Optional {
-	return nil
-}
-
-func (ls *LazyStream) Skip(n int) Stream {
-	return nil
-}
-
-func (ls *LazyStream) Sorted(c comparator.Comparator) Stream {
+func (ls *LazyStream[T]) Sorted(c comparator.Comparator[T]) Stream[T] {
 	return nil
 }

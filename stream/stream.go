@@ -2,10 +2,8 @@ package stream
 
 import (
 	"github.com/nsnikhil/go-datastructures/base"
-	"github.com/nsnikhil/go-datastructures/functions/collector"
 	"github.com/nsnikhil/go-datastructures/functions/comparator"
 	"github.com/nsnikhil/go-datastructures/functions/consumer"
-	"github.com/nsnikhil/go-datastructures/functions/function"
 	"github.com/nsnikhil/go-datastructures/functions/iterator"
 	"github.com/nsnikhil/go-datastructures/functions/operator"
 	"github.com/nsnikhil/go-datastructures/functions/predicate"
@@ -17,41 +15,41 @@ type Stream[T comparable] interface {
 
 	AnyMatch(p predicate.Predicate[T]) bool
 
-	Collect(c collector.Collector[T]) interface{}
+	//Collect(c collector.Collector[T]) T
 
 	Count() int
 
-	Distinct() Stream
+	Distinct() Stream[T]
 
-	DropWhile(p predicate.Predicate[T]) Stream
+	DropWhile(p predicate.Predicate[T]) Stream[T]
 
-	TakeWhile(p predicate.Predicate[T]) Stream
+	TakeWhile(p predicate.Predicate[T]) Stream[T]
 
 	Empty() bool
 
-	Filter(p predicate.Predicate[T]) Stream
+	Filter(p predicate.Predicate[T]) Stream[T]
 
-	Iterator() iterator.Iterator
+	Iterator() iterator.Iterator[T]
 
-	Generate(s supplier.Supplier) Stream
+	Generate(s supplier.Supplier[T]) Stream[T]
 
-	Iterate(s interface{}, uo operator.UnaryOperator) Stream
+	Iterate(s T, uo operator.UnaryOperator[T]) Stream[T]
 
-	Limit(c int) Stream
+	Limit(c int) Stream[T]
 
-	Map(f function.Function) Stream
+	//Map(f function.Function[T]) Stream[T]
 
-	Max(c comparator.Comparator) base.Optional
+	Max(c comparator.Comparator[T]) base.Optional[T]
 
-	Min(c comparator.Comparator) base.Optional
+	Min(c comparator.Comparator[T]) base.Optional[T]
 
-	Of(e ...interface{}) Stream
+	Of(e ...T) Stream[T]
 
-	Peek(c consumer.Consumer) Stream
+	Peek(c consumer.Consumer[T]) Stream[T]
 
-	Reduce(bo operator.BinaryOperator) base.Optional
+	//Reduce(bo operator.BinaryOperator[T]) base.Optional[T]
 
-	Skip(n int) Stream
+	Skip(n int) Stream[T]
 
-	Sorted(c comparator.Comparator) Stream
+	Sorted(c comparator.Comparator[T]) Stream[T]
 }
