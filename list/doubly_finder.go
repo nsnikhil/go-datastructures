@@ -1,5 +1,7 @@
 package list
 
+import "github.com/nsnikhil/go-datastructures/internal"
+
 //should only be used by list with descending iterator like linked list here
 type doublyFinder[T comparable] struct{}
 
@@ -13,7 +15,7 @@ func newDoublyFinder[T comparable]() doublyFinder[T] {
 func (df doublyFinder[T]) search(l List[T], e T) int64 {
 	sz := l.Size()
 	if sz == 0 {
-		return -1
+		return internal.InvalidIndex
 	}
 
 	it := l.Iterator()
@@ -39,5 +41,5 @@ func (df doublyFinder[T]) search(l List[T], e T) int64 {
 		backwardCount++
 	}
 
-	return -1
+	return internal.InvalidIndex
 }

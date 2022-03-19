@@ -1,5 +1,7 @@
 package list
 
+import "github.com/nsnikhil/go-datastructures/internal"
+
 type reverseFinder[T comparable] struct{}
 
 func newReverseFinder[T comparable]() finder[T] {
@@ -12,7 +14,7 @@ func newReverseFinder[T comparable]() finder[T] {
 func (lf reverseFinder[T]) search(l List[T], e T) int64 {
 	sz := l.Size()
 	if sz == 0 {
-		return -1
+		return internal.InvalidIndex
 	}
 
 	it := l.DescendingIterator()
@@ -27,6 +29,6 @@ func (lf reverseFinder[T]) search(l List[T], e T) int64 {
 		count--
 	}
 
-	return -1
+	return internal.InvalidIndex
 
 }

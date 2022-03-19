@@ -27,6 +27,7 @@ func NewTrie() *Trie {
 func (t *Trie) Insert(s string) error {
 	n := t.root
 	if n == nil {
+		//TODO: WILL THIS ERROR HAPPEN?
 		return errors.New("root is nil")
 	}
 

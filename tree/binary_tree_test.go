@@ -2,8 +2,8 @@ package tree
 
 import (
 	"errors"
-	"fmt"
 	"github.com/nsnikhil/go-datastructures/functions/comparator"
+	"github.com/nsnikhil/go-datastructures/internal"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"testing"
@@ -409,7 +409,7 @@ func TestBinaryTreeDelete(t *testing.T) {
 
 				return bt
 			},
-			expectedError: errors.New("7 not found in the tree"),
+			expectedError: errors.New("element 7 not found in the tree"),
 		},
 	}
 
@@ -417,7 +417,7 @@ func TestBinaryTreeDelete(t *testing.T) {
 		t.Run(testCase.name, func(t *testing.T) {
 			err, res := testCase.actualResult()
 
-			assert.Equal(t, testCase.expectedError, err)
+			internal.AssertErrorEquals(t, testCase.expectedError, err)
 			assert.Equal(t, testCase.expectedResult(), res)
 		})
 	}
@@ -633,7 +633,7 @@ func TestBinaryTreeDeleteCompare(t *testing.T) {
 
 				return bt
 			},
-			expectedError: errors.New("7 not found in the tree"),
+			expectedError: errors.New("element 7 not found in the tree"),
 		},
 	}
 
@@ -641,7 +641,7 @@ func TestBinaryTreeDeleteCompare(t *testing.T) {
 		t.Run(testCase.name, func(t *testing.T) {
 			err, res := testCase.actualResult()
 
-			assert.Equal(t, testCase.expectedError, err)
+			internal.AssertErrorEquals(t, testCase.expectedError, err)
 			assert.Equal(t, testCase.expectedResult(), res)
 		})
 	}
@@ -1236,7 +1236,7 @@ func TestBinaryTreeSearch(t *testing.T) {
 				return bt.Search(5)
 			},
 			expectedResult: false,
-			expectedError:  errors.New("5 not found in the tree"),
+			expectedError:  errors.New("element 5 not found in the tree"),
 		},
 	}
 
@@ -1244,7 +1244,7 @@ func TestBinaryTreeSearch(t *testing.T) {
 		t.Run(testCase.name, func(t *testing.T) {
 			res, err := testCase.actualResult()
 
-			assert.Equal(t, testCase.expectedError, err)
+			internal.AssertErrorEquals(t, testCase.expectedError, err)
 			assert.Equal(t, testCase.expectedResult, res)
 		})
 	}
@@ -1291,7 +1291,7 @@ func TestBinaryTreeSearchCompare(t *testing.T) {
 				return bt.SearchCompare(5, comparator.NewIntegerComparator())
 			},
 			expectedResult: false,
-			expectedError:  errors.New("5 not found in the tree"),
+			expectedError:  errors.New("element 5 not found in the tree"),
 		},
 	}
 
@@ -1299,7 +1299,7 @@ func TestBinaryTreeSearchCompare(t *testing.T) {
 		t.Run(testCase.name, func(t *testing.T) {
 			res, err := testCase.actualResult()
 
-			assert.Equal(t, testCase.expectedError, err)
+			internal.AssertErrorEquals(t, testCase.expectedError, err)
 			assert.Equal(t, testCase.expectedResult, res)
 		})
 	}
@@ -1621,7 +1621,7 @@ func TestBinaryTreeMirror(t *testing.T) {
 			ok, err, res := testCase.actualResult()
 
 			assert.Equal(t, testCase.expectedResult, ok)
-			assert.Equal(t, testCase.expectedError, err)
+			internal.AssertErrorEquals(t, testCase.expectedError, err)
 			assert.Equal(t, testCase.expectedTree(), res)
 		})
 	}
@@ -1823,7 +1823,7 @@ func TestBinaryTreeMirrorAt(t *testing.T) {
 				return bt
 			},
 			expectedResult: false,
-			expectedError:  errors.New("6 not found in the tree"),
+			expectedError:  errors.New("element 6 not found in the tree"),
 		},
 	}
 
@@ -1832,7 +1832,7 @@ func TestBinaryTreeMirrorAt(t *testing.T) {
 			ok, err, res := testCase.actualResult()
 
 			assert.Equal(t, testCase.expectedResult, ok)
-			assert.Equal(t, testCase.expectedError, err)
+			internal.AssertErrorEquals(t, testCase.expectedError, err)
 			assert.Equal(t, testCase.expectedTree(), res)
 		})
 	}
@@ -2208,7 +2208,7 @@ func TestBinaryTreeRotateRight(t *testing.T) {
 		t.Run(testCase.name, func(t *testing.T) {
 			err, res := testCase.actualResult()
 
-			assert.Equal(t, testCase.expectedError, err)
+			internal.AssertErrorEquals(t, testCase.expectedError, err)
 			assert.Equal(t, testCase.expectedResult(), res)
 		})
 	}
@@ -2360,7 +2360,7 @@ func TestBinaryTreeRotateLeft(t *testing.T) {
 		t.Run(testCase.name, func(t *testing.T) {
 			err, res := testCase.actualResult()
 
-			assert.Equal(t, testCase.expectedError, err)
+			internal.AssertErrorEquals(t, testCase.expectedError, err)
 			assert.Equal(t, testCase.expectedResult(), res)
 		})
 	}
@@ -2531,7 +2531,7 @@ func TestBinaryTreeRotateLeftAt(t *testing.T) {
 
 				return bt
 			},
-			expectedError: errors.New("1 not found in the tree"),
+			expectedError: errors.New("element 1 not found in the tree"),
 		},
 	}
 
@@ -2539,7 +2539,7 @@ func TestBinaryTreeRotateLeftAt(t *testing.T) {
 		t.Run(testCase.name, func(t *testing.T) {
 			err, res := testCase.actualResult()
 
-			assert.Equal(t, testCase.expectedError, err)
+			internal.AssertErrorEquals(t, testCase.expectedError, err)
 			assert.Equal(t, testCase.expectedResult(), res)
 		})
 	}
@@ -2710,7 +2710,7 @@ func TestBinaryTreeRotateRightAt(t *testing.T) {
 
 				return bt
 			},
-			expectedError: errors.New("1 not found in the tree"),
+			expectedError: errors.New("element 1 not found in the tree"),
 		},
 	}
 
@@ -2718,7 +2718,7 @@ func TestBinaryTreeRotateRightAt(t *testing.T) {
 		t.Run(testCase.name, func(t *testing.T) {
 			err, res := testCase.actualResult()
 
-			assert.Equal(t, testCase.expectedError, err)
+			internal.AssertErrorEquals(t, testCase.expectedError, err)
 			assert.Equal(t, testCase.expectedResult(), res)
 		})
 	}
@@ -2988,7 +2988,7 @@ func TestBinaryTreeLowestCommonAncestor(t *testing.T) {
 
 				return bt.LowestCommonAncestor(1, 12)
 			},
-			expectedError: errors.New("1 not found in the tree"),
+			expectedError: errors.New("element 1 not found in the tree"),
 		},
 	}
 
@@ -2996,7 +2996,7 @@ func TestBinaryTreeLowestCommonAncestor(t *testing.T) {
 		t.Run(testCase.name, func(t *testing.T) {
 			res, err := testCase.actualResult()
 
-			assert.Equal(t, testCase.expectedError, err)
+			internal.AssertErrorEquals(t, testCase.expectedError, err)
 			assert.Equal(t, testCase.expectedResult, res)
 		})
 	}
@@ -3366,11 +3366,6 @@ func TestBinaryTreePaths(t *testing.T) {
 				bt.InsertCompare(17, c)
 				bt.InsertCompare(19, c)
 
-				it := bt.LevelOrderIterator()
-				for it.HasNext() {
-					fmt.Println(it.Next())
-				}
-
 				return bt.Paths()
 			},
 			expectedResult: func() [][]int {
@@ -3393,7 +3388,7 @@ func TestBinaryTreePaths(t *testing.T) {
 		t.Run(testCase.name, func(t *testing.T) {
 			res, err := testCase.actualResult()
 
-			assert.Equal(t, testCase.expectedError, err)
+			internal.AssertErrorEquals(t, testCase.expectedError, err)
 			assert.Equal(t, testCase.expectedResult(), res)
 		})
 	}
@@ -4018,7 +4013,7 @@ func TestBinaryTreePreOrderSuccessor(t *testing.T) {
 
 				return bt.PreOrderSuccessor(3)
 			},
-			expectedError: errors.New("3 not found in the tree"),
+			expectedError: errors.New("element 3 not found in the tree"),
 		},
 	}
 
@@ -4026,7 +4021,7 @@ func TestBinaryTreePreOrderSuccessor(t *testing.T) {
 		t.Run(testCase.name, func(t *testing.T) {
 			res, err := testCase.actualResult()
 
-			assert.Equal(t, testCase.expectedError, err)
+			internal.AssertErrorEquals(t, testCase.expectedError, err)
 			assert.Equal(t, testCase.expectedResult, res)
 		})
 	}
@@ -4118,7 +4113,7 @@ func TestBinaryTreePostOrderSuccessor(t *testing.T) {
 
 				return bt.PostOrderSuccessor(3)
 			},
-			expectedError: errors.New("3 not found in the tree"),
+			expectedError: errors.New("element 3 not found in the tree"),
 		},
 	}
 
@@ -4126,7 +4121,7 @@ func TestBinaryTreePostOrderSuccessor(t *testing.T) {
 		t.Run(testCase.name, func(t *testing.T) {
 			res, err := testCase.actualResult()
 
-			assert.Equal(t, testCase.expectedError, err)
+			internal.AssertErrorEquals(t, testCase.expectedError, err)
 			assert.Equal(t, testCase.expectedResult, res)
 		})
 	}
@@ -4218,7 +4213,7 @@ func TestBinaryTreeInOrderSuccessor(t *testing.T) {
 
 				return bt.InOrderSuccessor(3)
 			},
-			expectedError: errors.New("3 not found in the tree"),
+			expectedError: errors.New("element 3 not found in the tree"),
 		},
 	}
 
@@ -4226,7 +4221,7 @@ func TestBinaryTreeInOrderSuccessor(t *testing.T) {
 		t.Run(testCase.name, func(t *testing.T) {
 			res, err := testCase.actualResult()
 
-			assert.Equal(t, testCase.expectedError, err)
+			internal.AssertErrorEquals(t, testCase.expectedError, err)
 			assert.Equal(t, testCase.expectedResult, res)
 		})
 	}
@@ -4318,7 +4313,7 @@ func TestBinaryTreeLevelOrderSuccessor(t *testing.T) {
 
 				return bt.LevelOrderSuccessor(3)
 			},
-			expectedError: errors.New("3 not found in the tree"),
+			expectedError: errors.New("element 3 not found in the tree"),
 		},
 	}
 
@@ -4326,7 +4321,7 @@ func TestBinaryTreeLevelOrderSuccessor(t *testing.T) {
 		t.Run(testCase.name, func(t *testing.T) {
 			res, err := testCase.actualResult()
 
-			assert.Equal(t, testCase.expectedError, err)
+			internal.AssertErrorEquals(t, testCase.expectedError, err)
 			assert.Equal(t, testCase.expectedResult, res)
 		})
 	}

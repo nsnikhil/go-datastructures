@@ -35,8 +35,6 @@ func hashCode[T comparable](h *hash.Hash, e T) (uint32, error) {
 	return binary.BigEndian.Uint32(res), nil
 }
 
-var m = make(map[interface{}]map[int64]int)
-
 func indexOf[T comparable](h *hash.Hash, e T, capacity int64) (int64, error) {
 	f, err := hashCode(h, e)
 	if err != nil {

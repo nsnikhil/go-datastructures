@@ -1,14 +1,11 @@
 package set
 
 import (
-	"errors"
 	"github.com/nsnikhil/erx"
 	"github.com/nsnikhil/go-datastructures/functions/iterator"
 	"github.com/nsnikhil/go-datastructures/internal"
 	gmap "github.com/nsnikhil/go-datastructures/map"
 )
-
-var errorDifferentTypes = errors.New("all elements must be of same type")
 
 type present struct{}
 

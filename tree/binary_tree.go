@@ -1,8 +1,7 @@
 package tree
 
 import (
-	"errors"
-	"fmt"
+	"github.com/nsnikhil/erx"
 	"github.com/nsnikhil/go-datastructures/functions/comparator"
 	"github.com/nsnikhil/go-datastructures/functions/iterator"
 	"github.com/nsnikhil/go-datastructures/internal"
@@ -18,10 +17,6 @@ type binaryNode[T comparable] struct {
 	left   *binaryNode[T]
 	right  *binaryNode[T]
 	parent *binaryNode[T]
-}
-
-func (bn *binaryNode[T]) String() string {
-	return fmt.Sprint(bn.data)
 }
 
 func (bn *binaryNode[T]) isLeaf() bool {
@@ -181,7 +176,7 @@ func (bt *BinaryTree[T]) InsertCompare(e T, c comparator.Comparator[T]) {
 
 func (bt *BinaryTree[T]) Delete(e T) error {
 	if bt.Empty() {
-		return errors.New("tree is empty")
+		return emptyTreeError("BinaryTree.Delete")
 	}
 
 	n, err := search(e, bt.root)
@@ -217,7 +212,7 @@ func (bt *BinaryTree[T]) DeleteCompare(e T, c comparator.Comparator[T]) error {
 
 	deleteNode = func(e T, c comparator.Comparator[T], n *binaryNode[T]) error {
 		if n == nil {
-			return fmt.Errorf("%v not found in the tree", e)
+			return elementNotFoundError(e, "BinaryTree.DeleteCompare")
 		}
 
 		i := c.Compare(n.data, e)
@@ -247,7 +242,7 @@ func (bt *BinaryTree[T]) DeleteCompare(e T, c comparator.Comparator[T]) error {
 	}
 
 	if bt.Empty() {
-		return errors.New("tree is empty")
+		return emptyTreeError("BinaryTree.DeleteCompare")
 	}
 
 	curr := bt.root
@@ -267,7 +262,7 @@ func (bt *BinaryTree[T]) DeleteCompare(e T, c comparator.Comparator[T]) error {
 
 func (bt *BinaryTree[T]) Search(e T) (bool, error) {
 	if bt.Empty() {
-		return false, errors.New("tree is empty")
+		return false, emptyTreeError("BinaryTree.Search")
 	}
 
 	_, err := search(e, bt.root)
@@ -280,7 +275,7 @@ func (bt *BinaryTree[T]) Search(e T) (bool, error) {
 
 func (bt *BinaryTree[T]) SearchCompare(e T, c comparator.Comparator[T]) (bool, error) {
 	if bt.Empty() {
-		return false, errors.New("tree is empty")
+		return false, emptyTreeError("BinaryTree.SearchCompare")
 	}
 
 	curr := bt.root
@@ -299,7 +294,7 @@ func (bt *BinaryTree[T]) SearchCompare(e T, c comparator.Comparator[T]) (bool, e
 		}
 	}
 
-	return false, fmt.Errorf("%v not found in the tree", e)
+	return false, elementNotFoundError(e, "BinaryTree.SearchCompare")
 }
 
 func (bt *BinaryTree[T]) Count() int {
@@ -334,7 +329,7 @@ func (bt *BinaryTree[T]) Clone() Tree[T] {
 
 func (bt *BinaryTree[T]) Mirror() (bool, error) {
 	if bt.Empty() {
-		return false, errors.New("tree is empty")
+		return false, emptyTreeError("BinaryTree.Mirror")
 	}
 
 	return bt.MirrorAt(bt.root.data)
@@ -342,16 +337,16 @@ func (bt *BinaryTree[T]) Mirror() (bool, error) {
 
 func (bt *BinaryTree[T]) MirrorAt(e T) (bool, error) {
 	if bt.Empty() {
-		return false, errors.New("tree is empty")
+		return false, emptyTreeError("BinaryTree.MirrorAt")
 	}
 
 	curr, err := search(e, bt.root)
 	if err != nil {
-		return false, err
+		return false, erx.WithArgs(erx.Kind("BinaryTree.MirrorAt"), err)
 	}
 
 	if err := mirrorAt(curr); err != nil {
-		return false, err
+		return false, erx.WithArgs(erx.Kind("BinaryTree.MirrorAt"), err)
 	}
 
 	return true, nil
@@ -359,7 +354,7 @@ func (bt *BinaryTree[T]) MirrorAt(e T) (bool, error) {
 
 func (bt *BinaryTree[T]) RotateLeft() error {
 	if bt.Empty() {
-		return errors.New("tree is empty")
+		return emptyTreeError("BinaryTree.RotateLeft")
 	}
 
 	rotateLeft(bt.root, nil, bt)
@@ -368,7 +363,7 @@ func (bt *BinaryTree[T]) RotateLeft() error {
 
 func (bt *BinaryTree[T]) RotateRight() error {
 	if bt.Empty() {
-		return errors.New("tree is empty")
+		return emptyTreeError("BinaryTree.RotateRight")
 	}
 
 	rotateRight(bt.root, nil, bt)
@@ -377,12 +372,12 @@ func (bt *BinaryTree[T]) RotateRight() error {
 
 func (bt *BinaryTree[T]) RotateLeftAt(e T) error {
 	if bt.Empty() {
-		return errors.New("tree is empty")
+		return emptyTreeError("BinaryTree.RotateLeftAt")
 	}
 
 	curr, err := search(e, bt.root)
 	if err != nil {
-		return err
+		return erx.WithArgs(erx.Kind("BinaryTree.RotateLeftAt"), err)
 	}
 
 	rotateLeft(curr, curr.parent, bt)
@@ -391,12 +386,12 @@ func (bt *BinaryTree[T]) RotateLeftAt(e T) error {
 
 func (bt *BinaryTree[T]) RotateRightAt(e T) error {
 	if bt.Empty() {
-		return errors.New("tree is empty")
+		return emptyTreeError("BinaryTree.RotateRightAt")
 	}
 
 	curr, err := search(e, bt.root)
 	if err != nil {
-		return err
+		return erx.WithArgs(erx.Kind("BinaryTree.RotateRightAt"), err)
 	}
 
 	rotateRight(curr, curr.parent, bt)
@@ -470,12 +465,12 @@ func (bt *BinaryTree[T]) IsComplete() bool {
 func (bt *BinaryTree[T]) LowestCommonAncestor(a, b T) (T, error) {
 	an, err := search(a, bt.root)
 	if err != nil {
-		return *new(T), err
+		return internal.ZeroValueOf[T](), erx.WithArgs(erx.Kind("BinaryTree.LowestCommonAncestor"), err)
 	}
 
 	bn, err := search(b, bt.root)
 	if err != nil {
-		return *new(T), err
+		return internal.ZeroValueOf[T](), erx.WithArgs(erx.Kind("BinaryTree.LowestCommonAncestor"), err)
 	}
 
 	return lowestCommonAncestor(an, bn, bt.root).data, nil
@@ -483,7 +478,7 @@ func (bt *BinaryTree[T]) LowestCommonAncestor(a, b T) (T, error) {
 
 func (bt *BinaryTree[T]) Paths() ([][]T, error) {
 	if bt.Empty() {
-		return nil, errors.New("tree is empty")
+		return nil, emptyTreeError("BinaryTree.Paths")
 	}
 
 	var res [][]T
@@ -495,7 +490,7 @@ func (bt *BinaryTree[T]) Paths() ([][]T, error) {
 
 func (bt *BinaryTree[T]) Mode() (list.List[T], error) {
 	if bt.Empty() {
-		return nil, errors.New("tree is empty")
+		return nil, emptyTreeError("BinaryTree.Mode")
 	}
 
 	res := list.NewArrayList[T]()
@@ -504,15 +499,13 @@ func (bt *BinaryTree[T]) Mode() (list.List[T], error) {
 	m := 0
 	var p T
 
-	var mode func(n *binaryNode[T], l list.List[T], cm, m *int, p *T) error
-	mode = func(n *binaryNode[T], l list.List[T], cm, m *int, p *T) error {
+	var mode func(n *binaryNode[T], l list.List[T], cm, m *int, p *T)
+	mode = func(n *binaryNode[T], l list.List[T], cm, m *int, p *T) {
 		if n == nil {
-			return nil
+			return
 		}
 
-		if err := mode(n.left, l, cm, m, p); err != nil {
-			return err
-		}
+		mode(n.left, l, cm, m, p)
 
 		if n.data == *p {
 			*cm += 1
@@ -531,16 +524,10 @@ func (bt *BinaryTree[T]) Mode() (list.List[T], error) {
 		*p = n.data
 		*m = max(*m, *cm)
 
-		if err := mode(n.right, l, cm, m, p); err != nil {
-			return err
-		}
-
-		return nil
+		mode(n.right, l, cm, m, p)
 	}
 
-	if err := mode(bt.root, res, &cm, &m, &p); err != nil {
-		return nil, err
-	}
+	mode(bt.root, res, &cm, &m, &p)
 
 	return res, nil
 }
@@ -548,7 +535,7 @@ func (bt *BinaryTree[T]) Mode() (list.List[T], error) {
 func (bt *BinaryTree[T]) Equal(t Tree[T]) (bool, error) {
 	_, ok := t.(*BinaryTree[T])
 	if !ok {
-		return false, errors.New("TODO")
+		return false, isNotBinaryTreeError("BinaryTree.Equal")
 	}
 
 	var equal func(a, b *binaryNode[T]) bool
@@ -634,10 +621,10 @@ func (bt *BinaryTree[T]) PreOrderSuccessor(e T) (T, error) {
 	}
 
 	if prev != nil && prev.data == e {
-		return *new(T), fmt.Errorf("no pre order successor found for %v", e)
+		return internal.ZeroValueOf[T](), noPreOrderSuccessorError(e, "BinaryTree.PreOrderSuccessor")
 	}
 
-	return *new(T), fmt.Errorf("%v not found in the tree", e)
+	return internal.ZeroValueOf[T](), elementNotFoundError(e, "BinaryTree.PreOrderSuccessor")
 }
 
 func (bt *BinaryTree[T]) PostOrderSuccessor(e T) (T, error) {
@@ -678,10 +665,10 @@ func (bt *BinaryTree[T]) PostOrderSuccessor(e T) (T, error) {
 	}
 
 	if prev != nil && prev.data == e {
-		return *new(T), fmt.Errorf("no post order successor found for %v", e)
+		return internal.ZeroValueOf[T](), noPostOrderSuccessorError(e, "BinaryTree.PostOrderSuccessor")
 	}
 
-	return *new(T), fmt.Errorf("%v not found in the tree", e)
+	return internal.ZeroValueOf[T](), elementNotFoundError(e, "BinaryTree.PostOrderSuccessor")
 }
 
 func (bt *BinaryTree[T]) InOrderSuccessor(e T) (T, error) {
@@ -715,10 +702,10 @@ func (bt *BinaryTree[T]) InOrderSuccessor(e T) (T, error) {
 	}
 
 	if prev != nil && prev.data == e {
-		return *new(T), fmt.Errorf("no in order successor found for %v", e)
+		return internal.ZeroValueOf[T](), noInOrderSuccessorError(e, "BinaryTree.InOrderSuccessor")
 	}
 
-	return *new(T), fmt.Errorf("%v not found in the tree", e)
+	return internal.ZeroValueOf[T](), elementNotFoundError(e, "BinaryTree.InOrderSuccessor")
 }
 
 func (bt *BinaryTree[T]) LevelOrderSuccessor(e T) (T, error) {
@@ -751,10 +738,10 @@ func (bt *BinaryTree[T]) LevelOrderSuccessor(e T) (T, error) {
 	}
 
 	if prev != nil && prev.data == e {
-		return *new(T), fmt.Errorf("no level order successor found for %v", e)
+		return internal.ZeroValueOf[T](), noLevelOrderSuccessorError(e, "BinaryTree.LevelOrderSuccessor")
 	}
 
-	return *new(T), fmt.Errorf("%v not found in the tree", e)
+	return internal.ZeroValueOf[T](), elementNotFoundError(e, "BinaryTree.LevelOrderSuccessor")
 }
 
 func (bt *BinaryTree[T]) PreOrderIterator() iterator.Iterator[T] {
@@ -778,6 +765,7 @@ func (bti *btPreOrderIterator[T]) HasNext() bool {
 	return bti.curr != nil || !bti.s.Empty()
 }
 
+//TODO: FIX ERROR
 func (bti *btPreOrderIterator[T]) Next() (T, error) {
 	if bti.curr == nil {
 		n, _ := bti.s.Pop()
@@ -821,6 +809,7 @@ func (bto *btPostOrderIterator[T]) HasNext() bool {
 	return bto.curr != nil || !bto.s.Empty()
 }
 
+//TODO: FIX ERROR
 func (bto *btPostOrderIterator[T]) Next() (T, error) {
 	get := func() (T, error) {
 		_, _ = bto.s.Pop()
@@ -839,7 +828,7 @@ func (bto *btPostOrderIterator[T]) Next() (T, error) {
 
 	if bto.curr == nil {
 		if bto.s.Empty() {
-			return *new(T), nil
+			return internal.ZeroValueOf[T](), nil
 		}
 
 		top, _ := bto.s.Peek()
@@ -868,7 +857,7 @@ func (bto *btPostOrderIterator[T]) Next() (T, error) {
 	left()
 
 	if bto.curr == nil {
-		return *new(T), nil
+		return internal.ZeroValueOf[T](), nil
 	}
 
 	for bto.curr != nil && bto.curr.right != nil && bto.curr.right != bto.last {
@@ -900,6 +889,7 @@ func (bti *btInOrderIterator[T]) HasNext() bool {
 	return bti.curr != nil || !bti.s.Empty()
 }
 
+//TODO: FIX ERROR
 func (bti *btInOrderIterator[T]) Next() (T, error) {
 	for bti.curr != nil {
 		bti.s.Push(bti.curr)
@@ -912,7 +902,7 @@ func (bti *btInOrderIterator[T]) Next() (T, error) {
 	}
 
 	if bti.curr == nil {
-		return *new(T), errors.New("some error")
+		return internal.ZeroValueOf[T](), nil
 	}
 
 	temp := bti.curr
@@ -950,6 +940,7 @@ func (blv *btLvOrderIterator[T]) HasNext() bool {
 	return !blv.q.Empty()
 }
 
+//TODO: FIX ERROR
 func (blv *btLvOrderIterator[T]) Next() (T, error) {
 	curr, _ := blv.q.Remove()
 
@@ -988,6 +979,7 @@ func (btv *btVerticalVOrderIterator[T]) HasNext() bool {
 	return btv.it.HasNext()
 }
 
+//TODO: FIX 'V' IMPLEMENTATION
 func (btv *btVerticalVOrderIterator[T]) Next() (T, error) {
 	if btv.v {
 		return btv.it.Next()
@@ -1020,6 +1012,7 @@ func (bfv *btLeftVOrderIterator[T]) HasNext() bool {
 	return !bfv.q.Empty()
 }
 
+//TODO: FIX ERROR
 func (bfv *btLeftVOrderIterator[T]) Next() (T, error) {
 	sz := bfv.q.Size()
 
@@ -1073,6 +1066,7 @@ func (brv *btRightVOrderIterator[T]) HasNext() bool {
 	return !brv.q.Empty()
 }
 
+//TODO: FIX ERROR
 func (brv *btRightVOrderIterator[T]) Next() (T, error) {
 	sz := brv.q.Size()
 
@@ -1183,6 +1177,7 @@ func lastNode[T comparable](bt *BinaryTree[T]) (*binaryNode[T], *binaryNode[T]) 
 	return curr, prev
 }
 
+//TODO: FIX ERROR
 //noinspection GoNilness
 func mirrorAt[T comparable](n *binaryNode[T]) error {
 	curr := n
@@ -1259,7 +1254,7 @@ func isBalancedAt[T comparable](n *binaryNode[T]) bool {
 
 func search[T comparable](e T, curr *binaryNode[T]) (*binaryNode[T], error) {
 	if curr == nil {
-		return nil, fmt.Errorf("%v not found in the tree", e)
+		return nil, elementNotFoundError(e, "binaryNode.search")
 	}
 
 	if curr.data == e {

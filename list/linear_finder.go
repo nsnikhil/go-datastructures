@@ -1,5 +1,7 @@
 package list
 
+import "github.com/nsnikhil/go-datastructures/internal"
+
 type linearFinder[T comparable] struct{}
 
 func newLinearFinder[T comparable]() finder[T] {
@@ -12,7 +14,7 @@ func newLinearFinder[T comparable]() finder[T] {
 func (lf linearFinder[T]) search(l List[T], e T) int64 {
 	sz := l.Size()
 	if sz == 0 {
-		return -1
+		return internal.InvalidIndex
 	}
 
 	it := l.Iterator()
@@ -26,6 +28,6 @@ func (lf linearFinder[T]) search(l List[T], e T) int64 {
 		count++
 	}
 
-	return -1
+	return internal.InvalidIndex
 
 }

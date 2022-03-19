@@ -38,6 +38,7 @@ func (pq *PriorityQueue[T]) Remove() (T, error) {
 	return v, nil
 }
 
+//TODO: IMPLEMENT PEEK IN HEAP AND CHANGE IT HERE
 func (pq *PriorityQueue[T]) Peek() (T, error) {
 	v, err := pq.h.Iterator().Next()
 	if err != nil {

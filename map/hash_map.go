@@ -1,7 +1,6 @@
 package gmap
 
 import (
-	"fmt"
 	"github.com/nsnikhil/go-datastructures/functions/function"
 	"github.com/nsnikhil/go-datastructures/functions/iterator"
 	"github.com/nsnikhil/go-datastructures/internal"
@@ -19,18 +18,10 @@ type factors struct {
 	capacity      int64
 }
 
-func (f *factors) String() string {
-	return fmt.Sprintf("%2.f, %2.f, %d, %d", f.upperLoadFactor, f.lowerLoadFactor, f.scalingFactor, f.capacity)
-}
-
 type counter struct {
 	elementCount int64
 	countMap     map[int64]bool
 	uniqueCount  int64
-}
-
-func (c *counter) String() string {
-	return fmt.Sprintf("%d, %v %d", c.elementCount, c.countMap, c.uniqueCount)
 }
 
 type HashMap[K comparable, V comparable] struct {
@@ -286,7 +277,6 @@ func (hm *HashMap[K, V]) insert(p *Pair[K, V]) error {
 
 		hm.data[idx] = tll
 
-		//fmt.Printf("added %v\n", p.first)
 		hm.elementCount++
 
 		tll.AddLast(p)
@@ -306,13 +296,11 @@ func (hm *HashMap[K, V]) insert(p *Pair[K, V]) error {
 	}
 
 	if curr == nil {
-		//fmt.Printf("added %v\n", p.first)
 		hm.elementCount++
 		ll.AddLast(p)
 		return nil
 	}
 
-	//fmt.Printf("skipped %v\n", p.first)
 	curr.second = p.second
 
 	return nil

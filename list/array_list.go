@@ -69,7 +69,7 @@ func (al *ArrayList[T]) Clone() List[T] {
 }
 
 func (al *ArrayList[T]) Contains(element T) bool {
-	return newDoublyFinder[T]().search(al, element) != -1
+	return newDoublyFinder[T]().search(al, element) != internal.InvalidIndex
 }
 
 func (al *ArrayList[T]) ContainsAll(elements ...T) bool {
@@ -94,11 +94,11 @@ func (al *ArrayList[T]) ContainsAll(elements ...T) bool {
 //TODO: WHAT TO RETURN AS DEFAULT VALUE?
 func (al *ArrayList[T]) Get(index int64) (T, error) {
 	if al.IsEmpty() {
-		return *new(T), emptyListError("ArrayList.Get")
+		return internal.ZeroValueOf[T](), emptyListError("ArrayList.Get")
 	}
 
 	if ok := al.isValidIndex(index); !ok {
-		return *new(T), invalidIndexError(index, "ArrayList.Get")
+		return internal.ZeroValueOf[T](), invalidIndexError(index, "ArrayList.Get")
 	}
 
 	return al.data[index], nil
@@ -147,7 +147,7 @@ func (al *ArrayList[T]) Remove(element T) error {
 	}
 
 	index := newLinearFinder[T]().search(al, element)
-	if index == invalidIndex {
+	if index == internal.InvalidIndex {
 		return elementNotFoundError(element, "ArrayList.Remove")
 	}
 
@@ -158,11 +158,11 @@ func (al *ArrayList[T]) Remove(element T) error {
 
 func (al *ArrayList[T]) RemoveAt(index int64) (T, error) {
 	if al.IsEmpty() {
-		return *new(T), emptyListError("ArrayList.RemoveAt")
+		return internal.ZeroValueOf[T](), emptyListError("ArrayList.RemoveAt")
 	}
 
 	if ok := al.isValidIndex(index); !ok {
-		return *new(T), invalidIndexError(index, "ArrayList.RemoveAt")
+		return internal.ZeroValueOf[T](), invalidIndexError(index, "ArrayList.RemoveAt")
 	}
 
 	e, _ := al.Get(index)
@@ -201,7 +201,7 @@ func (al *ArrayList[T]) Replace(old, new T) error {
 	}
 
 	idx := al.IndexOf(old)
-	if idx == invalidIndex {
+	if idx == internal.InvalidIndex {
 		return elementNotFoundError(old, "ArrayList.Replace")
 	}
 
@@ -224,11 +224,11 @@ func (al *ArrayList[T]) RetainAll(l ...T) error {
 
 func (al *ArrayList[T]) Set(index int64, element T) (T, error) {
 	if al.IsEmpty() {
-		return *new(T), emptyListError("ArrayList.Set")
+		return internal.ZeroValueOf[T](), emptyListError("ArrayList.Set")
 	}
 
 	if ok := al.isValidIndex(index); !ok {
-		return *new(T), invalidIndexError(index, "ArrayList.Set")
+		return internal.ZeroValueOf[T](), invalidIndexError(index, "ArrayList.Set")
 	}
 
 	al.data[index] = element
@@ -288,7 +288,7 @@ func (ali *arrayListIterator[T]) HasNext() bool {
 
 func (ali *arrayListIterator[T]) Next() (T, error) {
 	if ali.currentIndex >= ali.al.Size() {
-		return *new(T), emptyIteratorError("arrayListIterator.Next")
+		return internal.ZeroValueOf[T](), emptyIteratorError("arrayListIterator.Next")
 	}
 
 	e, _ := ali.al.Get(ali.currentIndex)
@@ -320,7 +320,7 @@ func (ali *arrayListDescendingIterator[T]) HasNext() bool {
 
 func (ali *arrayListDescendingIterator[T]) Next() (T, error) {
 	if ali.currentIndex < 0 {
-		return *new(T), emptyIteratorError("arrayListDescendingIterator.Next")
+		return internal.ZeroValueOf[T](), emptyIteratorError("arrayListDescendingIterator.Next")
 	}
 
 	e, _ := ali.al.Get(ali.currentIndex)
@@ -344,7 +344,7 @@ func (al *ArrayList[T]) filterArrayList(inverse bool, l ...T) error {
 	for _, e := range l {
 		i := al.IndexOf(e)
 
-		if i == invalidIndex {
+		if i == internal.InvalidIndex {
 			continue
 		}
 

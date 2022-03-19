@@ -2,6 +2,7 @@ package stack
 
 import (
 	"github.com/nsnikhil/erx"
+	"github.com/nsnikhil/go-datastructures/internal"
 	"github.com/nsnikhil/go-datastructures/list"
 )
 
@@ -22,12 +23,12 @@ func (s *Stack[T]) Push(e T) {
 
 func (s *Stack[T]) Pop() (T, error) {
 	if s.Empty() {
-		return *new(T), emptyStackError("Stack.Pop")
+		return internal.ZeroValueOf[T](), emptyStackError("Stack.Pop")
 	}
 
 	res, err := s.ll.RemoveFirst()
 	if err != nil {
-		return *new(T), erx.WithArgs(erx.Operation("Stack.Pop"), err)
+		return internal.ZeroValueOf[T](), erx.WithArgs(erx.Operation("Stack.Pop"), err)
 	}
 
 	return res, nil
@@ -35,12 +36,12 @@ func (s *Stack[T]) Pop() (T, error) {
 
 func (s *Stack[T]) Peek() (T, error) {
 	if s.Empty() {
-		return *new(T), emptyStackError("Stack.Peek")
+		return internal.ZeroValueOf[T](), emptyStackError("Stack.Peek")
 	}
 
 	res, err := s.ll.GetFirst()
 	if err != nil {
-		return *new(T), erx.WithArgs(erx.Operation("Stack.Peek"), err)
+		return internal.ZeroValueOf[T](), erx.WithArgs(erx.Operation("Stack.Peek"), err)
 	}
 
 	return res, nil

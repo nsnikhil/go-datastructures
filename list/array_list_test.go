@@ -208,6 +208,7 @@ func TestArrayListGet(t *testing.T) {
 		name           string
 		actualResult   func() (int64, error)
 		expectedResult int64
+		expectedError  error
 	}{
 		{
 			name: "should return error when trying to get value from empty list",
@@ -216,6 +217,7 @@ func TestArrayListGet(t *testing.T) {
 
 				return list.Get(0)
 			},
+			expectedError: errors.New("list is empty"),
 		},
 		{
 			name: "should return first element from the list",
@@ -239,16 +241,16 @@ func TestArrayListGet(t *testing.T) {
 			name: "should return error when trying to fetch value for invalid index",
 			actualResult: func() (int64, error) {
 				list := NewArrayList[int64](0)
-
 				return list.Get(1)
 			},
+			expectedError: errors.New("invalid index 1"),
 		},
 	}
 
 	for _, testCase := range testCases {
 		t.Run(testCase.name, func(t *testing.T) {
 			res, err := testCase.actualResult()
-			fmt.Println(err)
+			internal.AssertErrorEquals(t, testCase.expectedError, err)
 			assert.Equal(t, testCase.expectedResult, res)
 		})
 	}

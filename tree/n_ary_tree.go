@@ -84,7 +84,7 @@ package tree
 //}
 //
 //func (nt *NAryTree[T]) LowestCommonAncestor(a, b T) (T, error) {
-//	return *new(T), nil
+//	return internal.ZeroValueOf[T](), nil
 //}
 //
 //func (nt *NAryTree[T]) Paths() (list.List[T], error) {
@@ -108,19 +108,19 @@ package tree
 //}
 //
 //func (nt *NAryTree[T]) InOrderSuccessor(e T) (T, error) {
-//	return *new(T), nil
+//	return internal.ZeroValueOf[T](), nil
 //}
 //
 //func (nt *NAryTree[T]) PreOrderSuccessor(e T) (T, error) {
-//	return *new(T), nil
+//	return internal.ZeroValueOf[T](), nil
 //}
 //
 //func (nt *NAryTree[T]) PostOrderSuccessor(e T) (T, error) {
-//	return *new(T), nil
+//	return internal.ZeroValueOf[T](), nil
 //}
 //
 //func (nt *NAryTree[T]) LevelOrderSuccessor(e T) (T, error) {
-//	return *new(T), nil
+//	return internal.ZeroValueOf[T](), nil
 //}
 //
 //func (nt *NAryTree[T]) PreOrderIterator() iterator.Iterator[T] {

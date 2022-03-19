@@ -5,5 +5,4 @@ const (
 	lowerLoadFactor = 0.40
 	scalingFactor   = 2
 	initialCapacity = 16
-	invalidIndex    = -1
 )

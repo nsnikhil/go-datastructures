@@ -4,6 +4,7 @@ import (
 	"github.com/nsnikhil/erx"
 	"github.com/nsnikhil/go-datastructures/functions/comparator"
 	"github.com/nsnikhil/go-datastructures/functions/iterator"
+	"github.com/nsnikhil/go-datastructures/internal"
 )
 
 type binaryHeap[T comparable] struct {
@@ -50,7 +51,7 @@ func (bh *binaryHeap[T]) Add(data ...T) {
 
 func (bh *binaryHeap[T]) Extract() (T, error) {
 	if bh.IsEmpty() {
-		return *new(T), emptyHeapError("binaryHeap.Extract")
+		return internal.ZeroValueOf[T](), emptyHeapError("binaryHeap.Extract")
 	}
 
 	ele := bh.data[0]
@@ -106,7 +107,7 @@ func (bhi *binaryHeapIterator[T]) HasNext() bool {
 
 func (bhi *binaryHeapIterator[T]) Next() (T, error) {
 	if bhi.currentIndex >= bhi.h.Size() {
-		return *new(T), emptyIteratorError("binaryHeapIterator.Next")
+		return internal.ZeroValueOf[T](), emptyIteratorError("binaryHeapIterator.Next")
 	}
 
 	e := bhi.h.data[bhi.currentIndex]

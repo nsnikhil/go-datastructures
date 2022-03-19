@@ -2,7 +2,6 @@ package queue
 
 import (
 	"errors"
-	"fmt"
 	"github.com/nsnikhil/go-datastructures/internal"
 	"github.com/nsnikhil/go-datastructures/list"
 	"github.com/stretchr/testify/assert"
@@ -369,9 +368,6 @@ func NotTestBlockingQueueRemoveWithTimeout(t *testing.T) {
 	for _, testCase := range testCases {
 		t.Run(testCase.name, func(t *testing.T) {
 			e, err, res := testCase.actualResult()
-
-			fmt.Println(res.(*BlockingQueue[int]).ll.Size())
-			fmt.Println(testCase.expectedResult().(*BlockingQueue[int]).ll.Size())
 
 			internal.AssertErrorEquals(t, testCase.expectedError, err)
 

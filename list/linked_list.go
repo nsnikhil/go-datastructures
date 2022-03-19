@@ -77,7 +77,7 @@ func (ll *LinkedList[T]) Clone() List[T] {
 }
 
 func (ll *LinkedList[T]) Contains(element T) bool {
-	return newDoublyFinder[T]().search(ll, element) != -1
+	return newDoublyFinder[T]().search(ll, element) != internal.InvalidIndex
 }
 
 func (ll *LinkedList[T]) ContainsAll(elements ...T) bool {
@@ -166,7 +166,7 @@ func (ll *LinkedList[T]) FindFirst(predicate predicate.Predicate[T]) (T, error) 
 
 func (ll *LinkedList[T]) IndexOf(element T) int64 {
 	if ll.IsEmpty() {
-		return invalidIndex
+		return internal.InvalidIndex
 	}
 
 	return newLinearFinder[T]().search(ll, element)
@@ -187,7 +187,7 @@ func (ll *LinkedList[T]) DescendingIterator() iterator.Iterator[T] {
 //TODO: OPTIMIZE, MAKE IT SHORT
 func (ll *LinkedList[T]) LastIndexOf(element T) int64 {
 	if ll.IsEmpty() {
-		return invalidIndex
+		return internal.InvalidIndex
 	}
 
 	return newReverseFinder[T]().search(ll, element)
@@ -199,7 +199,7 @@ func (ll *LinkedList[T]) Remove(element T) error {
 	}
 
 	i := ll.IndexOf(element)
-	if i == -1 {
+	if i == internal.InvalidIndex {
 		return elementNotFoundError(element, "LinkedList.Remove")
 	}
 
@@ -242,7 +242,7 @@ func (ll *LinkedList[T]) RemoveLastOccurrence(element T) (bool, error) {
 	}
 
 	index := ll.LastIndexOf(element)
-	if index == invalidIndex {
+	if index == internal.InvalidIndex {
 		return false, elementNotFoundError(element, "LinkedList.RemoveLastOccurrence")
 	}
 
