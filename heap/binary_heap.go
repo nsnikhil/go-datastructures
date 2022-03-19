@@ -1,6 +1,7 @@
 package heap
 
 import (
+	"github.com/nsnikhil/erx"
 	"github.com/nsnikhil/go-datastructures/functions/comparator"
 	"github.com/nsnikhil/go-datastructures/functions/iterator"
 )
@@ -16,9 +17,7 @@ type MaxHeap[T comparable] struct {
 }
 
 func NewMaxHeap[T comparable](c comparator.Comparator[T], data ...T) *MaxHeap[T] {
-	heap := newBinaryHeap(c, true, data...)
-
-	return &MaxHeap[T]{binaryHeap: heap}
+	return &MaxHeap[T]{binaryHeap: newBinaryHeap(c, true, data...)}
 }
 
 type MinHeap[T comparable] struct {
@@ -26,26 +25,19 @@ type MinHeap[T comparable] struct {
 }
 
 func NewMinHeap[T comparable](c comparator.Comparator[T], data ...T) *MinHeap[T] {
-	heap := newBinaryHeap(c, false, data...)
-
-	return &MinHeap[T]{binaryHeap: heap}
+	return &MinHeap[T]{binaryHeap: newBinaryHeap(c, false, data...)}
 }
 
 func newBinaryHeap[T comparable](c comparator.Comparator[T], isMaxHeap bool, data ...T) *binaryHeap[T] {
-	if len(data) == 0 {
-		return &binaryHeap[T]{
-			c:         c,
-			isMaxHeap: isMaxHeap,
-		}
-	}
-
-	buildHeap(c, isMaxHeap, data)
-
-	return &binaryHeap[T]{
+	hp := &binaryHeap[T]{
 		c:         c,
 		isMaxHeap: isMaxHeap,
 		data:      data,
 	}
+
+	buildHeap(c, isMaxHeap, data)
+
+	return hp
 }
 
 func (bh *binaryHeap[T]) Add(data ...T) {
@@ -54,7 +46,6 @@ func (bh *binaryHeap[T]) Add(data ...T) {
 
 		heapify(len(bh.data)-1, bh.c, bh.isMaxHeap, bh.data)
 	}
-
 }
 
 func (bh *binaryHeap[T]) Extract() (T, error) {
@@ -75,7 +66,7 @@ func (bh *binaryHeap[T]) Extract() (T, error) {
 
 func (bh *binaryHeap[T]) Delete() error {
 	if _, err := bh.Extract(); err != nil {
-		return err
+		return erx.WithArgs(erx.Kind("binaryHeap.Delete"), err)
 	}
 
 	return nil

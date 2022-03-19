@@ -14,7 +14,7 @@ func TestHeapSort(t *testing.T) {
 		expectedError  error
 	}{
 		{
-			name: "test sort integer array descending",
+			name: "should sort integer array descending",
 			actualResult: func() (error, []int) {
 				hs := newHeapSort[int]()
 				data := []int{8, 4, 7, 2, 9, 0, 1, 3, 5, 6}
@@ -26,7 +26,7 @@ func TestHeapSort(t *testing.T) {
 			expectedResult: []int{9, 8, 7, 6, 5, 4, 3, 2, 1, 0},
 		},
 		{
-			name: "test sort integer array ascending",
+			name: "should sort integer array ascending",
 			actualResult: func() (error, []int) {
 				hs := newHeapSort[int]()
 				data := []int{8, 4, 7, 2, 9, 0, 1, 3, 5, 6}

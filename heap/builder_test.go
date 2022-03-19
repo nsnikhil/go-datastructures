@@ -14,7 +14,7 @@ func TestHeapBuilder(t *testing.T) {
 		expectedIndexes map[int]int
 	}{
 		{
-			name: "test build max heap from one element",
+			name: "should build max heap from one element",
 			actualResult: func() []int {
 				data := []int{10}
 				buildHeap[int](comparator.NewIntegerComparator(), true, data)
@@ -24,7 +24,7 @@ func TestHeapBuilder(t *testing.T) {
 			expectedIndexes: map[int]int{10: 0},
 		},
 		{
-			name: "test build max heap from two element",
+			name: "should build max heap from two element",
 			actualResult: func() []int {
 				data := []int{10, 40}
 				buildHeap[int](comparator.NewIntegerComparator(), true, data)
@@ -34,7 +34,7 @@ func TestHeapBuilder(t *testing.T) {
 			expectedIndexes: map[int]int{40: 0, 10: 1},
 		},
 		{
-			name: "test build max heap from arbitrary elements",
+			name: "should build max heap from arbitrary elements",
 			actualResult: func() []int {
 				data := []int{0, 1, 2, 3}
 				buildHeap[int](comparator.NewIntegerComparator(), true, data)
@@ -44,7 +44,7 @@ func TestHeapBuilder(t *testing.T) {
 			expectedIndexes: map[int]int{3: 0, 1: 1, 2: 2, 0: 3},
 		},
 		{
-			name: "test build another max heap from arbitrary elements",
+			name: "should build max heap from arbitrary elements scenario two",
 			actualResult: func() []int {
 				data := []int{10, 80, 60, 5, 9, 45, 72, 85, 120}
 				buildHeap[int](comparator.NewIntegerComparator(), true, data)
@@ -54,7 +54,7 @@ func TestHeapBuilder(t *testing.T) {
 			expectedIndexes: map[int]int{120: 0, 85: 1, 72: 2, 80: 3, 9: 4, 45: 5, 60: 6, 10: 7, 5: 8},
 		},
 		{
-			name: "test build min heap from one element",
+			name: "should build min heap from one element",
 			actualResult: func() []int {
 				data := []int{10}
 				buildHeap[int](comparator.NewIntegerComparator(), false, data)
@@ -64,7 +64,7 @@ func TestHeapBuilder(t *testing.T) {
 			expectedIndexes: map[int]int{10: 0},
 		},
 		{
-			name: "test build min heap from two element",
+			name: "should build min heap from two element",
 			actualResult: func() []int {
 				data := []int{10, 40}
 				buildHeap[int](comparator.NewIntegerComparator(), false, data)
@@ -74,7 +74,7 @@ func TestHeapBuilder(t *testing.T) {
 			expectedIndexes: map[int]int{10: 0, 40: 1},
 		},
 		{
-			name: "test build min heap from arbitrary elements",
+			name: "should build min heap from arbitrary elements",
 			actualResult: func() []int {
 				data := []int{3, 2, 1, 0}
 				buildHeap[int](comparator.NewIntegerComparator(), false, data)
@@ -84,7 +84,7 @@ func TestHeapBuilder(t *testing.T) {
 			expectedIndexes: map[int]int{0: 0, 2: 1, 1: 2, 3: 3},
 		},
 		{
-			name: "test build another min heap from arbitrary elements",
+			name: "should build min heap from arbitrary elements scenario two",
 			actualResult: func() []int {
 				data := []int{10, 1, 60, 5, 9, 45, 12, 2, 0}
 				buildHeap[int](comparator.NewIntegerComparator(), false, data)

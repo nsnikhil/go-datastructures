@@ -2,7 +2,6 @@ package heap
 
 import (
 	"errors"
-	"fmt"
 	"github.com/nsnikhil/go-datastructures/functions/comparator"
 	"github.com/nsnikhil/go-datastructures/internal"
 	"github.com/stretchr/testify/assert"
@@ -17,7 +16,7 @@ func TestCreateMaxHeap(t *testing.T) {
 		expectedError  error
 	}{
 		{
-			name: "test create empty max heap",
+			name: "should create empty max heap",
 			actualResult: func() *MaxHeap[int] {
 				return NewMaxHeap[int](comparator.NewIntegerComparator())
 			},
@@ -27,7 +26,7 @@ func TestCreateMaxHeap(t *testing.T) {
 			}},
 		},
 		{
-			name: "test create heap of one element",
+			name: "should create heap of one element",
 			actualResult: func() *MaxHeap[int] {
 				return NewMaxHeap[int](comparator.NewIntegerComparator(), 1)
 			},
@@ -38,7 +37,7 @@ func TestCreateMaxHeap(t *testing.T) {
 			}},
 		},
 		{
-			name: "test create max heap with multiple elements",
+			name: "should create max heap with multiple elements",
 			actualResult: func() *MaxHeap[int] {
 				return NewMaxHeap[int](comparator.NewIntegerComparator(), 1, 2, 3, 4)
 			},
@@ -66,7 +65,7 @@ func TestCreateMinHeap(t *testing.T) {
 		expectedError  error
 	}{
 		{
-			name: "test create empty min heap",
+			name: "should create empty min heap",
 			actualResult: func() *MinHeap[int] {
 				return NewMinHeap[int](comparator.NewIntegerComparator())
 			},
@@ -75,7 +74,7 @@ func TestCreateMinHeap(t *testing.T) {
 			}},
 		},
 		{
-			name: "test create min heap with one element",
+			name: "should create min heap with one element",
 			actualResult: func() *MinHeap[int] {
 				return NewMinHeap[int](comparator.NewIntegerComparator(), 1)
 			},
@@ -85,7 +84,7 @@ func TestCreateMinHeap(t *testing.T) {
 			}},
 		},
 		{
-			name: "test create heap with many elements",
+			name: "should create heap with many elements",
 			actualResult: func() *MinHeap[int] {
 				return NewMinHeap[int](comparator.NewIntegerComparator(), 4, 3, 2, 1)
 			},
@@ -112,7 +111,7 @@ func TestMaxHeapAdd(t *testing.T) {
 		expectedError  error
 	}{
 		{
-			name: "test heap add one element",
+			name: "should add one element",
 			actualResult: func() (error, *MaxHeap[int]) {
 				h := NewMaxHeap(comparator.NewIntegerComparator())
 
@@ -126,7 +125,7 @@ func TestMaxHeapAdd(t *testing.T) {
 			}},
 		},
 		{
-			name: "test add will heapify one element",
+			name: "should heapify one element",
 			actualResult: func() (error, *MaxHeap[int]) {
 				h := NewMaxHeap(comparator.NewIntegerComparator())
 
@@ -141,7 +140,7 @@ func TestMaxHeapAdd(t *testing.T) {
 			}},
 		},
 		{
-			name: "test add will heapify two element",
+			name: "should heapify two element",
 			actualResult: func() (error, *MaxHeap[int]) {
 				h := NewMaxHeap(comparator.NewIntegerComparator())
 
@@ -155,7 +154,7 @@ func TestMaxHeapAdd(t *testing.T) {
 			}},
 		},
 		{
-			name: "test add will heapify two element two",
+			name: "should heapify two element scenario two",
 			actualResult: func() (error, *MaxHeap[int]) {
 				h := NewMaxHeap(comparator.NewIntegerComparator())
 
@@ -169,7 +168,7 @@ func TestMaxHeapAdd(t *testing.T) {
 			}},
 		},
 		{
-			name: "test add will heapify all element",
+			name: "should heapify all element",
 			actualResult: func() (error, *MaxHeap[int]) {
 				h := NewMaxHeap(comparator.NewIntegerComparator())
 
@@ -205,7 +204,7 @@ func TestMinHeapAdd(t *testing.T) {
 		expectedError  error
 	}{
 		{
-			name: "test heap add one element",
+			name: "should add one element",
 			actualResult: func() (error, *MinHeap[int]) {
 				h := NewMinHeap(comparator.NewIntegerComparator())
 
@@ -218,7 +217,7 @@ func TestMinHeapAdd(t *testing.T) {
 			}},
 		},
 		{
-			name: "test add will heapify one element",
+			name: "should heapify one element",
 			actualResult: func() (error, *MinHeap[int]) {
 				h := NewMinHeap(comparator.NewIntegerComparator())
 
@@ -231,7 +230,7 @@ func TestMinHeapAdd(t *testing.T) {
 			}},
 		},
 		{
-			name: "test add will heapify two element",
+			name: "should heapify two element",
 			actualResult: func() (error, *MinHeap[int]) {
 				h := NewMinHeap(comparator.NewIntegerComparator())
 
@@ -244,7 +243,7 @@ func TestMinHeapAdd(t *testing.T) {
 			}},
 		},
 		{
-			name: "test add will heapify two element two",
+			name: "should heapify two element scenario two",
 			actualResult: func() (error, *MinHeap[int]) {
 				h := NewMinHeap(comparator.NewIntegerComparator())
 
@@ -257,7 +256,7 @@ func TestMinHeapAdd(t *testing.T) {
 			}},
 		},
 		{
-			name: "test add will heapify all element",
+			name: "should heapify all element",
 			actualResult: func() (error, *MinHeap[int]) {
 				h := NewMinHeap(comparator.NewIntegerComparator())
 
@@ -291,7 +290,7 @@ func TestMaxHeapIsEmpty(t *testing.T) {
 		expectedResult bool
 	}{
 		{
-			name: "return false when Heap is not empty",
+			name: "should return false when heap is not empty",
 			actualResult: func() bool {
 				h := NewMaxHeap(comparator.NewIntegerComparator(), 1, 2, 3, 4)
 
@@ -299,7 +298,7 @@ func TestMaxHeapIsEmpty(t *testing.T) {
 			},
 		},
 		{
-			name: "return true when Heap is empty",
+			name: "should return true when heap is empty",
 			actualResult: func() bool {
 				h := NewMaxHeap(comparator.NewIntegerComparator())
 
@@ -323,7 +322,7 @@ func TestMinHeapIsEmpty(t *testing.T) {
 		expectedResult bool
 	}{
 		{
-			name: "return false when Heap is not empty",
+			name: "should return false when heap is not empty",
 			actualResult: func() bool {
 				h := NewMinHeap(comparator.NewIntegerComparator(), 1, 2, 3, 4)
 
@@ -331,7 +330,7 @@ func TestMinHeapIsEmpty(t *testing.T) {
 			},
 		},
 		{
-			name: "return true when Heap is empty",
+			name: "should return true when heap is empty",
 			actualResult: func() bool {
 				h := NewMinHeap(comparator.NewIntegerComparator())
 
@@ -355,7 +354,7 @@ func TestMaxHeapClear(t *testing.T) {
 		expectedResult bool
 	}{
 		{
-			name: "return true when Heap is empty after Clear",
+			name: "should return true when heap is empty after clear",
 			actualResult: func() bool {
 				h := NewMaxHeap(comparator.NewIntegerComparator(), 1, 2, 3, 4)
 
@@ -366,7 +365,7 @@ func TestMaxHeapClear(t *testing.T) {
 			expectedResult: true,
 		},
 		{
-			name: "return true when Heap is empty after Clear two",
+			name: "should return true when heap is empty after clear scenario two",
 			actualResult: func() bool {
 				h := NewMaxHeap(comparator.NewStringComparator(), "a", "b")
 
@@ -392,7 +391,7 @@ func TestMinHeapClear(t *testing.T) {
 		expectedResult bool
 	}{
 		{
-			name: "return true when Heap is empty after Clear",
+			name: "should return true when heap is empty after clear",
 			actualResult: func() bool {
 				h := NewMinHeap(comparator.NewIntegerComparator(), 1, 2, 3, 4)
 
@@ -403,7 +402,7 @@ func TestMinHeapClear(t *testing.T) {
 			expectedResult: true,
 		},
 		{
-			name: "return true when Heap is empty after Clear two",
+			name: "should return true when heap is empty after clear scenario two",
 			actualResult: func() bool {
 				h := NewMinHeap(comparator.NewStringComparator(), "a", "b")
 
@@ -429,7 +428,7 @@ func TestMaxHeapSize(t *testing.T) {
 		expectedResult int64
 	}{
 		{
-			name: "get Size of empty Heap as 0",
+			name: "should get size of empty heap as 0",
 			actualResult: func() int64 {
 				h := NewMaxHeap(comparator.NewIntegerComparator())
 
@@ -437,7 +436,7 @@ func TestMaxHeapSize(t *testing.T) {
 			},
 		},
 		{
-			name: "get Size of empty Heap as 2",
+			name: "should get size of heap as 2",
 			actualResult: func() int64 {
 				h := NewMaxHeap(comparator.NewIntegerComparator(), 1, 2)
 
@@ -461,7 +460,7 @@ func TestMinHeapSize(t *testing.T) {
 		expectedResult int64
 	}{
 		{
-			name: "get Size of empty Heap as 0",
+			name: "should get size of empty heap as 0",
 			actualResult: func() int64 {
 				h := NewMinHeap(comparator.NewIntegerComparator())
 
@@ -469,7 +468,7 @@ func TestMinHeapSize(t *testing.T) {
 			},
 		},
 		{
-			name: "get Size of empty Heap as 2",
+			name: "should get size of heap as 2",
 			actualResult: func() int64 {
 				h := NewMinHeap(comparator.NewIntegerComparator(), 1, 2)
 
@@ -495,7 +494,7 @@ func TestMaxHeapExtract(t *testing.T) {
 		expectedError   error
 	}{
 		{
-			name: "extract first element of the max heap",
+			name: "should extract first element of the max heap",
 			actualResult: func() (int, error, *MaxHeap[int]) {
 				h := NewMaxHeap(comparator.NewIntegerComparator(), 1, 2)
 
@@ -510,7 +509,7 @@ func TestMaxHeapExtract(t *testing.T) {
 			}},
 		},
 		{
-			name: "extract first element of the max heap two",
+			name: "should extract first element of the max heap scenario two",
 			actualResult: func() (int, error, *MaxHeap[int]) {
 				h := NewMaxHeap(comparator.NewIntegerComparator(), 10, 9, 8, 7)
 
@@ -525,7 +524,7 @@ func TestMaxHeapExtract(t *testing.T) {
 			}},
 		},
 		{
-			name: "extract first element of the max heap three",
+			name: "should extract first element of the max heap scenario three",
 			actualResult: func() (int, error, *MaxHeap[int]) {
 				h := NewMaxHeap(comparator.NewIntegerComparator(), 9, 8, 5, 6, 7, 1, 4, 0, 3, 2)
 
@@ -540,7 +539,7 @@ func TestMaxHeapExtract(t *testing.T) {
 			}},
 		},
 		{
-			name: "extract return error when heap is empty",
+			name: "should return error when heap is empty",
 			actualResult: func() (int, error, *MaxHeap[int]) {
 				h := NewMaxHeap(comparator.NewIntegerComparator())
 
@@ -579,7 +578,7 @@ func TestMinHeapExtract(t *testing.T) {
 		expectedError   error
 	}{
 		{
-			name: "extract first element of the min heap",
+			name: "should extract first element of the min heap",
 			actualResult: func() (int, error, *MinHeap[int]) {
 				h := NewMinHeap(comparator.NewIntegerComparator(), 1, 2)
 
@@ -593,7 +592,7 @@ func TestMinHeapExtract(t *testing.T) {
 			}},
 		},
 		{
-			name: "extract first element of the min heap two",
+			name: "should extract first element of the min heap scenario two",
 			actualResult: func() (int, error, *MinHeap[int]) {
 				h := NewMinHeap(comparator.NewIntegerComparator(), 10, 9, 8, 7)
 
@@ -607,7 +606,7 @@ func TestMinHeapExtract(t *testing.T) {
 			}},
 		},
 		{
-			name: "extract first element of the min heap three",
+			name: "should extract first element of the min heap scenario three",
 			actualResult: func() (int, error, *MinHeap[int]) {
 				h := NewMinHeap(comparator.NewIntegerComparator(), 0, 1, 4, 3, 2, 8, 5, 9, 6, 7)
 
@@ -621,7 +620,7 @@ func TestMinHeapExtract(t *testing.T) {
 			}},
 		},
 		{
-			name: "extract return error when heap is empty",
+			name: "should extract return error when heap is empty",
 			actualResult: func() (int, error, *MinHeap[int]) {
 				h := NewMinHeap(comparator.NewIntegerComparator())
 
@@ -650,26 +649,6 @@ func TestMinHeapExtract(t *testing.T) {
 	}
 }
 
-type value struct{ val int }
-
-func newValue(v int) *value { return &value{val: v} }
-
-func (v *value) String() string {
-	return fmt.Sprintf("%d", v.val)
-}
-
-type pointerValueComparator struct{}
-
-func (vc *pointerValueComparator) Compare(one *value, two *value) int {
-	return one.val - two.val
-}
-
-type valueComparator struct{}
-
-func (vc valueComparator) Compare(one value, two value) int {
-	return one.val - two.val
-}
-
 func TestMaxHeapDelete(t *testing.T) {
 	testCases := []struct {
 		name           string
@@ -678,7 +657,7 @@ func TestMaxHeapDelete(t *testing.T) {
 		expectedError  error
 	}{
 		{
-			name: "delete first element of the max heap",
+			name: "should delete first element of the max heap",
 			actualResult: func() (error, *MaxHeap[int]) {
 				h := NewMaxHeap(comparator.NewIntegerComparator(), 1, 2)
 
@@ -692,7 +671,7 @@ func TestMaxHeapDelete(t *testing.T) {
 			}},
 		},
 		{
-			name: "delete first element of the max heap two",
+			name: "should delete first element of the max heap scenario two",
 			actualResult: func() (error, *MaxHeap[int]) {
 				h := NewMaxHeap(comparator.NewIntegerComparator(), 10, 9, 8, 7)
 
@@ -706,7 +685,7 @@ func TestMaxHeapDelete(t *testing.T) {
 			}},
 		},
 		{
-			name: "delete first element of the max heap three",
+			name: "should delete first element of the max heap scenario three",
 			actualResult: func() (error, *MaxHeap[int]) {
 				h := NewMaxHeap(comparator.NewIntegerComparator(), 9, 8, 5, 6, 7, 1, 4, 0, 3, 2)
 
@@ -720,7 +699,7 @@ func TestMaxHeapDelete(t *testing.T) {
 			}},
 		},
 		{
-			name: "delete return error when heap is empty",
+			name: "should return error when heap is empty",
 			actualResult: func() (error, *MaxHeap[int]) {
 				h := NewMaxHeap(comparator.NewIntegerComparator())
 
@@ -757,7 +736,7 @@ func TestMinHeapDelete(t *testing.T) {
 		expectedError  error
 	}{
 		{
-			name: "delete first element of the min Heap",
+			name: "should delete first element of the min heap",
 			actualResult: func() (error, *MinHeap[int]) {
 				h := NewMinHeap(comparator.NewIntegerComparator(), 1, 2)
 
@@ -770,7 +749,7 @@ func TestMinHeapDelete(t *testing.T) {
 			}},
 		},
 		{
-			name: "delete first element of the min Heap two",
+			name: "should delete first element of the min heap scenario two",
 			actualResult: func() (error, *MinHeap[int]) {
 				h := NewMinHeap(comparator.NewIntegerComparator(), 10, 9, 8, 7)
 
@@ -783,7 +762,7 @@ func TestMinHeapDelete(t *testing.T) {
 			}},
 		},
 		{
-			name: "delete first element of the min Heap three",
+			name: "should delete first element of the min heap scenario three",
 			actualResult: func() (error, *MinHeap[int]) {
 				h := NewMinHeap(comparator.NewIntegerComparator(), 0, 1, 4, 3, 2, 8, 5, 9, 6, 7)
 
@@ -796,7 +775,7 @@ func TestMinHeapDelete(t *testing.T) {
 			}},
 		},
 		{
-			name: "delete return error when heap is empty",
+			name: "should return error when heap is empty",
 			actualResult: func() (error, *MinHeap[int]) {
 				h := NewMinHeap(comparator.NewIntegerComparator())
 
@@ -831,7 +810,7 @@ func TestMaxHeapIteratorHasNext(t *testing.T) {
 		expectedResult bool
 	}{
 		{
-			name: "test has next return false for empty Heap",
+			name: "should return false for empty heap",
 			actualResult: func() bool {
 				h := NewMaxHeap(comparator.NewIntegerComparator())
 
@@ -839,7 +818,7 @@ func TestMaxHeapIteratorHasNext(t *testing.T) {
 			},
 		},
 		{
-			name: "test has next return true for non empty Heap",
+			name: "should return true for non empty heap",
 			actualResult: func() bool {
 				h := NewMaxHeap(comparator.NewIntegerComparator(), 1)
 
@@ -863,7 +842,7 @@ func TestMinHeapIteratorHasNext(t *testing.T) {
 		expectedResult bool
 	}{
 		{
-			name: "test has next return false for empty Heap",
+			name: "should return false for empty heap",
 			actualResult: func() bool {
 				h := NewMinHeap(comparator.NewIntegerComparator())
 
@@ -871,7 +850,7 @@ func TestMinHeapIteratorHasNext(t *testing.T) {
 			},
 		},
 		{
-			name: "test has next return true for non empty Heap",
+			name: "should return true for non empty heap",
 			actualResult: func() bool {
 				h := NewMinHeap(comparator.NewIntegerComparator(), 1)
 
@@ -896,7 +875,7 @@ func TestMaxHeapIteratorNext(t *testing.T) {
 		expectedError  error
 	}{
 		{
-			name: "test get nil for empty Heap",
+			name: "should get nil for empty heap",
 			actualResult: func() ([]int, error) {
 				h := NewMaxHeap(comparator.NewIntegerComparator())
 
@@ -907,7 +886,7 @@ func TestMaxHeapIteratorNext(t *testing.T) {
 			expectedError: errors.New("iterator is empty"),
 		},
 		{
-			name: "test get all items from Heap one",
+			name: "should get all items from heap one",
 			actualResult: func() ([]int, error) {
 				h := NewMaxHeap(comparator.NewIntegerComparator(), 1)
 
@@ -918,7 +897,7 @@ func TestMaxHeapIteratorNext(t *testing.T) {
 			expectedResult: []int{1},
 		},
 		{
-			name: "test get all items from Heap two",
+			name: "should get all items from heap scenario two",
 			actualResult: func() ([]int, error) {
 				h := NewMaxHeap(comparator.NewIntegerComparator(), 1, 2, 3, 4)
 
@@ -953,7 +932,7 @@ func TestMinHeapIteratorNext(t *testing.T) {
 		expectedError  error
 	}{
 		{
-			name: "test get nil for empty Heap",
+			name: "should get nil for empty heap",
 			actualResult: func() ([]int, error) {
 				h := NewMinHeap(comparator.NewIntegerComparator())
 
@@ -964,7 +943,7 @@ func TestMinHeapIteratorNext(t *testing.T) {
 			expectedError: errors.New("iterator is empty"),
 		},
 		{
-			name: "test get all items from Heap one",
+			name: "should get all items from heap one",
 			actualResult: func() ([]int, error) {
 				h := NewMinHeap(comparator.NewIntegerComparator(), 1)
 
@@ -975,7 +954,7 @@ func TestMinHeapIteratorNext(t *testing.T) {
 			expectedResult: []int{1},
 		},
 		{
-			name: "test get all items from Heap two",
+			name: "should get all items from heap scenario two",
 			actualResult: func() ([]int, error) {
 				h := NewMinHeap(comparator.NewIntegerComparator(), 1, 2, 3, 4)
 
