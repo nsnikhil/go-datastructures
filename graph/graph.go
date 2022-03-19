@@ -1,15 +1,15 @@
 package main
 
-type graph interface {
-	addNode(n *node)
+type graph[T comparable] interface {
+	addNode(n *node[T])
 
-	createDiEdges(curr *node, nodes ...*node)
-	createWeightedDiEdge(curr, next *node, weight int)
-	createBiEdges(curr *node, next ...*node)
-	createWeightedBiEdge(curr, nodes *node, weight int)
+	createDiEdges(curr *node[T], nodes ...*node[T])
+	createWeightedDiEdge(curr, next *node[T], weight int64)
+	createBiEdges(curr *node[T], next ...*node[T])
+	createWeightedBiEdge(curr, nodes *node[T], weight int64)
 
-	deleteNode(n *node)
-	deleteEdge(start, end *node)
+	deleteNode(n *node[T])
+	deleteEdge(start, end *node[T])
 
 	print()
 	dfs()
@@ -17,20 +17,20 @@ type graph interface {
 
 	//hasLoop() bool
 	hasCycle() bool
-	//areAdjacent(a, b *node) bool
-	//degreeOfNode(a *node) int
+	//areAdjacent(a, b *node[T) bool
+	//degreeOfNode(a *node[T) int
 	//hasBridge() bool
 
 	reverse()
-	clone() graph
+	clone() graph[T]
 
-	hasRoute(source, target *node) bool
+	hasRoute(source, target *node[T]) bool
 
 	//isDirected() bool
 
 	//isConnected() bool
 
-	getConnectedComponents() [][]*node
+	getConnectedComponents() [][]*node[T]
 
 	shortestPath()
 }

@@ -2,28 +2,28 @@ package main
 
 import "math"
 
-type node struct {
-	data  int
-	edges map[*edge]bool
+type node[T comparable] struct {
+	data  T
+	edges map[*edge[T]]bool
 
 	// SHORTEST PATH
-	costToReach int
-	predecessor *node
+	costToReach int64
+	predecessor *node[T]
 }
 
-func (n *node) getData() int {
+func (n *node[T]) getData() T {
 	return n.data
 }
 
-func (n *node) getEdges() map[*edge]bool {
+func (n *node[T]) getEdges() map[*edge[T]]bool {
 	return n.edges
 }
 
-func (n *node) clearEdges() {
-	n.edges = make(map[*edge]bool)
+func (n *node[T]) clearEdges() {
+	n.edges = make(map[*edge[T]]bool)
 }
 
-func (n *node) removeEdge(e *edge) {
+func (n *node[T]) removeEdge(e *edge[T]) {
 	if !n.hasEdge(e) {
 		return
 	}
@@ -31,7 +31,7 @@ func (n *node) removeEdge(e *edge) {
 	delete(n.edges, e)
 }
 
-func (n *node) addEdge(e *edge) {
+func (n *node[T]) addEdge(e *edge[T]) {
 	if n.hasEdge(e) {
 		return
 	}
@@ -39,17 +39,17 @@ func (n *node) addEdge(e *edge) {
 	n.edges[e] = true
 }
 
-func (n *node) hasEdge(e *edge) bool {
+func (n *node[T]) hasEdge(e *edge[T]) bool {
 	return n.edges[e]
 }
 
-func (n *node) addEdges(edges ...*edge) {
+func (n *node[T]) addEdges(edges ...*edge[T]) {
 	for _, e := range edges {
 		n.addEdge(e)
 	}
 }
 
-func (n *node) areConnected(o *node) bool {
+func (n *node[T]) areConnected(o *node[T]) bool {
 	for k := range n.edges {
 		if k.getNext() == o {
 			return true
@@ -59,10 +59,28 @@ func (n *node) areConnected(o *node) bool {
 	return false
 }
 
-func newNode(data int) *node {
-	return &node{
+func (n *node[T]) copy() *node[T] {
+	copyEdges := func(edges map[*edge[T]]bool) map[*edge[T]]bool {
+		res := make(map[*edge[T]]bool)
+
+		for e, ok := range edges {
+			res[e.copy()] = ok
+		}
+
+		return res
+	}
+
+	return &node[T]{
+		data:        n.data,
+		costToReach: math.MaxInt64,
+		edges:       copyEdges(n.edges),
+	}
+}
+
+func newNode[T comparable](data T) *node[T] {
+	return &node[T]{
 		data:        data,
-		costToReach: math.MaxInt32,
-		edges:       make(map[*edge]bool),
+		costToReach: math.MaxInt64,
+		edges:       make(map[*edge[T]]bool),
 	}
 }

@@ -42,7 +42,7 @@ func newPropertySet(properties ...property) propertySet {
 	}
 }
 
-func graphOne() (graph, propertySet) {
+func graphOne() (graph[int], propertySet) {
 	// ONE
 	//
 	//  6 <-- 4
@@ -52,18 +52,19 @@ func graphOne() (graph, propertySet) {
 	//     5
 	//
 
-	four := newNode(4)
-	five := newNode(5)
-	six := newNode(6)
+	four := newNode[int](4)
+	five := newNode[int](5)
+	six := newNode[int](6)
 
-	g := newListGraph()
+	g := newListGraph[int]()
 	g.createDiEdges(four, six)
 	g.createDiEdges(six, five)
 	g.createDiEdges(five, four)
+
 	return g, newPropertySet(directed, unWeighted, cyclic, connected, stronglyConnected)
 }
 
-func graphTwo() (graph, propertySet) {
+func graphTwo() (graph[int], propertySet) {
 	// TWO
 	//
 	//  0  --> 1
@@ -72,12 +73,12 @@ func graphTwo() (graph, propertySet) {
 	//  3 <--> 2
 	//
 
-	zero := newNode(0)
-	one := newNode(1)
-	two := newNode(2)
-	three := newNode(3)
+	zero := newNode[int](0)
+	one := newNode[int](1)
+	two := newNode[int](2)
+	three := newNode[int](3)
 
-	g := newListGraph()
+	g := newListGraph[int]()
 	g.createDiEdges(zero, one)
 	g.createDiEdges(one, two)
 	g.createDiEdges(two, zero)
@@ -85,7 +86,7 @@ func graphTwo() (graph, propertySet) {
 	return g, newPropertySet(directed, unWeighted, cyclic, connected, stronglyConnected)
 }
 
-func graphThree() (graph, propertySet) {
+func graphThree() (graph[int], propertySet) {
 	// THREE
 	//
 	//  0  --> 1
@@ -94,12 +95,12 @@ func graphThree() (graph, propertySet) {
 	//  3  --> 2
 	//
 
-	zero := newNode(0)
-	one := newNode(1)
-	two := newNode(2)
-	three := newNode(3)
+	zero := newNode[int](0)
+	one := newNode[int](1)
+	two := newNode[int](2)
+	three := newNode[int](3)
 
-	g := newListGraph()
+	g := newListGraph[int]()
 	g.createDiEdges(zero, one)
 	g.createDiEdges(one, two)
 	g.createDiEdges(two, zero)
@@ -107,7 +108,7 @@ func graphThree() (graph, propertySet) {
 	return g, newPropertySet(directed, unWeighted, cyclic, connected, weaklyConnected)
 }
 
-func graphFour() (graph, propertySet) {
+func graphFour() (graph[int], propertySet) {
 	// FOUR
 	//
 	//  0  --> 1 <-- 2
@@ -116,14 +117,14 @@ func graphFour() (graph, propertySet) {
 	//  5      4 <-- 3
 	//
 
-	zero := newNode(0)
-	one := newNode(1)
-	two := newNode(2)
-	three := newNode(3)
-	four := newNode(4)
-	five := newNode(5)
+	zero := newNode[int](0)
+	one := newNode[int](1)
+	two := newNode[int](2)
+	three := newNode[int](3)
+	four := newNode[int](4)
+	five := newNode[int](5)
 
-	g := newListGraph()
+	g := newListGraph[int]()
 	g.createDiEdges(zero, one, four, five)
 	g.createDiEdges(one, three, four)
 	g.createDiEdges(two, one)
@@ -131,7 +132,7 @@ func graphFour() (graph, propertySet) {
 	return g, newPropertySet(directed, unWeighted, cyclic, connected, weaklyConnected)
 }
 
-func graphFive() (graph, propertySet) {
+func graphFive() (graph[int], propertySet) {
 	// FIVE
 	//
 	//            0 --> 1
@@ -143,14 +144,14 @@ func graphFive() (graph, propertySet) {
 	//    5
 	//
 
-	zero := newNode(0)
-	one := newNode(1)
-	two := newNode(2)
-	three := newNode(3)
-	four := newNode(4)
-	five := newNode(5)
+	zero := newNode[int](0)
+	one := newNode[int](1)
+	two := newNode[int](2)
+	three := newNode[int](3)
+	four := newNode[int](4)
+	five := newNode[int](5)
 
-	g := newListGraph()
+	g := newListGraph[int]()
 	g.createDiEdges(zero, one)
 	g.createDiEdges(one, two)
 	g.createDiEdges(two, zero)
@@ -160,7 +161,7 @@ func graphFive() (graph, propertySet) {
 	return g, newPropertySet(directed, unWeighted, cyclic, connected, weaklyConnected)
 }
 
-func graphSix() (graph, propertySet) {
+func graphSix() (graph[int], propertySet) {
 	// SIX
 	//
 	//  6 --- 4
@@ -169,17 +170,17 @@ func graphSix() (graph, propertySet) {
 	//     5
 	//
 
-	four := newNode(4)
-	five := newNode(5)
-	six := newNode(6)
+	four := newNode[int](4)
+	five := newNode[int](5)
+	six := newNode[int](6)
 
-	g := newListGraph()
+	g := newListGraph[int]()
 	g.createBiEdges(four, six, five)
 	g.createBiEdges(five, six)
 	return g, newPropertySet(unDirected, unWeighted, cyclic, connected)
 }
 
-func graphSeven() (graph, propertySet) {
+func graphSeven() (graph[int], propertySet) {
 	// SEVEN
 	//
 	//  0  --- 1
@@ -188,18 +189,18 @@ func graphSeven() (graph, propertySet) {
 	//  3  --- 2
 	//
 
-	zero := newNode(0)
-	one := newNode(1)
-	two := newNode(2)
-	three := newNode(3)
+	zero := newNode[int](0)
+	one := newNode[int](1)
+	two := newNode[int](2)
+	three := newNode[int](3)
 
-	g := newListGraph()
+	g := newListGraph[int]()
 	g.createBiEdges(zero, one, two)
 	g.createBiEdges(two, one, three)
 	return g, newPropertySet(unDirected, unWeighted, cyclic, connected)
 }
 
-func graphEight() (graph, propertySet) {
+func graphEight() (graph[int], propertySet) {
 	// EIGHT
 	//
 	//  0 --- 1 --- 2
@@ -208,21 +209,21 @@ func graphEight() (graph, propertySet) {
 	//  5     4 --- 3
 	//
 
-	zero := newNode(0)
-	one := newNode(1)
-	two := newNode(2)
-	three := newNode(3)
-	four := newNode(4)
-	five := newNode(5)
+	zero := newNode[int](0)
+	one := newNode[int](1)
+	two := newNode[int](2)
+	three := newNode[int](3)
+	four := newNode[int](4)
+	five := newNode[int](5)
 
-	g := newListGraph()
+	g := newListGraph[int]()
 	g.createBiEdges(zero, one, four, five)
 	g.createBiEdges(one, two, three, four)
 	g.createBiEdges(three, two, four)
 	return g, newPropertySet(unDirected, unWeighted, cyclic, connected)
 }
 
-func graphNine() (graph, propertySet) {
+func graphNine() (graph[int], propertySet) {
 	// NINE
 	//
 	//            0 --- 1
@@ -234,14 +235,14 @@ func graphNine() (graph, propertySet) {
 	//     5
 	//
 
-	zero := newNode(0)
-	one := newNode(1)
-	two := newNode(2)
-	three := newNode(3)
-	four := newNode(4)
-	five := newNode(5)
+	zero := newNode[int](0)
+	one := newNode[int](1)
+	two := newNode[int](2)
+	three := newNode[int](3)
+	four := newNode[int](4)
+	five := newNode[int](5)
 
-	g := newListGraph()
+	g := newListGraph[int]()
 	g.createBiEdges(zero, one, two)
 	g.createBiEdges(one, two)
 	g.createBiEdges(three, two, four, five)
@@ -249,7 +250,7 @@ func graphNine() (graph, propertySet) {
 	return g, newPropertySet(unDirected, unWeighted, cyclic, connected)
 }
 
-func graphTen() (graph, propertySet) {
+func graphTen() (graph[int], propertySet) {
 	// ONE
 	//     2
 	//  6 <-- 4
@@ -259,18 +260,18 @@ func graphTen() (graph, propertySet) {
 	//     5
 	//
 
-	four := newNode(4)
-	five := newNode(5)
-	six := newNode(6)
+	four := newNode[int](4)
+	five := newNode[int](5)
+	six := newNode[int](6)
 
-	g := newListGraph()
+	g := newListGraph[int]()
 	g.createWeightedDiEdge(four, six, 2)
 	g.createWeightedDiEdge(six, five, 3)
 	g.createWeightedDiEdge(five, four, 4)
 	return g, newPropertySet(directed, weighted, cyclic, connected, stronglyConnected)
 }
 
-func graphEleven() (graph, propertySet) {
+func graphEleven() (graph[int], propertySet) {
 	// TWO
 	//
 	//      2
@@ -281,12 +282,12 @@ func graphEleven() (graph, propertySet) {
 	//      3
 	//
 
-	zero := newNode(0)
-	one := newNode(1)
-	two := newNode(2)
-	three := newNode(3)
+	zero := newNode[int](0)
+	one := newNode[int](1)
+	two := newNode[int](2)
+	three := newNode[int](3)
 
-	g := newListGraph()
+	g := newListGraph[int]()
 	g.createWeightedDiEdge(zero, one, 2)
 	g.createWeightedDiEdge(one, two, 4)
 	g.createWeightedDiEdge(two, zero, 5)
@@ -294,7 +295,7 @@ func graphEleven() (graph, propertySet) {
 	return g, newPropertySet(directed, weighted, cyclic, connected, stronglyConnected)
 }
 
-func graphTwelve() (graph, propertySet) {
+func graphTwelve() (graph[int], propertySet) {
 	// THREE
 	//
 	//      2
@@ -305,12 +306,12 @@ func graphTwelve() (graph, propertySet) {
 	//      3
 	//
 
-	zero := newNode(0)
-	one := newNode(1)
-	two := newNode(2)
-	three := newNode(3)
+	zero := newNode[int](0)
+	one := newNode[int](1)
+	two := newNode[int](2)
+	three := newNode[int](3)
 
-	g := newListGraph()
+	g := newListGraph[int]()
 	g.createWeightedDiEdge(zero, one, 2)
 	g.createWeightedDiEdge(one, two, 4)
 	g.createWeightedDiEdge(two, zero, 5)
@@ -318,7 +319,7 @@ func graphTwelve() (graph, propertySet) {
 	return g, newPropertySet(directed, weighted, cyclic, connected, weaklyConnected)
 }
 
-func graphThirteen() (graph, propertySet) {
+func graphThirteen() (graph[int], propertySet) {
 	// FOUR
 	//       2      3
 	//    0  --> 1 <-- 2
@@ -328,14 +329,14 @@ func graphThirteen() (graph, propertySet) {
 	//               4
 	//
 
-	zero := newNode(0)
-	one := newNode(1)
-	two := newNode(2)
-	three := newNode(3)
-	four := newNode(4)
-	five := newNode(5)
+	zero := newNode[int](0)
+	one := newNode[int](1)
+	two := newNode[int](2)
+	three := newNode[int](3)
+	four := newNode[int](4)
+	five := newNode[int](5)
 
-	g := newListGraph()
+	g := newListGraph[int]()
 	g.createWeightedDiEdge(zero, one, 2)
 	g.createWeightedDiEdge(zero, four, 5)
 	g.createWeightedDiEdge(zero, five, 4)
@@ -347,7 +348,7 @@ func graphThirteen() (graph, propertySet) {
 	return g, newPropertySet(directed, weighted, cyclic, connected, weaklyConnected)
 }
 
-func graphFourteen() (graph, propertySet) {
+func graphFourteen() (graph[int], propertySet) {
 	// FIVE
 	//               4
 	//            0 --> 1
@@ -359,14 +360,14 @@ func graphFourteen() (graph, propertySet) {
 	//    5
 	//
 
-	zero := newNode(0)
-	one := newNode(1)
-	two := newNode(2)
-	three := newNode(3)
-	four := newNode(4)
-	five := newNode(5)
+	zero := newNode[int](0)
+	one := newNode[int](1)
+	two := newNode[int](2)
+	three := newNode[int](3)
+	four := newNode[int](4)
+	five := newNode[int](5)
 
-	g := newListGraph()
+	g := newListGraph[int]()
 	g.createWeightedDiEdge(zero, one, 4)
 	g.createWeightedDiEdge(one, two, 5)
 	g.createWeightedDiEdge(two, zero, 3)
@@ -377,7 +378,7 @@ func graphFourteen() (graph, propertySet) {
 	return g, newPropertySet(directed, weighted, cyclic, connected, weaklyConnected)
 }
 
-func graphFifteen() (graph, propertySet) {
+func graphFifteen() (graph[int], propertySet) {
 	// ONE
 	//     2
 	//  6 --- 4
@@ -387,18 +388,18 @@ func graphFifteen() (graph, propertySet) {
 	//     5
 	//
 
-	four := newNode(4)
-	five := newNode(5)
-	six := newNode(6)
+	four := newNode[int](4)
+	five := newNode[int](5)
+	six := newNode[int](6)
 
-	g := newListGraph()
+	g := newListGraph[int]()
 	g.createWeightedBiEdge(four, six, 2)
 	g.createWeightedBiEdge(six, five, 3)
 	g.createWeightedBiEdge(five, four, 4)
 	return g, newPropertySet(unDirected, weighted, cyclic, connected)
 }
 
-func graphSixteen() (graph, propertySet) {
+func graphSixteen() (graph[int], propertySet) {
 	// TWO
 	//
 	//      2
@@ -409,12 +410,12 @@ func graphSixteen() (graph, propertySet) {
 	//      3
 	//
 
-	zero := newNode(0)
-	one := newNode(1)
-	two := newNode(2)
-	three := newNode(3)
+	zero := newNode[int](0)
+	one := newNode[int](1)
+	two := newNode[int](2)
+	three := newNode[int](3)
 
-	g := newListGraph()
+	g := newListGraph[int]()
 	g.createWeightedBiEdge(zero, one, 2)
 	g.createWeightedBiEdge(one, two, 4)
 	g.createWeightedBiEdge(two, zero, 5)
@@ -422,7 +423,7 @@ func graphSixteen() (graph, propertySet) {
 	return g, newPropertySet(unDirected, weighted, cyclic, connected)
 }
 
-func graphSeventeen() (graph, propertySet) {
+func graphSeventeen() (graph[int], propertySet) {
 	// FOUR
 	//       2      3
 	//    0  --- 1 --- 2
@@ -432,14 +433,14 @@ func graphSeventeen() (graph, propertySet) {
 	//               4
 	//
 
-	zero := newNode(0)
-	one := newNode(1)
-	two := newNode(2)
-	three := newNode(3)
-	four := newNode(4)
-	five := newNode(5)
+	zero := newNode[int](0)
+	one := newNode[int](1)
+	two := newNode[int](2)
+	three := newNode[int](3)
+	four := newNode[int](4)
+	five := newNode[int](5)
 
-	g := newListGraph()
+	g := newListGraph[int]()
 	g.createWeightedBiEdge(zero, one, 2)
 	g.createWeightedBiEdge(zero, four, 5)
 	g.createWeightedBiEdge(zero, five, 4)
@@ -451,7 +452,7 @@ func graphSeventeen() (graph, propertySet) {
 	return g, newPropertySet(unDirected, weighted, cyclic, connected)
 }
 
-func graphEighteen() (graph, propertySet) {
+func graphEighteen() (graph[int], propertySet) {
 	// FIVE
 	//               4
 	//            0 --- 1
@@ -463,14 +464,14 @@ func graphEighteen() (graph, propertySet) {
 	//    5
 	//
 
-	zero := newNode(0)
-	one := newNode(1)
-	two := newNode(2)
-	three := newNode(3)
-	four := newNode(4)
-	five := newNode(5)
+	zero := newNode[int](0)
+	one := newNode[int](1)
+	two := newNode[int](2)
+	three := newNode[int](3)
+	four := newNode[int](4)
+	five := newNode[int](5)
 
-	g := newListGraph()
+	g := newListGraph[int]()
 	g.createWeightedBiEdge(zero, one, 4)
 	g.createWeightedBiEdge(one, two, 5)
 	g.createWeightedBiEdge(two, zero, 3)
@@ -481,7 +482,7 @@ func graphEighteen() (graph, propertySet) {
 	return g, newPropertySet(unDirected, weighted, cyclic, connected)
 }
 
-func graphNineTeen() (graph, propertySet) {
+func graphNineTeen() (graph[int], propertySet) {
 	// ONE
 	//             2
 	//          6 <-- 4
@@ -492,12 +493,12 @@ func graphNineTeen() (graph, propertySet) {
 	//
 	//
 
-	four := newNode(4)
-	five := newNode(5)
-	six := newNode(6)
-	seven := newNode(7)
+	four := newNode[int](4)
+	five := newNode[int](5)
+	six := newNode[int](6)
+	seven := newNode[int](7)
 
-	g := newListGraph()
+	g := newListGraph[int]()
 	g.createWeightedDiEdge(four, six, 2)
 	g.createWeightedDiEdge(six, five, 3)
 	g.createWeightedDiEdge(six, seven, 1)
@@ -505,7 +506,7 @@ func graphNineTeen() (graph, propertySet) {
 	return g, newPropertySet(directed, weighted, aCyclic, connected, weaklyConnected)
 }
 
-func graphTwenty() (graph, propertySet) {
+func graphTwenty() (graph[int], propertySet) {
 	// TWO
 	//
 	//      2
@@ -516,12 +517,12 @@ func graphTwenty() (graph, propertySet) {
 	//         3
 	//
 
-	zero := newNode(0)
-	one := newNode(1)
-	two := newNode(2)
-	three := newNode(3)
+	zero := newNode[int](0)
+	one := newNode[int](1)
+	two := newNode[int](2)
+	three := newNode[int](3)
 
-	g := newListGraph()
+	g := newListGraph[int]()
 	g.createWeightedDiEdge(zero, one, 2)
 	g.createWeightedDiEdge(one, two, 4)
 	g.createWeightedDiEdge(one, three, 8)
@@ -529,7 +530,7 @@ func graphTwenty() (graph, propertySet) {
 	return g, newPropertySet(directed, weighted, aCyclic, connected, weaklyConnected)
 }
 
-func graphTwentyOne() (graph, propertySet) {
+func graphTwentyOne() (graph[int], propertySet) {
 	// FOUR
 	//       2      5
 	//    0  --> 1 --> 2
@@ -539,14 +540,14 @@ func graphTwentyOne() (graph, propertySet) {
 	//               4
 	//
 
-	zero := newNode(0)
-	one := newNode(1)
-	two := newNode(2)
-	three := newNode(3)
-	four := newNode(4)
-	five := newNode(5)
+	zero := newNode[int](0)
+	one := newNode[int](1)
+	two := newNode[int](2)
+	three := newNode[int](3)
+	four := newNode[int](4)
+	five := newNode[int](5)
 
-	g := newListGraph()
+	g := newListGraph[int]()
 	g.createWeightedDiEdge(zero, one, 2)
 	g.createWeightedDiEdge(zero, four, 5)
 	g.createWeightedDiEdge(zero, five, 4)
@@ -558,7 +559,7 @@ func graphTwentyOne() (graph, propertySet) {
 	return g, newPropertySet(directed, weighted, aCyclic, connected, weaklyConnected)
 }
 
-func graphTwentyTwo() (graph, propertySet) {
+func graphTwentyTwo() (graph[int], propertySet) {
 	// FIVE
 	//               4
 	//            0 --> 1
@@ -570,14 +571,14 @@ func graphTwentyTwo() (graph, propertySet) {
 	//    5
 	//
 
-	zero := newNode(0)
-	one := newNode(1)
-	two := newNode(2)
-	three := newNode(3)
-	four := newNode(4)
-	five := newNode(5)
+	zero := newNode[int](0)
+	one := newNode[int](1)
+	two := newNode[int](2)
+	three := newNode[int](3)
+	four := newNode[int](4)
+	five := newNode[int](5)
 
-	g := newListGraph()
+	g := newListGraph[int]()
 	g.createWeightedDiEdge(zero, one, 4)
 	g.createWeightedDiEdge(zero, three, 2)
 	g.createWeightedDiEdge(one, two, 5)
@@ -587,7 +588,7 @@ func graphTwentyTwo() (graph, propertySet) {
 	return g, newPropertySet(directed, weighted, aCyclic, connected, weaklyConnected)
 }
 
-func graphTwentyThree() (graph, propertySet) {
+func graphTwentyThree() (graph[int], propertySet) {
 	// TWENTY THREE
 	//
 	//             -6
@@ -597,13 +598,13 @@ func graphTwentyThree() (graph, propertySet) {
 	//     2     2     3     4
 	//
 
-	zero := newNode(0)
-	one := newNode(1)
-	two := newNode(2)
-	three := newNode(3)
-	four := newNode(4)
+	zero := newNode[int](0)
+	one := newNode[int](1)
+	two := newNode[int](2)
+	three := newNode[int](3)
+	four := newNode[int](4)
 
-	g := newListGraph()
+	g := newListGraph[int]()
 	g.createWeightedDiEdge(zero, one, 2)
 	g.createWeightedDiEdge(one, two, 2)
 	g.createWeightedDiEdge(two, three, 3)
@@ -612,25 +613,25 @@ func graphTwentyThree() (graph, propertySet) {
 	return g, newPropertySet(directed, weighted, cyclic, connected, weaklyConnected, negativeWeights, negativeCycles)
 }
 
-func getGraphs(properties ...property) []graph {
+type graphSet[T comparable] struct {
+	g  graph[T]
+	ps propertySet
+}
+
+func getGraphs[T comparable](properties ...property) []graph[int] {
 	if len(properties) == 0 {
-		return []graph{}
+		return []graph[int]{}
 	}
 
-	type graphSet struct {
-		g  graph
-		ps propertySet
-	}
-
-	toGS := func(g graph, ps propertySet) graphSet {
-		return graphSet{
+	toGS := func(g graph[int], ps propertySet) graphSet[int] {
+		return graphSet[int]{
 			g:  g,
 			ps: ps,
 		}
 	}
 
-	filter := func(gs []graphSet, p ...property) []graph {
-		var res []graph
+	filter := func(gs []graphSet[int], p ...property) []graph[int] {
+		var res []graph[int]
 
 		for _, g := range gs {
 
@@ -650,7 +651,7 @@ func getGraphs(properties ...property) []graph {
 		return res
 	}
 
-	gs := make([]graphSet, 0)
+	gs := make([]graphSet[int], 0)
 	gs = append(gs,
 		toGS(graphOne()), toGS(graphTwo()), toGS(graphThree()), toGS(graphFour()),
 		toGS(graphFive()), toGS(graphSix()), toGS(graphSeven()), toGS(graphEight()),

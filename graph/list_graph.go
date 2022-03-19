@@ -2,74 +2,72 @@ package main
 
 import (
 	"fmt"
-	"github.com/nsnikhil/go-datastructures/liberr"
 	"github.com/nsnikhil/go-datastructures/queue"
 	"github.com/nsnikhil/go-datastructures/set"
 	"github.com/nsnikhil/go-datastructures/stack"
-	"github.com/nsnikhil/go-datastructures/utils"
 )
 
-type listGraph struct {
-	nodes map[*node]bool
+type listGraph[T comparable] struct {
+	nodes map[*node[T]]bool
 }
 
-func newListGraph() graph {
-	return &listGraph{
-		nodes: make(map[*node]bool),
+func newListGraph[T comparable]() graph[T] {
+	return &listGraph[T]{
+		nodes: make(map[*node[T]]bool),
 	}
 }
 
-func (lg *listGraph) addNode(n *node) {
+func (lg *listGraph[T]) addNode(n *node[T]) {
 	if !lg.nodes[n] {
 		lg.nodes[n] = true
 	}
 }
 
-func (lg *listGraph) createDiEdges(curr *node, nodes ...*node) {
+func (lg *listGraph[T]) createDiEdges(curr *node[T], nodes ...*node[T]) {
 	for _, node := range nodes {
 		lg.createWeightedDiEdge(curr, node, 0)
 	}
 }
 
-func (lg *listGraph) createWeightedDiEdge(curr, next *node, weight int) {
-	curr.addEdges(newWeightedDiEdge(next, weight))
+func (lg *listGraph[T]) createWeightedDiEdge(curr, next *node[T], weight int64) {
+	curr.addEdges(newWeightedDiEdge[T](next, weight))
 	lg.addNode(curr)
 	lg.addNode(next)
 }
 
-func (lg *listGraph) createBiEdges(curr *node, nodes ...*node) {
+func (lg *listGraph[T]) createBiEdges(curr *node[T], nodes ...*node[T]) {
 	for _, node := range nodes {
 		lg.createWeightedDiEdge(curr, node, 0)
 		lg.createWeightedDiEdge(node, curr, 0)
 	}
 }
 
-func (lg *listGraph) createWeightedBiEdge(curr, next *node, weight int) {
+func (lg *listGraph[T]) createWeightedBiEdge(curr, next *node[T], weight int64) {
 	lg.createWeightedDiEdge(curr, next, weight)
 	lg.createWeightedDiEdge(next, curr, weight)
 }
 
-func (lg *listGraph) deleteNode(n *node) {
+func (lg *listGraph[T]) deleteNode(n *node[T]) {
 	fmt.Println("UN IMPLEMENTED")
 }
 
-func (lg *listGraph) deleteEdge(start, end *node) {
+func (lg *listGraph[T]) deleteEdge(start, end *node[T]) {
 	fmt.Println("UN IMPLEMENTED")
 }
 
-func (lg *listGraph) print() {
+func (lg *listGraph[T]) print() {
 	for n := range lg.nodes {
-		fmt.Printf("%d: ", n.getData())
+		fmt.Printf("%v: ", n.getData())
 		for edge := range n.getEdges() {
-			fmt.Printf("(%d, %d)", edge.getNext().getData(), edge.getWeight())
+			fmt.Printf("(%v, %d)", edge.getNext().getData(), edge.getWeight())
 		}
 		fmt.Println()
 	}
 }
 
-func (lg *listGraph) dfs() {
-	var visitNode func(curr *node, visited map[*node]bool)
-	visitNode = func(curr *node, visited map[*node]bool) {
+func (lg *listGraph[T]) dfs() {
+	var visitNode func(curr *node[T], visited map[*node[T]]bool)
+	visitNode = func(curr *node[T], visited map[*node[T]]bool) {
 		visited[curr] = true
 
 		for edge := range curr.getEdges() {
@@ -79,10 +77,10 @@ func (lg *listGraph) dfs() {
 			}
 		}
 
-		fmt.Printf("%d ", curr.getData())
+		fmt.Printf("%v ", curr.getData())
 	}
 
-	visited := make(map[*node]bool)
+	visited := make(map[*node[T]]bool)
 	for curr := range lg.nodes {
 		if !visited[curr] {
 			visitNode(curr, visited)
@@ -90,21 +88,21 @@ func (lg *listGraph) dfs() {
 	}
 }
 
-func (lg *listGraph) bfs() {
-	var visitNode func(curr *node, visited map[*node]bool, q queue.Queue)
-	visitNode = func(curr *node, visited map[*node]bool, q queue.Queue) {
+func (lg *listGraph[T]) bfs() {
+	var visitNode func(curr *node[T], visited map[*node[T]]bool, q queue.Queue[*node[T]])
+	visitNode = func(curr *node[T], visited map[*node[T]]bool, q queue.Queue[*node[T]]) {
 		q.Add(curr)
 		visited[curr] = true
 
 		for !q.Empty() {
 			sz := q.Size()
 
-			for i := 0; i < sz; i++ {
+			for i := int64(0); i < sz; i++ {
 				n, _ := q.Remove()
 
-				fmt.Printf("%d ", n.(*node).getData())
+				fmt.Printf("%d ", n.getData())
 
-				for edge := range n.(*node).getEdges() {
+				for edge := range n.getEdges() {
 					next := edge.getNext()
 					if !visited[next] {
 						visited[next] = true
@@ -115,8 +113,8 @@ func (lg *listGraph) bfs() {
 		}
 	}
 
-	q, _ := queue.NewLinkedQueue()
-	visited := make(map[*node]bool)
+	q := queue.NewLinkedQueue[*node[T]]()
+	visited := make(map[*node[T]]bool)
 	for curr := range lg.nodes {
 		if !visited[curr] {
 			visitNode(curr, visited, q)
@@ -124,9 +122,9 @@ func (lg *listGraph) bfs() {
 	}
 }
 
-func (lg *listGraph) reverse() {
-	var reverseUtil func(curr *node, visited map[*node]bool)
-	reverseUtil = func(curr *node, visited map[*node]bool) {
+func (lg *listGraph[T]) reverse() {
+	var reverseUtil func(curr *node[T], visited map[*node[T]]bool)
+	reverseUtil = func(curr *node[T], visited map[*node[T]]bool) {
 		visited[curr] = true
 
 		edges := curr.getEdges()
@@ -143,7 +141,7 @@ func (lg *listGraph) reverse() {
 		}
 	}
 
-	visited := make(map[*node]bool)
+	visited := make(map[*node[T]]bool)
 	for curr := range lg.nodes {
 		if !visited[curr] {
 			reverseUtil(curr, visited)
@@ -151,9 +149,9 @@ func (lg *listGraph) reverse() {
 	}
 }
 
-func (lg *listGraph) hasCycle() bool {
-	var check func(curr *node, pd map[*node]bool, dn map[*node]bool) bool
-	check = func(curr *node, pd map[*node]bool, dn map[*node]bool) bool {
+func (lg *listGraph[T]) hasCycle() bool {
+	var check func(curr *node[T], pd map[*node[T]]bool, dn map[*node[T]]bool) bool
+	check = func(curr *node[T], pd map[*node[T]]bool, dn map[*node[T]]bool) bool {
 		pd[curr] = true
 
 		if len(curr.getEdges()) == 0 {
@@ -183,8 +181,8 @@ func (lg *listGraph) hasCycle() bool {
 		return false
 	}
 
-	pd := make(map[*node]bool)
-	dn := make(map[*node]bool)
+	pd := make(map[*node[T]]bool)
+	dn := make(map[*node[T]]bool)
 
 	for n := range lg.nodes {
 		if dn[n] {
@@ -203,9 +201,9 @@ func (lg *listGraph) hasCycle() bool {
 	return false
 }
 
-func (lg *listGraph) clone() graph {
-	var cl func(curr *node, cache map[*node]*node) *node
-	cl = func(curr *node, cache map[*node]*node) *node {
+func (lg *listGraph[T]) clone() graph[T] {
+	var cl func(curr *node[T], cache map[*node[T]]*node[T]) *node[T]
+	cl = func(curr *node[T], cache map[*node[T]]*node[T]) *node[T] {
 		if cache[curr] != nil {
 			return cache[curr]
 		}
@@ -215,12 +213,12 @@ func (lg *listGraph) clone() graph {
 
 		for e := range curr.getEdges() {
 			nx := e.getNext()
-			var ne *edge
+			var ne *edge[T]
 
 			if cache[nx] != nil {
-				ne = newDiEdge(cache[nx])
+				ne = newDiEdge[T](cache[nx])
 			} else {
-				ne = newDiEdge(cl(nx, cache))
+				ne = newDiEdge[T](cl(nx, cache))
 			}
 
 			ne.weight = e.getWeight()
@@ -230,8 +228,8 @@ func (lg *listGraph) clone() graph {
 		return n
 	}
 
-	cache := make(map[*node]*node)
-	nodes := make(map[*node]bool, 0)
+	cache := make(map[*node[T]]*node[T])
+	nodes := make(map[*node[T]]bool, 0)
 
 	for n := range lg.nodes {
 		t := cache[n]
@@ -242,14 +240,14 @@ func (lg *listGraph) clone() graph {
 		}
 	}
 
-	return &listGraph{
+	return &listGraph[T]{
 		nodes: nodes,
 	}
 }
 
-func (lg *listGraph) hasRoute(source, target *node) bool {
-	var visit func(curr, target *node, visited map[*node]bool) bool
-	visit = func(curr, target *node, visited map[*node]bool) bool {
+func (lg *listGraph[T]) hasRoute(source, target *node[T]) bool {
+	var visit func(curr, target *node[T], visited map[*node[T]]bool) bool
+	visit = func(curr, target *node[T], visited map[*node[T]]bool) bool {
 		visited[curr] = true
 
 		if curr == target {
@@ -274,17 +272,17 @@ func (lg *listGraph) hasRoute(source, target *node) bool {
 		return found
 	}
 
-	visited := make(map[*node]bool)
+	visited := make(map[*node[T]]bool)
 	return visit(source, target, visited)
 }
 
-func (lg *listGraph) getConnectedComponents() [][]*node {
+func (lg *listGraph[T]) getConnectedComponents() [][]*node[T] {
 	return koasraju(lg)
 }
 
-func koasraju(lg *listGraph) [][]*node {
-	var pushToStack func(node *node, visited map[*node]bool, st *stack.Stack)
-	pushToStack = func(node *node, visited map[*node]bool, st *stack.Stack) {
+func koasraju[T comparable](lg *listGraph[T]) [][]*node[T] {
+	var pushToStack func(node *node[T], visited map[*node[T]]bool, st *stack.Stack[*node[T]])
+	pushToStack = func(node *node[T], visited map[*node[T]]bool, st *stack.Stack[*node[T]]) {
 		visited[node] = true
 
 		for edge := range node.getEdges() {
@@ -297,8 +295,8 @@ func koasraju(lg *listGraph) [][]*node {
 		st.Push(node)
 	}
 
-	var printComponent func(node *node, visited map[*node]bool, temp []*node)
-	printComponent = func(node *node, visited map[*node]bool, temp []*node) {
+	var printComponent func(node *node[T], visited map[*node[T]]bool, temp []*node[T])
+	printComponent = func(node *node[T], visited map[*node[T]]bool, temp []*node[T]) {
 		visited[node] = true
 
 		for edge := range node.edges {
@@ -311,8 +309,8 @@ func koasraju(lg *listGraph) [][]*node {
 		temp = append(temp, node)
 	}
 
-	st, _ := stack.NewStack()
-	visited := make(map[*node]bool)
+	st := stack.NewStack[*node[T]]()
+	visited := make(map[*node[T]]bool)
 
 	for node := range lg.nodes {
 		if !visited[node] {
@@ -322,16 +320,16 @@ func koasraju(lg *listGraph) [][]*node {
 
 	lg.reverse()
 
-	visited = make(map[*node]bool)
+	visited = make(map[*node[T]]bool)
 
-	res := make([][]*node, 0)
+	res := make([][]*node[T], 0)
 
 	for !st.Empty() {
 		n, _ := st.Pop()
 
-		if !visited[n.(*node)] {
-			temp := make([]*node, 0)
-			printComponent(n.(*node), visited, temp)
+		if !visited[n] {
+			temp := make([]*node[T], 0)
+			printComponent(n, visited, temp)
 			res = append(res, temp)
 		}
 	}
@@ -339,7 +337,7 @@ func koasraju(lg *listGraph) [][]*node {
 	return res
 }
 
-func (lg *listGraph) shortestPath() {
+func (lg *listGraph[T]) shortestPath() {
 
 	// unweighted graph
 	// dag
@@ -351,9 +349,9 @@ func (lg *listGraph) shortestPath() {
 	// all pair shortest path -> floyd(DP)
 }
 
-func nonWeightedShortestPath(source, target *node, lg *listGraph) {
-	visited := make(map[*node]bool)
-	q, _ := queue.NewLinkedQueue()
+func nonWeightedShortestPath[T comparable](source, target *node[T], lg *listGraph[T]) {
+	visited := make(map[*node[T]]bool)
+	q := queue.NewLinkedQueue[*node[T]]()
 
 	q.Add(source)
 
@@ -361,10 +359,10 @@ func nonWeightedShortestPath(source, target *node, lg *listGraph) {
 		sz := q.Size()
 
 		found := false
-		for i := 0; i < sz; i++ {
+		for i := int64(0); i < sz; i++ {
 			e, _ := q.Remove()
 
-			for edge := range e.(*node).getEdges() {
+			for edge := range e.getEdges() {
 				n := edge.getNext()
 
 				if n == source {
@@ -373,7 +371,7 @@ func nonWeightedShortestPath(source, target *node, lg *listGraph) {
 
 				if !visited[n] {
 					if n.predecessor == nil {
-						n.predecessor = e.(*node)
+						n.predecessor = e
 					}
 
 					if n == target {
@@ -400,17 +398,17 @@ func nonWeightedShortestPath(source, target *node, lg *listGraph) {
 	curr := target
 
 	for curr != nil {
-		fmt.Printf("%d ", curr.getData())
+		fmt.Printf("%v ", curr.getData())
 
 		curr = curr.predecessor
 	}
 
 }
 
-func dagShortestPath(lg *listGraph) {
-	var updateCost func(curr *node)
+func dagShortestPath[T comparable](lg *listGraph[T]) {
+	var updateCost func(curr *node[T])
 
-	updateCost = func(curr *node) {
+	updateCost = func(curr *node[T]) {
 		for edge := range curr.edges {
 			n := edge.getNext()
 
@@ -421,7 +419,7 @@ func dagShortestPath(lg *listGraph) {
 	}
 
 	first := true
-	var firstNode *node
+	var firstNode *node[T]
 
 	for node := range lg.nodes {
 		if first {
@@ -443,35 +441,27 @@ func dagShortestPath(lg *listGraph) {
 
 }
 
-type nodeComparator struct {
+type nodeComparator[T comparable] struct {
 }
 
-func (nc *nodeComparator) Compare(one interface{}, two interface{}) (int, error) {
-	ot := utils.GetTypeName(one)
-	tt := utils.GetTypeName(two)
-
-	if ot != tt {
-		return -1, liberr.TypeMismatchError(ot, tt)
-	}
-
-	return one.(*node).costToReach - two.(*node).costToReach, nil
+func (nc *nodeComparator[T]) Compare(one *node[T], two *node[T]) int {
+	return int(one.costToReach - two.costToReach)
 }
 
-func dijkstra(start *node, lg *listGraph) {
-	var relaxCost func(curr *node, q *queue.PriorityQueue)
-	relaxCost = func(curr *node, q *queue.PriorityQueue) {
+func dijkstra[T comparable](start *node[T], lg *listGraph[T]) {
+	var relaxCost func(curr *node[T], q *queue.PriorityQueue[*node[T]])
+	relaxCost = func(curr *node[T], q *queue.PriorityQueue[*node[T]]) {
 
 		for edge := range curr.edges {
 			n := edge.getNext()
 
 			if n.costToReach > curr.costToReach+edge.getWeight() {
 
-				uf := func(e interface{}) interface{} {
-					e.(*node).costToReach = curr.costToReach + edge.getWeight()
-					return e
-				}
+				//TODO: NEED TO VERIFY IF THIS CHANGE WORKS
+				cp := n.copy()
+				cp.costToReach = curr.costToReach + edge.getWeight()
+				q.Add(cp)
 
-				q.UpdateFunc(n, uf)
 			}
 		}
 
@@ -485,27 +475,27 @@ func dijkstra(start *node, lg *listGraph) {
 
 	start.costToReach = 0
 
-	q, _ := queue.NewPriorityQueue(false, &nodeComparator{})
+	q := queue.NewPriorityQueue[*node[T]](false, &nodeComparator[T]{})
 	for node := range lg.nodes {
 		q.Add(node)
 	}
 
-	relaxedNodes, _ := set.NewHashSet()
+	relaxedNodes := set.NewHashSet[*node[T]]()
 
 	for !q.Empty() {
 		n, _ := q.Remove()
 
 		relaxedNodes.Add(n)
 
-		relaxCost(n.(*node), q)
+		relaxCost(n, q)
 	}
 
 }
 
-func bellmenFord(start *node, lg *listGraph) {
+func bellmenFord[T comparable](start *node[T], lg *listGraph[T]) {
 	start.costToReach = 0
 
-	edges := make(map[*edge]*node)
+	edges := make(map[*edge[T]]*node[T])
 
 	//INEFFICIENT
 	for curr := range lg.nodes {

@@ -1,28 +1,35 @@
 package main
 
-type edge struct {
-	next   *node
-	weight int
+type edge[T comparable] struct {
+	next   *node[T]
+	weight int64
 }
 
-func (e *edge) getNext() *node {
+func (e *edge[T]) getNext() *node[T] {
 	return e.next
 }
 
-func (e *edge) getWeight() int {
+func (e *edge[T]) getWeight() int64 {
 	return e.weight
 }
 
-func (e *edge) changeNext(next *node) {
+func (e *edge[T]) changeNext(next *node[T]) {
 	e.next = next
 }
 
-func newDiEdge(next *node) *edge {
-	return newWeightedDiEdge(next, 0)
+func (e *edge[T]) copy() *edge[T] {
+	return &edge[T]{
+		next:   e.next.copy(),
+		weight: e.weight,
+	}
 }
 
-func newWeightedDiEdge(next *node, weight int) *edge {
-	return &edge{
+func newDiEdge[T comparable](next *node[T]) *edge[T] {
+	return newWeightedDiEdge[T](next, 0)
+}
+
+func newWeightedDiEdge[T comparable](next *node[T], weight int64) *edge[T] {
+	return &edge[T]{
 		next:   next,
 		weight: weight,
 	}
