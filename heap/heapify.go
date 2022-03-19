@@ -2,6 +2,7 @@ package heap
 
 import (
 	"github.com/nsnikhil/go-datastructures/functions/comparator"
+	"github.com/nsnikhil/go-datastructures/internal"
 )
 
 func heapify[T comparable](curr int, c comparator.Comparator[T], maxHeapify bool, data []T) {
@@ -59,7 +60,7 @@ func shiftDown[T comparable](curr int, c comparator.Comparator[T], maxHeapify bo
 
 func shouldSwapWithParent[T comparable](curr int, c comparator.Comparator[T], maxHeapify bool, data []T) (bool, int) {
 	if curr == 0 {
-		return false, invalidIndex
+		return false, internal.InvalidIndex
 	}
 
 	parent := parentIndex(curr)
@@ -95,7 +96,7 @@ func shouldSwapWithChild[T comparable](curr int, c comparator.Comparator[T], max
 func shouldSwapWithChildMaxUtil(hasRC bool, leftDiff, rightDiff, lcIndex, rcIndex int) (bool, int) {
 	if hasRC {
 		if leftDiff > 0 && rightDiff > 0 {
-			return false, invalidIndex
+			return false, internal.InvalidIndex
 		}
 
 		if leftDiff < rightDiff {
@@ -106,7 +107,7 @@ func shouldSwapWithChildMaxUtil(hasRC bool, leftDiff, rightDiff, lcIndex, rcInde
 	}
 
 	if leftDiff > 0 {
-		return false, invalidIndex
+		return false, internal.InvalidIndex
 	}
 
 	return true, lcIndex
@@ -116,7 +117,7 @@ func shouldSwapWithChildMaxUtil(hasRC bool, leftDiff, rightDiff, lcIndex, rcInde
 func shouldSwapWithChildMinUtil(hasRC bool, leftDiff, rightDiff, lcIndex, rcIndex int) (bool, int) {
 	if hasRC {
 		if leftDiff < 0 && rightDiff < 0 {
-			return false, invalidIndex
+			return false, internal.InvalidIndex
 		}
 
 		if leftDiff > rightDiff {
@@ -127,7 +128,7 @@ func shouldSwapWithChildMinUtil(hasRC bool, leftDiff, rightDiff, lcIndex, rcInde
 	}
 
 	if leftDiff < 0 {
-		return false, invalidIndex
+		return false, internal.InvalidIndex
 	}
 
 	return true, lcIndex

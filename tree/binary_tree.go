@@ -5,10 +5,10 @@ import (
 	"fmt"
 	"github.com/nsnikhil/go-datastructures/functions/comparator"
 	"github.com/nsnikhil/go-datastructures/functions/iterator"
+	"github.com/nsnikhil/go-datastructures/internal"
 	"github.com/nsnikhil/go-datastructures/list"
 	"github.com/nsnikhil/go-datastructures/queue"
 	"github.com/nsnikhil/go-datastructures/stack"
-	"github.com/nsnikhil/go-datastructures/utils"
 )
 
 type binaryNode[T comparable] struct {
@@ -75,7 +75,7 @@ type BinaryTree[T comparable] struct {
 }
 
 func NewBinaryTree[T comparable](e ...T) *BinaryTree[T] {
-	bt := &BinaryTree[T]{count: utils.Naught}
+	bt := &BinaryTree[T]{count: internal.Zero}
 
 	sz := int64(len(e))
 
@@ -311,18 +311,18 @@ func (bt *BinaryTree[T]) Height() int {
 }
 
 func (bt *BinaryTree[T]) Diameter() int {
-	d := utils.Naught
+	d := internal.Zero
 	calculateHeight(bt.root, &d)
 	return d
 }
 
 func (bt *BinaryTree[T]) Empty() bool {
-	return bt.count == utils.Naught
+	return bt.count == internal.Zero
 }
 
 func (bt *BinaryTree[T]) Clear() {
 	bt.root = nil
-	bt.count = utils.Naught
+	bt.count = internal.Zero
 }
 
 func (bt *BinaryTree[T]) Clone() Tree[T] {

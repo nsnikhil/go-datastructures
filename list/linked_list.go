@@ -27,7 +27,7 @@ type LinkedList[T comparable] struct {
 }
 
 func NewLinkedList[T comparable](elements ...T) *LinkedList[T] {
-	ll := &LinkedList[T]{size: nought}
+	ll := &LinkedList[T]{size: internal.Zero}
 
 	ll.AddAll(elements...)
 

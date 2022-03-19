@@ -2,8 +2,8 @@ package tree
 
 import (
 	"github.com/nsnikhil/go-datastructures/functions/iterator"
+	"github.com/nsnikhil/go-datastructures/internal"
 	"github.com/nsnikhil/go-datastructures/list"
-	"github.com/nsnikhil/go-datastructures/utils"
 )
 
 type NAryTree[T comparable] struct {
@@ -26,15 +26,15 @@ func (nt *NAryTree[T]) Search(e T) (bool, error) {
 }
 
 func (nt *NAryTree[T]) Count() int {
-	return utils.InvalidIndex
+	return internal.InvalidIndex
 }
 
 func (nt *NAryTree[T]) Height() int {
-	return utils.InvalidIndex
+	return internal.InvalidIndex
 }
 
 func (nt *NAryTree[T]) Diameter() int {
-	return utils.InvalidIndex
+	return internal.InvalidIndex
 }
 
 func (nt *NAryTree[T]) Empty() bool {

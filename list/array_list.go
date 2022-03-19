@@ -30,11 +30,11 @@ func NewArrayList[T comparable](elements ...T) *ArrayList[T] {
 			scalingFactor:   scalingFactor,
 			capacity:        initialCapacity,
 		},
-		size: nought,
+		size: internal.Zero,
 		data: make([]T, initialCapacity),
 	}
 
-	al.addAllFrom(nought, elements...)
+	al.addAllFrom(internal.Zero, elements...)
 
 	return al
 }
@@ -54,7 +54,7 @@ func (al *ArrayList[T]) AddAll(elements ...T) {
 
 //TODO: SHOULD WE JUST RESET THE SIZE OR ALSO RE-INITIALIZE THE DATA TO CLAIM UNUSED SPACE?
 func (al *ArrayList[T]) Clear() {
-	al.size = nought
+	al.size = internal.Zero
 	al.data = make([]T, initialCapacity)
 }
 
@@ -63,7 +63,7 @@ func (al *ArrayList[T]) Clone() List[T] {
 		return NewArrayList[T]()
 	}
 
-	clonedList, _ := al.SubList(nought, al.size-1)
+	clonedList, _ := al.SubList(internal.Zero, al.size-1)
 
 	return clonedList
 }
@@ -134,7 +134,7 @@ func (al *ArrayList[T]) IndexOf(element T) int64 {
 }
 
 func (al *ArrayList[T]) IsEmpty() bool {
-	return al.size == nought
+	return al.size == internal.Zero
 }
 
 func (al *ArrayList[T]) LastIndexOf(element T) int64 {

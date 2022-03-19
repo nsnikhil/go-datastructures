@@ -199,14 +199,14 @@ func (hm *HashMap[K, V]) Values() (list.List[V], error) {
 func (hm *HashMap[K, V]) Clear() {
 	hm.h = sha3.New512()
 	hm.capacity = initialCapacity
-	hm.elementCount = nought
-	hm.uniqueCount = nought
+	hm.elementCount = internal.Zero
+	hm.uniqueCount = internal.Zero
 	hm.countMap = make(map[int64]bool)
 	hm.data = make([]*list.LinkedList[*Pair[K, V]], initialCapacity)
 }
 
 func (hm *HashMap[K, V]) IsEmpty() bool {
-	return hm.elementCount == nought
+	return hm.elementCount == internal.Zero
 }
 
 func (hm *HashMap[K, V]) Iterator() iterator.Iterator[*Pair[K, V]] {
@@ -221,7 +221,7 @@ type hashMapIterator[K comparable, V comparable] struct {
 
 func newHashMapIterator[K comparable, V comparable](hm *HashMap[K, V]) iterator.Iterator[*Pair[K, V]] {
 	return &hashMapIterator[K, V]{
-		currIndex: nought,
+		currIndex: internal.Zero,
 		hm:        hm,
 	}
 }
@@ -251,7 +251,7 @@ func (hmi *hashMapIterator[K, V]) Next() (*Pair[K, V], error) {
 }
 
 func (hm *HashMap[K, V]) insertAll(p ...*Pair[K, V]) error {
-	if len(p) == nought {
+	if len(p) == internal.Zero {
 		return nil
 	}
 
@@ -445,7 +445,7 @@ func resize[K comparable, V comparable](hm *HashMap[K, V], newCap int64) {
 func newHashMap[K comparable, V comparable]() *HashMap[K, V] {
 	return &HashMap[K, V]{
 		factors: &factors{upperLoadFactor: upperLoadFactor, lowerLoadFactor: lowerLoadFactor, scalingFactor: scalingFactor, capacity: initialCapacity},
-		counter: &counter{elementCount: nought, countMap: make(map[int64]bool), uniqueCount: nought},
+		counter: &counter{elementCount: internal.Zero, countMap: make(map[int64]bool), uniqueCount: internal.Zero},
 		h:       sha3.New512(),
 		data:    make([]*list.LinkedList[*Pair[K, V]], initialCapacity),
 	}

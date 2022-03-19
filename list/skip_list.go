@@ -1,8 +1,6 @@
 package list
 
 import (
-	"github.com/nsnikhil/go-datastructures/liberr"
-	"github.com/nsnikhil/go-datastructures/utils"
 	"math/rand"
 	"time"
 )
@@ -42,30 +40,6 @@ func (sl *skipList) Add(e interface{}) error {
 }
 
 func insert(e interface{}, sl *skipList) error {
-	et := utils.GetTypeName(e)
-
-	if sl.typeURL == utils.NA {
-		sl.typeURL = et
-	}
-
-	if et != sl.typeURL {
-		return liberr.TypeMismatchError(sl.typeURL, et)
-	}
-
-	temp := newSkipNode(e)
-
-	if sl.IsEmpty() {
-		sl.first = temp
-		sl.last = temp
-	}
-
-	ct := sl.last
-
-	for coinToss() == heads {
-		ct.top = newSkipNode(e)
-		ct = ct.top
-	}
-
 	return nil
 }
 

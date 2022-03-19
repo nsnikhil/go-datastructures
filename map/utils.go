@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/binary"
 	"encoding/json"
+	"github.com/nsnikhil/go-datastructures/internal"
 	"hash"
 	"math"
 )
@@ -39,7 +40,7 @@ var m = make(map[interface{}]map[int64]int)
 func indexOf[T comparable](h *hash.Hash, e T, capacity int64) (int64, error) {
 	f, err := hashCode(h, e)
 	if err != nil {
-		return invalidIndex, err
+		return internal.InvalidIndex, err
 	}
 
 	return int64(math.Mod(float64(f>>16), float64(capacity))), nil

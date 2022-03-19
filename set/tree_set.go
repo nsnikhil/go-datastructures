@@ -2,7 +2,7 @@ package set
 
 import (
 	"github.com/nsnikhil/go-datastructures/functions/iterator"
-	"github.com/nsnikhil/go-datastructures/utils"
+	"github.com/nsnikhil/go-datastructures/internal"
 )
 
 type TreeSet[T comparable] struct {
@@ -35,7 +35,7 @@ func (ts *TreeSet[T]) IsEmpty() bool {
 }
 
 func (ts *TreeSet[T]) Size() int {
-	return utils.InvalidIndex
+	return internal.InvalidIndex
 }
 
 func (ts *TreeSet[T]) Remove(e T) error {

@@ -8,8 +8,8 @@ import (
 	"github.com/nsnikhil/go-datastructures/functions/operator"
 	"github.com/nsnikhil/go-datastructures/functions/predicate"
 	"github.com/nsnikhil/go-datastructures/functions/supplier"
+	"github.com/nsnikhil/go-datastructures/internal"
 	"github.com/nsnikhil/go-datastructures/queue"
-	"github.com/nsnikhil/go-datastructures/utils"
 )
 
 type LazyStream[T comparable] struct {
@@ -35,7 +35,7 @@ func (ls *LazyStream[T]) AnyMatch(p predicate.Predicate[T]) bool {
 //}
 
 func (ls *LazyStream[T]) Count() int {
-	return utils.InvalidIndex
+	return internal.InvalidIndex
 }
 
 func (ls *LazyStream[T]) Distinct() Stream[T] {
