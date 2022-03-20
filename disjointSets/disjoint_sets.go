@@ -43,6 +43,7 @@ func newNode[T comparable](data T) *node[T] {
 	return nd
 }
 
+//TODO: RENAME DEFAULT
 type defaultDisjointSets[T comparable] struct {
 	sets gmap.Map[T, *node[T]]
 }
