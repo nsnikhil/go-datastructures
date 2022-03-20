@@ -3,7 +3,7 @@ package set
 //type TreeSet[T comparable] struct {
 //}
 //
-//func (ts *TreeSet[T]) Add(e T) {
+//func (ts *TreeSet[T]) MakeSet(e T) {
 //}
 //
 //func (ts *TreeSet[T]) AddAll(e ...T) {
