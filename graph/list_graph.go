@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/nsnikhil/erx"
 	"github.com/nsnikhil/go-datastructures/functions/iterator"
+	"github.com/nsnikhil/go-datastructures/internal"
 	"github.com/nsnikhil/go-datastructures/set"
 )
 
@@ -18,7 +19,7 @@ func NewListGraph[T comparable]() Graph[T] {
 }
 
 func (lg *listGraph[T]) AddNode(n *Node[T]) {
-	if !lg.nodes.Contains(n) {
+	if !lg.Contains(n) {
 		lg.nodes.Add(n)
 	}
 }
@@ -48,11 +49,11 @@ func (lg *listGraph[T]) CreateWeightedBiEdge(curr, next *Node[T], weight int64) 
 }
 
 func (lg *listGraph[T]) createEdge(curr, next *Node[T], weight int64) error {
-	if !lg.nodes.Contains(curr) {
+	if !lg.Contains(curr) {
 		return nodeNotFoundError(curr.data, "listGraph.createEdge")
 	}
 
-	if !lg.nodes.Contains(next) {
+	if !lg.Contains(next) {
 		return nodeNotFoundError(next.data, "listGraph.createEdge")
 	}
 
@@ -88,11 +89,11 @@ func (lg *listGraph[T]) DeleteNode(n *Node[T]) error {
 }
 
 func (lg *listGraph[T]) DeleteEdge(start, end *Node[T]) error {
-	if !lg.nodes.Contains(start) {
+	if !lg.Contains(start) {
 		return nodeNotFoundError(start.data, "listGraph.DeleteEdge")
 	}
 
-	if !lg.nodes.Contains(end) {
+	if !lg.Contains(end) {
 		return nodeNotFoundError(end.data, "listGraph.DeleteEdge")
 	}
 
@@ -272,11 +273,11 @@ func (lg *listGraph[T]) HasLoop() bool {
 
 //TODO: WHAT IF THEIR IS A EDGE FROM B TO A?
 func (lg *listGraph[T]) AreAdjacent(a, b *Node[T]) (bool, error) {
-	if !lg.nodes.Contains(a) {
+	if !lg.Contains(a) {
 		return false, nodeNotFoundError(a.data, "listGraph.AreAdjacent")
 	}
 
-	if !lg.nodes.Contains(b) {
+	if !lg.Contains(b) {
 		return false, nodeNotFoundError(b.data, "listGraph.AreAdjacent")
 	}
 
@@ -287,8 +288,35 @@ func (lg *listGraph[T]) AreAdjacent(a, b *Node[T]) (bool, error) {
 	return false, edgeNotFoundError(a.data, b.data, "listGraph.AreAdjacent")
 }
 
-func (lg *listGraph[T]) DegreeOfNode(a *Node[T]) int {
-	return -1
+func (lg *listGraph[T]) InDegreeOfNode(a *Node[T]) (int64, error) {
+	if !lg.Contains(a) {
+		return internal.Zero, nodeNotFoundError(a.data, "listGraph.InDegreeOfNode")
+	}
+
+	var res int64
+
+	ni := lg.nodes.Iterator()
+	for ni.HasNext() {
+		n, _ := ni.Next()
+
+		ei := n.edges.Iterator()
+		for ei.HasNext() {
+			e, _ := ei.Next()
+			if e.next == a {
+				res++
+			}
+		}
+	}
+
+	return res, nil
+}
+
+func (lg *listGraph[T]) OutDegreeOfNode(a *Node[T]) (int64, error) {
+	if !lg.Contains(a) {
+		return internal.Zero, nodeNotFoundError(a.data, "listGraph.OutDegreeOfNode")
+	}
+
+	return a.edges.Size(), nil
 }
 
 func (lg *listGraph[T]) HasBridge() bool {

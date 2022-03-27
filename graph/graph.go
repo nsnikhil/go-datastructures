@@ -25,9 +25,12 @@ type Graph[T comparable] interface {
 
 	HasLoop() bool
 	HasCycle() bool
-	AreAdjacent(a, b *Node[T]) (bool, error)
-	DegreeOfNode(a *Node[T]) int
 	HasBridge() bool
+
+	AreAdjacent(a, b *Node[T]) (bool, error)
+
+	InDegreeOfNode(a *Node[T]) (int64, error)
+	OutDegreeOfNode(a *Node[T]) (int64, error)
 
 	Reverse()
 	Clone() Graph[T]

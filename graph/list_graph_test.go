@@ -668,8 +668,189 @@ func TestListGraphAreAdjacent(t *testing.T) {
 	}
 }
 
-func TestListGraphDegreeOfNode(t *testing.T) {
+func TestListGraphInDegreeOfNode(t *testing.T) {
+	testCases := map[string]struct {
+		actualResult   func() (int64, error)
+		expectedResult int64
+		expectedError  error
+	}{
+		"should return 0 when node has no in-degree": {
+			actualResult: func() (int64, error) {
+				a := NewNode[int](1)
 
+				g := NewListGraph[int]()
+				g.AddNode(a)
+
+				return g.InDegreeOfNode(a)
+			},
+			expectedResult: 0,
+		},
+		"should return 1 for self loop": {
+			actualResult: func() (int64, error) {
+				a := NewNode[int](1)
+
+				g := NewListGraph[int]()
+				g.AddNode(a)
+
+				require.NoError(t, g.CreateDiEdge(a, a))
+
+				return g.InDegreeOfNode(a)
+			},
+			expectedResult: 1,
+		},
+		"should return 0 for di direction edge": {
+			actualResult: func() (int64, error) {
+				a := NewNode[int](1)
+				b := NewNode[int](2)
+
+				g := NewListGraph[int]()
+				g.AddNode(a)
+				g.AddNode(b)
+
+				require.NoError(t, g.CreateDiEdge(a, b))
+
+				return g.InDegreeOfNode(a)
+			},
+			expectedResult: 0,
+		},
+		"should return 1 for bi direction edge": {
+			actualResult: func() (int64, error) {
+				a := NewNode[int](1)
+				b := NewNode[int](2)
+
+				g := NewListGraph[int]()
+				g.AddNode(a)
+				g.AddNode(b)
+
+				require.NoError(t, g.CreateBiEdge(a, b))
+
+				return g.InDegreeOfNode(a)
+			},
+			expectedResult: 1,
+		},
+		"should return 4 when 4 nodes point to the curr node": {
+			actualResult: func() (int64, error) {
+				g, _ := graphTwentyFour()
+
+				n := getNodeWithVal(g.(*listGraph[int]), 2)
+
+				return g.InDegreeOfNode(n)
+			},
+			expectedResult: 4,
+		},
+		"should return 2 when 2 nodes point to the curr node": {
+			actualResult: func() (int64, error) {
+				g, _ := graphTwentyFive()
+
+				n := getNodeWithVal(g.(*listGraph[int]), 2)
+
+				return g.InDegreeOfNode(n)
+			},
+			expectedResult: 2,
+		},
+		"should return error when node is not present in the graph": {
+			actualResult: func() (int64, error) {
+				g := NewListGraph[int]()
+
+				return g.InDegreeOfNode(NewNode[int](1))
+			},
+			expectedError: errors.New("node 1 not found in the graph"),
+		},
+	}
+
+	for name, testCase := range testCases {
+		t.Run(name, func(t *testing.T) {
+			res, err := testCase.actualResult()
+
+			assert.Equal(t, testCase.expectedResult, res)
+			internal.AssertErrorEquals(t, testCase.expectedError, err)
+		})
+	}
+}
+
+func TestListGraphOutDegreeOfNode(t *testing.T) {
+	testCases := map[string]struct {
+		actualResult   func() (int64, error)
+		expectedResult int64
+		expectedError  error
+	}{
+		"should return 0 when node has no out-degree": {
+			actualResult: func() (int64, error) {
+				a := NewNode[int](1)
+
+				g := NewListGraph[int]()
+				g.AddNode(a)
+
+				return g.OutDegreeOfNode(a)
+			},
+			expectedResult: 0,
+		},
+		"should return 1 for self loop": {
+			actualResult: func() (int64, error) {
+				a := NewNode[int](1)
+
+				g := NewListGraph[int]()
+				g.AddNode(a)
+
+				require.NoError(t, g.CreateDiEdge(a, a))
+
+				return g.OutDegreeOfNode(a)
+			},
+			expectedResult: 1,
+		},
+		"should return 1 for bi direction edge": {
+			actualResult: func() (int64, error) {
+				a := NewNode[int](1)
+				b := NewNode[int](2)
+
+				g := NewListGraph[int]()
+				g.AddNode(a)
+				g.AddNode(b)
+
+				require.NoError(t, g.CreateBiEdge(b, a))
+
+				return g.OutDegreeOfNode(a)
+			},
+			expectedResult: 1,
+		},
+		"should return 4 when 4 edges comes out the curr node": {
+			actualResult: func() (int64, error) {
+				g, _ := graphTwentyFour()
+
+				n := getNodeWithVal(g.(*listGraph[int]), 2)
+
+				return g.InDegreeOfNode(n)
+			},
+			expectedResult: 4,
+		},
+		"should return 2 when 2 edges comes out the curr node": {
+			actualResult: func() (int64, error) {
+				g, _ := graphTwentyFive()
+
+				n := getNodeWithVal(g.(*listGraph[int]), 2)
+
+				return g.InDegreeOfNode(n)
+			},
+			expectedResult: 2,
+		},
+		"should return error when node is not present in the graph": {
+			actualResult: func() (int64, error) {
+				g := NewListGraph[int]()
+
+				return g.OutDegreeOfNode(NewNode[int](1))
+			},
+			expectedError: errors.New("node 1 not found in the graph"),
+		},
+	}
+
+	for name, testCase := range testCases {
+		t.Run(name, func(t *testing.T) {
+			res, err := testCase.actualResult()
+
+			assert.Equal(t, testCase.expectedResult, res)
+			internal.AssertErrorEquals(t, testCase.expectedError, err)
+		})
+	}
 }
 
 func TestListGraphHasBridge(t *testing.T) {
