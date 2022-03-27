@@ -76,6 +76,12 @@ func simplifyGraph(g *listGraph[int]) map[int][]int {
 	ni := g.nodes.Iterator()
 	for ni.HasNext() {
 		n, _ := ni.Next()
+
+		if n.edges.Size() == 0 {
+			res[n.data] = []int{}
+			continue
+		}
+
 		vi := n.edges.Iterator()
 		for vi.HasNext() {
 			v, _ := vi.Next()

@@ -300,7 +300,41 @@ func TestListGraphDeleteEdgeFailure(t *testing.T) {
 			internal.AssertErrorEquals(t, testCase.expectedError, testCase.actualError())
 		})
 	}
+}
 
+func TestListGraphContains(t *testing.T) {
+	testCases := map[string]struct {
+		actualResult   func() bool
+		expectedResult bool
+	}{
+		"should return true when node is present in the graphs": {
+			actualResult: func() bool {
+				a := NewNode[int](1)
+
+				g := NewListGraph[int]()
+				g.AddNode(a)
+
+				return g.Contains(a)
+			},
+			expectedResult: true,
+		},
+		"should return false when node is not present in the graphs": {
+			actualResult: func() bool {
+				a := NewNode[int](1)
+
+				g := NewListGraph[int]()
+
+				return g.Contains(a)
+			},
+			expectedResult: false,
+		},
+	}
+
+	for name, testCase := range testCases {
+		t.Run(name, func(t *testing.T) {
+			assert.Equal(t, testCase.expectedResult, testCase.actualResult())
+		})
+	}
 }
 
 func TestListGraphBfsIteratorHasNext(t *testing.T) {
@@ -478,16 +512,160 @@ func TestListGraphReverse(t *testing.T) {
 	}
 }
 
-func TestListGraphHasLoop(t *testing.T) {
+func TestListGraphHasCycle(t *testing.T) {
+	cyclicGraphs := getGraphs[int](cyclic)
 
+	for _, cyclicGraph := range cyclicGraphs {
+		assert.True(t, cyclicGraph.HasCycle())
+	}
+
+	aCyclicGraphs := getGraphs[int](aCyclic)
+
+	for _, aCyclicGraph := range aCyclicGraphs {
+		assert.False(t, aCyclicGraph.HasCycle())
+	}
 }
 
-func TestListGraphHasCycle(t *testing.T) {
+func TestListGraphHasLoop(t *testing.T) {
+	testCases := map[string]struct {
+		actualResult   func() bool
+		expectedResult bool
+	}{
+		"should return false when loop does not exists": {
+			actualResult: func() bool {
+				a := NewNode[int](1)
 
+				g := NewListGraph[int]()
+				g.AddNode(a)
+
+				return g.HasLoop()
+			},
+			expectedResult: false,
+		},
+		"should return true when loop exists": {
+			actualResult: func() bool {
+				a := NewNode[int](1)
+
+				g := NewListGraph[int]()
+				g.AddNode(a)
+
+				require.NoError(t, g.CreateDiEdge(a, a))
+
+				return g.HasLoop()
+			},
+			expectedResult: true,
+		},
+	}
+
+	for name, testCase := range testCases {
+		t.Run(name, func(t *testing.T) {
+			assert.Equal(t, testCase.expectedResult, testCase.actualResult())
+		})
+	}
 }
 
 func TestListGraphAreAdjacent(t *testing.T) {
+	testCases := map[string]struct {
+		actualResult   func() (bool, error)
+		expectedResult bool
+		expectedError  error
+	}{
+		"should return false when there is no path between the nodes": {
+			actualResult: func() (bool, error) {
+				a := NewNode[int](1)
+				b := NewNode[int](2)
 
+				g := NewListGraph[int]()
+				g.AddNode(a)
+				g.AddNode(b)
+
+				return g.AreAdjacent(a, b)
+			},
+			expectedResult: false,
+			expectedError:  errors.New("edge 1 to 2 not found in the graph"),
+		},
+		"should return false when there is path but not adjacent": {
+			actualResult: func() (bool, error) {
+				a := NewNode[int](1)
+				b := NewNode[int](2)
+				c := NewNode[int](3)
+
+				g := NewListGraph[int]()
+				g.AddNode(a)
+				g.AddNode(b)
+				g.AddNode(c)
+
+				require.NoError(t, g.CreateDiEdge(a, c))
+				require.NoError(t, g.CreateDiEdge(c, b))
+
+				return g.AreAdjacent(a, b)
+			},
+			expectedResult: false,
+			expectedError:  errors.New("edge 1 to 2 not found in the graph"),
+		},
+		"should return false when there is a reverse edge": {
+			actualResult: func() (bool, error) {
+				a := NewNode[int](1)
+				b := NewNode[int](2)
+
+				g := NewListGraph[int]()
+				g.AddNode(a)
+				g.AddNode(b)
+
+				require.NoError(t, g.CreateDiEdge(b, a))
+
+				return g.AreAdjacent(a, b)
+			},
+			expectedResult: false,
+			expectedError:  errors.New("edge 1 to 2 not found in the graph"),
+		},
+		"should return true when two nodes not adjacent": {
+			actualResult: func() (bool, error) {
+				a := NewNode[int](1)
+				b := NewNode[int](2)
+
+				g := NewListGraph[int]()
+				g.AddNode(a)
+				g.AddNode(b)
+
+				require.NoError(t, g.CreateDiEdge(a, b))
+
+				return g.AreAdjacent(a, b)
+			},
+			expectedResult: true,
+		},
+		"should return error when first node does not exist in the graph": {
+			actualResult: func() (bool, error) {
+				a := NewNode[int](1)
+				b := NewNode[int](2)
+
+				g := NewListGraph[int]()
+
+				return g.AreAdjacent(a, b)
+			},
+			expectedError: errors.New("node 1 not found in the graph"),
+		},
+		"should return error when second node does not exist in the graph": {
+			actualResult: func() (bool, error) {
+				a := NewNode[int](1)
+				b := NewNode[int](2)
+
+				g := NewListGraph[int]()
+				g.AddNode(a)
+
+				return g.AreAdjacent(a, b)
+			},
+			expectedError: errors.New("node 2 not found in the graph"),
+		},
+	}
+
+	for name, testCase := range testCases {
+		t.Run(name, func(t *testing.T) {
+			res, err := testCase.actualResult()
+			assert.Equal(t, testCase.expectedResult, res)
+			internal.AssertErrorEquals(t, testCase.expectedError, err)
+		})
+	}
 }
 
 func TestListGraphDegreeOfNode(t *testing.T) {

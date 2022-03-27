@@ -287,9 +287,9 @@ func graphTen() (Graph[int], propertySet) {
 	six := NewNode[int](6)
 
 	g := NewListGraph[int]()
-	g.CreateWeightedDiEdge(four, six, 2)
-	g.CreateWeightedDiEdge(six, five, 3)
-	g.CreateWeightedDiEdge(five, four, 4)
+	createWeightedEdge(g, false, four, six, 2)
+	createWeightedEdge(g, false, six, five, 3)
+	createWeightedEdge(g, false, five, four, 4)
 	return g, newPropertySet(directed, weighted, cyclic, connected, stronglyConnected)
 }
 
@@ -310,10 +310,10 @@ func graphEleven() (Graph[int], propertySet) {
 	three := NewNode[int](3)
 
 	g := NewListGraph[int]()
-	g.CreateWeightedDiEdge(zero, one, 2)
-	g.CreateWeightedDiEdge(one, two, 4)
-	g.CreateWeightedDiEdge(two, zero, 5)
-	g.CreateWeightedBiEdge(two, three, 3)
+	createWeightedEdge(g, false, zero, one, 2)
+	createWeightedEdge(g, false, one, two, 4)
+	createWeightedEdge(g, false, two, zero, 5)
+	createWeightedEdge(g, true, two, three, 3)
 	return g, newPropertySet(directed, weighted, cyclic, connected, stronglyConnected)
 }
 
@@ -334,10 +334,10 @@ func graphTwelve() (Graph[int], propertySet) {
 	three := NewNode[int](3)
 
 	g := NewListGraph[int]()
-	g.CreateWeightedDiEdge(zero, one, 2)
-	g.CreateWeightedDiEdge(one, two, 4)
-	g.CreateWeightedDiEdge(two, zero, 5)
-	g.CreateWeightedDiEdge(three, two, 3)
+	createWeightedEdge(g, false, zero, one, 2)
+	createWeightedEdge(g, false, one, two, 4)
+	createWeightedEdge(g, false, two, zero, 5)
+	createWeightedEdge(g, false, three, two, 3)
 	return g, newPropertySet(directed, weighted, cyclic, connected, weaklyConnected)
 }
 
@@ -359,14 +359,14 @@ func graphThirteen() (Graph[int], propertySet) {
 	five := NewNode[int](5)
 
 	g := NewListGraph[int]()
-	g.CreateWeightedDiEdge(zero, one, 2)
-	g.CreateWeightedDiEdge(zero, four, 5)
-	g.CreateWeightedDiEdge(zero, five, 4)
-	g.CreateWeightedDiEdge(one, four, 2)
-	g.CreateWeightedDiEdge(one, three, 3)
-	g.CreateWeightedDiEdge(two, one, 3)
-	g.CreateWeightedDiEdge(three, two, 1)
-	g.CreateWeightedDiEdge(three, four, 4)
+	createWeightedEdge(g, false, zero, one, 2)
+	createWeightedEdge(g, false, zero, four, 5)
+	createWeightedEdge(g, false, zero, five, 4)
+	createWeightedEdge(g, false, one, four, 2)
+	createWeightedEdge(g, false, one, three, 3)
+	createWeightedEdge(g, false, two, one, 3)
+	createWeightedEdge(g, false, three, two, 1)
+	createWeightedEdge(g, false, three, four, 4)
 	return g, newPropertySet(directed, weighted, cyclic, connected, weaklyConnected)
 }
 
@@ -390,13 +390,13 @@ func graphFourteen() (Graph[int], propertySet) {
 	five := NewNode[int](5)
 
 	g := NewListGraph[int]()
-	g.CreateWeightedDiEdge(zero, one, 4)
-	g.CreateWeightedDiEdge(one, two, 5)
-	g.CreateWeightedDiEdge(two, zero, 3)
-	g.CreateWeightedDiEdge(three, two, 2)
-	g.CreateWeightedDiEdge(three, four, 4)
-	g.CreateWeightedDiEdge(four, five, 5)
-	g.CreateWeightedDiEdge(five, three, 6)
+	createWeightedEdge(g, false, zero, one, 4)
+	createWeightedEdge(g, false, one, two, 5)
+	createWeightedEdge(g, false, two, zero, 3)
+	createWeightedEdge(g, false, three, two, 2)
+	createWeightedEdge(g, false, three, four, 4)
+	createWeightedEdge(g, false, four, five, 5)
+	createWeightedEdge(g, false, five, three, 6)
 	return g, newPropertySet(directed, weighted, cyclic, connected, weaklyConnected)
 }
 
@@ -415,9 +415,9 @@ func graphFifteen() (Graph[int], propertySet) {
 	six := NewNode[int](6)
 
 	g := NewListGraph[int]()
-	g.CreateWeightedBiEdge(four, six, 2)
-	g.CreateWeightedBiEdge(six, five, 3)
-	g.CreateWeightedBiEdge(five, four, 4)
+	createWeightedEdge(g, true, four, six, 2)
+	createWeightedEdge(g, true, six, five, 3)
+	createWeightedEdge(g, true, five, four, 4)
 	return g, newPropertySet(unDirected, weighted, cyclic, connected)
 }
 
@@ -438,10 +438,10 @@ func graphSixteen() (Graph[int], propertySet) {
 	three := NewNode[int](3)
 
 	g := NewListGraph[int]()
-	g.CreateWeightedBiEdge(zero, one, 2)
-	g.CreateWeightedBiEdge(one, two, 4)
-	g.CreateWeightedBiEdge(two, zero, 5)
-	g.CreateWeightedBiEdge(two, three, 3)
+	createWeightedEdge(g, true, zero, one, 2)
+	createWeightedEdge(g, true, one, two, 4)
+	createWeightedEdge(g, true, two, zero, 5)
+	createWeightedEdge(g, true, two, three, 3)
 	return g, newPropertySet(unDirected, weighted, cyclic, connected)
 }
 
@@ -463,14 +463,14 @@ func graphSeventeen() (Graph[int], propertySet) {
 	five := NewNode[int](5)
 
 	g := NewListGraph[int]()
-	g.CreateWeightedBiEdge(zero, one, 2)
-	g.CreateWeightedBiEdge(zero, four, 5)
-	g.CreateWeightedBiEdge(zero, five, 4)
-	g.CreateWeightedBiEdge(one, four, 2)
-	g.CreateWeightedBiEdge(one, three, 3)
-	g.CreateWeightedBiEdge(two, one, 3)
-	g.CreateWeightedBiEdge(three, two, 1)
-	g.CreateWeightedBiEdge(three, four, 4)
+	createWeightedEdge(g, true, zero, one, 2)
+	createWeightedEdge(g, true, zero, four, 5)
+	createWeightedEdge(g, true, zero, five, 4)
+	createWeightedEdge(g, true, one, four, 2)
+	createWeightedEdge(g, true, one, three, 3)
+	createWeightedEdge(g, true, two, one, 3)
+	createWeightedEdge(g, true, three, two, 1)
+	createWeightedEdge(g, true, three, four, 4)
 	return g, newPropertySet(unDirected, weighted, cyclic, connected)
 }
 
@@ -494,13 +494,13 @@ func graphEighteen() (Graph[int], propertySet) {
 	five := NewNode[int](5)
 
 	g := NewListGraph[int]()
-	g.CreateWeightedBiEdge(zero, one, 4)
-	g.CreateWeightedBiEdge(one, two, 5)
-	g.CreateWeightedBiEdge(two, zero, 3)
-	g.CreateWeightedBiEdge(three, two, 2)
-	g.CreateWeightedBiEdge(three, four, 4)
-	g.CreateWeightedBiEdge(four, five, 5)
-	g.CreateWeightedBiEdge(five, three, 6)
+	createWeightedEdge(g, true, zero, one, 4)
+	createWeightedEdge(g, true, one, two, 5)
+	createWeightedEdge(g, true, two, zero, 3)
+	createWeightedEdge(g, true, three, two, 2)
+	createWeightedEdge(g, true, three, four, 4)
+	createWeightedEdge(g, true, four, five, 5)
+	createWeightedEdge(g, true, five, three, 6)
 	return g, newPropertySet(unDirected, weighted, cyclic, connected)
 }
 
@@ -521,10 +521,10 @@ func graphNineTeen() (Graph[int], propertySet) {
 	seven := NewNode[int](7)
 
 	g := NewListGraph[int]()
-	g.CreateWeightedDiEdge(four, six, 2)
-	g.CreateWeightedDiEdge(six, five, 3)
-	g.CreateWeightedDiEdge(six, seven, 1)
-	g.CreateWeightedDiEdge(seven, five, 1)
+	createWeightedEdge(g, false, four, six, 2)
+	createWeightedEdge(g, false, six, five, 3)
+	createWeightedEdge(g, false, six, seven, 1)
+	createWeightedEdge(g, false, seven, five, 1)
 	return g, newPropertySet(directed, weighted, aCyclic, connected, weaklyConnected)
 }
 
@@ -545,10 +545,10 @@ func graphTwenty() (Graph[int], propertySet) {
 	three := NewNode[int](3)
 
 	g := NewListGraph[int]()
-	g.CreateWeightedDiEdge(zero, one, 2)
-	g.CreateWeightedDiEdge(one, two, 4)
-	g.CreateWeightedDiEdge(one, three, 8)
-	g.CreateWeightedBiEdge(two, three, 3)
+	createWeightedEdge(g, false, zero, one, 2)
+	createWeightedEdge(g, false, one, two, 4)
+	createWeightedEdge(g, false, one, three, 8)
+	createWeightedEdge(g, false, two, three, 3)
 	return g, newPropertySet(directed, weighted, aCyclic, connected, weaklyConnected)
 }
 
@@ -570,14 +570,14 @@ func graphTwentyOne() (Graph[int], propertySet) {
 	five := NewNode[int](5)
 
 	g := NewListGraph[int]()
-	g.CreateWeightedDiEdge(zero, one, 2)
-	g.CreateWeightedDiEdge(zero, four, 5)
-	g.CreateWeightedDiEdge(zero, five, 4)
-	g.CreateWeightedDiEdge(one, two, 5)
-	g.CreateWeightedDiEdge(one, three, 3)
-	g.CreateWeightedDiEdge(one, four, 2)
-	g.CreateWeightedDiEdge(three, two, 1)
-	g.CreateWeightedDiEdge(three, four, 4)
+	createWeightedEdge(g, false, zero, one, 2)
+	createWeightedEdge(g, false, zero, four, 5)
+	createWeightedEdge(g, false, zero, five, 4)
+	createWeightedEdge(g, false, one, two, 5)
+	createWeightedEdge(g, false, one, three, 3)
+	createWeightedEdge(g, false, one, four, 2)
+	createWeightedEdge(g, false, three, two, 1)
+	createWeightedEdge(g, false, three, four, 4)
 	return g, newPropertySet(directed, weighted, aCyclic, connected, weaklyConnected)
 }
 
@@ -601,12 +601,12 @@ func graphTwentyTwo() (Graph[int], propertySet) {
 	five := NewNode[int](5)
 
 	g := NewListGraph[int]()
-	g.CreateWeightedDiEdge(zero, one, 4)
-	g.CreateWeightedDiEdge(zero, three, 2)
-	g.CreateWeightedDiEdge(one, two, 5)
-	g.CreateWeightedDiEdge(three, two, 6)
-	g.CreateWeightedDiEdge(three, four, 4)
-	g.CreateWeightedDiEdge(four, five, 5)
+	createWeightedEdge(g, false, zero, one, 4)
+	createWeightedEdge(g, false, zero, three, 2)
+	createWeightedEdge(g, false, one, two, 5)
+	createWeightedEdge(g, false, three, two, 6)
+	createWeightedEdge(g, false, three, four, 4)
+	createWeightedEdge(g, false, four, five, 5)
 	return g, newPropertySet(directed, weighted, aCyclic, connected, weaklyConnected)
 }
 
@@ -627,11 +627,11 @@ func graphTwentyThree() (Graph[int], propertySet) {
 	four := NewNode[int](4)
 
 	g := NewListGraph[int]()
-	g.CreateWeightedDiEdge(zero, one, 2)
-	g.CreateWeightedDiEdge(one, two, 2)
-	g.CreateWeightedDiEdge(two, three, 3)
-	g.CreateWeightedDiEdge(three, one, -6)
-	g.CreateWeightedDiEdge(three, four, 4)
+	createWeightedEdge(g, false, zero, one, 2)
+	createWeightedEdge(g, false, one, two, 2)
+	createWeightedEdge(g, false, two, three, 3)
+	createWeightedEdge(g, false, three, one, -6)
+	createWeightedEdge(g, false, three, four, 4)
 	return g, newPropertySet(directed, weighted, cyclic, connected, weaklyConnected, negativeWeights, negativeCycles)
 }
 
@@ -657,24 +657,24 @@ func graphTwentyFour() (Graph[int], propertySet) {
 		g.AddNode(nodes[i])
 	}
 
-	g.CreateBiEdge(nodes[0], nodes[1])
-	g.CreateBiEdge(nodes[1], nodes[2])
-	g.CreateBiEdge(nodes[1], nodes[5])
-	g.CreateBiEdge(nodes[2], nodes[3])
-	g.CreateBiEdge(nodes[2], nodes[4])
-	g.CreateBiEdge(nodes[2], nodes[6])
-	g.CreateBiEdge(nodes[4], nodes[5])
-	g.CreateBiEdge(nodes[4], nodes[7])
-	g.CreateBiEdge(nodes[6], nodes[7])
+	createEdge(g, true, nodes[0], nodes[1])
+	createEdge(g, true, nodes[1], nodes[2])
+	createEdge(g, true, nodes[1], nodes[5])
+	createEdge(g, true, nodes[2], nodes[3])
+	createEdge(g, true, nodes[2], nodes[4])
+	createEdge(g, true, nodes[2], nodes[6])
+	createEdge(g, true, nodes[4], nodes[5])
+	createEdge(g, true, nodes[4], nodes[7])
+	createEdge(g, true, nodes[6], nodes[7])
 
-	g.CreateBiEdge(nodes[8], nodes[9])
+	createEdge(g, true, nodes[8], nodes[9])
 
-	g.CreateBiEdge(nodes[10], nodes[11])
-	g.CreateBiEdge(nodes[10], nodes[12])
-	g.CreateBiEdge(nodes[10], nodes[13])
-	g.CreateBiEdge(nodes[11], nodes[13])
-	g.CreateBiEdge(nodes[12], nodes[14])
-	g.CreateBiEdge(nodes[13], nodes[14])
+	createEdge(g, true, nodes[10], nodes[11])
+	createEdge(g, true, nodes[10], nodes[12])
+	createEdge(g, true, nodes[10], nodes[13])
+	createEdge(g, true, nodes[11], nodes[13])
+	createEdge(g, true, nodes[12], nodes[14])
+	createEdge(g, true, nodes[13], nodes[14])
 
 	return g, newPropertySet(unDirected, unWeighted, cyclic, disConnected)
 }
@@ -701,24 +701,24 @@ func graphTwentyFive() (Graph[int], propertySet) {
 		g.AddNode(nodes[i])
 	}
 
-	g.CreateDiEdge(nodes[0], nodes[1])
-	g.CreateDiEdge(nodes[1], nodes[2])
-	g.CreateDiEdge(nodes[1], nodes[5])
-	g.CreateDiEdge(nodes[2], nodes[3])
-	g.CreateDiEdge(nodes[2], nodes[6])
-	g.CreateDiEdge(nodes[4], nodes[2])
-	g.CreateDiEdge(nodes[4], nodes[5])
-	g.CreateDiEdge(nodes[6], nodes[7])
-	g.CreateDiEdge(nodes[7], nodes[4])
+	createEdge(g, false, nodes[0], nodes[1])
+	createEdge(g, false, nodes[1], nodes[2])
+	createEdge(g, false, nodes[1], nodes[5])
+	createEdge(g, false, nodes[2], nodes[3])
+	createEdge(g, false, nodes[2], nodes[6])
+	createEdge(g, false, nodes[4], nodes[2])
+	createEdge(g, false, nodes[4], nodes[5])
+	createEdge(g, false, nodes[6], nodes[7])
+	createEdge(g, false, nodes[7], nodes[4])
 
-	g.CreateDiEdge(nodes[8], nodes[9])
+	createEdge(g, false, nodes[8], nodes[9])
 
-	g.CreateDiEdge(nodes[10], nodes[13])
-	g.CreateDiEdge(nodes[11], nodes[10])
-	g.CreateDiEdge(nodes[12], nodes[10])
-	g.CreateDiEdge(nodes[13], nodes[11])
-	g.CreateDiEdge(nodes[13], nodes[14])
-	g.CreateDiEdge(nodes[14], nodes[12])
+	createEdge(g, false, nodes[10], nodes[13])
+	createEdge(g, false, nodes[11], nodes[10])
+	createEdge(g, false, nodes[12], nodes[10])
+	createEdge(g, false, nodes[13], nodes[11])
+	createEdge(g, false, nodes[13], nodes[14])
+	createEdge(g, false, nodes[14], nodes[12])
 
 	return g, newPropertySet(directed, unWeighted, cyclic, disConnected)
 }
@@ -745,24 +745,24 @@ func graphTwentyFiveReverse() (Graph[int], propertySet) {
 		g.AddNode(nodes[i])
 	}
 
-	g.CreateDiEdge(nodes[1], nodes[0])
-	g.CreateDiEdge(nodes[2], nodes[1])
-	g.CreateDiEdge(nodes[5], nodes[1])
-	g.CreateDiEdge(nodes[3], nodes[2])
-	g.CreateDiEdge(nodes[6], nodes[2])
-	g.CreateDiEdge(nodes[2], nodes[4])
-	g.CreateDiEdge(nodes[5], nodes[4])
-	g.CreateDiEdge(nodes[7], nodes[6])
-	g.CreateDiEdge(nodes[4], nodes[7])
+	createEdge(g, false, nodes[1], nodes[0])
+	createEdge(g, false, nodes[2], nodes[1])
+	createEdge(g, false, nodes[5], nodes[1])
+	createEdge(g, false, nodes[3], nodes[2])
+	createEdge(g, false, nodes[6], nodes[2])
+	createEdge(g, false, nodes[2], nodes[4])
+	createEdge(g, false, nodes[5], nodes[4])
+	createEdge(g, false, nodes[7], nodes[6])
+	createEdge(g, false, nodes[4], nodes[7])
 
-	g.CreateDiEdge(nodes[9], nodes[8])
+	createEdge(g, false, nodes[9], nodes[8])
 
-	g.CreateDiEdge(nodes[13], nodes[10])
-	g.CreateDiEdge(nodes[10], nodes[11])
-	g.CreateDiEdge(nodes[10], nodes[12])
-	g.CreateDiEdge(nodes[11], nodes[13])
-	g.CreateDiEdge(nodes[14], nodes[13])
-	g.CreateDiEdge(nodes[12], nodes[14])
+	createEdge(g, false, nodes[13], nodes[10])
+	createEdge(g, false, nodes[10], nodes[11])
+	createEdge(g, false, nodes[10], nodes[12])
+	createEdge(g, false, nodes[11], nodes[13])
+	createEdge(g, false, nodes[14], nodes[13])
+	createEdge(g, false, nodes[12], nodes[14])
 
 	return g, newPropertySet(directed, unWeighted, cyclic, disConnected)
 }
@@ -821,10 +821,28 @@ func getGraphs[T comparable](properties ...property) []Graph[int] {
 
 func createEdge(g Graph[int], isBidirected bool, source *Node[int], targets ...*Node[int]) {
 	for _, target := range targets {
-		if isBidirected {
-			g.CreateBiEdge(source, target)
-		} else {
-			g.CreateDiEdge(source, target)
-		}
+		createWeightedEdge(g, isBidirected, source, target, 0)
+	}
+}
+
+func createWeightedEdge(g Graph[int], isBidirected bool, source *Node[int], target *Node[int], weight int64) {
+	if !g.Contains(source) {
+		g.AddNode(source)
+	}
+
+	if !g.Contains(target) {
+		g.AddNode(target)
+	}
+
+	var err error
+
+	if isBidirected {
+		err = g.CreateWeightedBiEdge(source, target, weight)
+	} else {
+		err = g.CreateWeightedDiEdge(source, target, weight)
+	}
+
+	if err != nil {
+		panic(err)
 	}
 }

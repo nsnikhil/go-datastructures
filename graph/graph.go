@@ -17,13 +17,15 @@ type Graph[T comparable] interface {
 
 	DeleteEdge(start, end *Node[T]) error
 
+	Contains(n *Node[T]) bool
+
 	//print()
 	DFSIterator() iterator.Iterator[*Node[T]]
 	BFSIterator() iterator.Iterator[*Node[T]]
 
 	HasLoop() bool
 	HasCycle() bool
-	AreAdjacent(a, b *Node[T]) bool
+	AreAdjacent(a, b *Node[T]) (bool, error)
 	DegreeOfNode(a *Node[T]) int
 	HasBridge() bool
 

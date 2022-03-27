@@ -108,6 +108,10 @@ func (lg *listGraph[T]) DeleteEdge(start, end *Node[T]) error {
 	return nil
 }
 
+func (lg *listGraph[T]) Contains(n *Node[T]) bool {
+	return lg.nodes.Contains(n)
+}
+
 func (lg *listGraph[T]) DFSIterator() iterator.Iterator[*Node[T]] {
 	return newListGraphIterator(false, lg)
 }
@@ -197,65 +201,90 @@ func (lg *listGraph[T]) Reverse() {
 }
 
 func (lg *listGraph[T]) HasCycle() bool {
-	//var check func(curr *Node[T], pd map[*Node[T]]bool, dn map[*Node[T]]bool) bool
-	//check = func(curr *Node[T], pd map[*Node[T]]bool, dn map[*Node[T]]bool) bool {
-	//	pd[curr] = true
-	//
-	//	if len(curr.edges) == 0 {
-	//		pd[curr] = false
-	//		dn[curr] = true
-	//		return false
-	//	}
-	//
-	//	for e := range curr.edges {
-	//		nx := e.next
-	//
-	//		if dn[nx] {
-	//			continue
-	//		}
-	//
-	//		if pd[nx] {
-	//			return true
-	//		}
-	//
-	//		if check(nx, pd, dn) {
-	//			return true
-	//		}
-	//	}
-	//
-	//	pd[curr] = false
-	//	dn[curr] = true
-	//	return false
-	//}
-	//
-	//pd := make(map[*Node[T]]bool)
-	//dn := make(map[*Node[T]]bool)
-	//
-	//it := lg.nodes.Iterator()
-	//for it.HasNext() {
-	//	v, _ := it.Next()
-	//	if dn[v] {
-	//		continue
-	//	}
-	//
-	//	if pd[v] {
-	//		return true
-	//	}
-	//
-	//	if check(v, pd, dn) {
-	//		return true
-	//	}
-	//}
+
+	var check func(curr *Node[T], pd set.Set[*Node[T]], dn set.Set[*Node[T]]) bool
+
+	check = func(curr *Node[T], pd set.Set[*Node[T]], dn set.Set[*Node[T]]) bool {
+		pd.Add(curr)
+
+		it := curr.edges.Iterator()
+		for it.HasNext() {
+			e, _ := it.Next()
+			nx := e.next
+
+			if dn.Contains(nx) {
+				continue
+			}
+
+			if pd.Contains(nx) {
+				return true
+			}
+
+			if check(nx, pd, dn) {
+				return true
+			}
+		}
+
+		pd.Remove(curr)
+		dn.Add(curr)
+		return false
+	}
+
+	pd := set.NewHashSet[*Node[T]]()
+	dn := set.NewHashSet[*Node[T]]()
+
+	it := lg.nodes.Iterator()
+	for it.HasNext() {
+		v, _ := it.Next()
+		if dn.Contains(v) {
+			continue
+		}
+
+		if pd.Contains(v) {
+			return true
+		}
+
+		if check(v, pd, dn) {
+			return true
+		}
+	}
 
 	return false
 }
 
 func (lg *listGraph[T]) HasLoop() bool {
+
+	ni := lg.nodes.Iterator()
+	for ni.HasNext() {
+		n, _ := ni.Next()
+
+		ei := n.edges.Iterator()
+		for ei.HasNext() {
+			e, _ := ei.Next()
+			if n == e.next {
+				return true
+			}
+		}
+	}
+
 	return false
 }
 
-func (lg *listGraph[T]) AreAdjacent(a, b *Node[T]) bool {
-	return false
+//TODO: WHAT IF THEIR IS A EDGE FROM B TO A?
+func (lg *listGraph[T]) AreAdjacent(a, b *Node[T]) (bool, error) {
+	if !lg.nodes.Contains(a) {
+		return false, nodeNotFoundError(a.data, "listGraph.AreAdjacent")
+	}
+
+	if !lg.nodes.Contains(b) {
+		return false, nodeNotFoundError(b.data, "listGraph.AreAdjacent")
+	}
+
+	if _, err := a.findEdge(b); err == nil {
+		return true, nil
+	}
+
+	return false, edgeNotFoundError(a.data, b.data, "listGraph.AreAdjacent")
 }
 
 func (lg *listGraph[T]) DegreeOfNode(a *Node[T]) int {
