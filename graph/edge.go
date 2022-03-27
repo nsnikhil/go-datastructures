@@ -1,19 +1,19 @@
-package main
+package graph
+
+import (
+	"github.com/nsnikhil/go-datastructures/internal"
+)
 
 type edge[T comparable] struct {
-	next   *node[T]
+	next   *Node[T]
 	weight int64
 }
 
-func (e *edge[T]) getNext() *node[T] {
-	return e.next
+func (e *edge[T]) changeWeight(weight int64) {
+	e.weight = weight
 }
 
-func (e *edge[T]) getWeight() int64 {
-	return e.weight
-}
-
-func (e *edge[T]) changeNext(next *node[T]) {
+func (e *edge[T]) changeNext(next *Node[T]) {
 	e.next = next
 }
 
@@ -24,11 +24,15 @@ func (e *edge[T]) copy() *edge[T] {
 	}
 }
 
-func newDiEdge[T comparable](next *node[T]) *edge[T] {
-	return newWeightedDiEdge[T](next, 0)
+func newDiEdge[T comparable](next *Node[T]) *edge[T] {
+	return newEdge[T](next, internal.Zero)
 }
 
-func newWeightedDiEdge[T comparable](next *node[T], weight int64) *edge[T] {
+func newWeightedDiEdge[T comparable](next *Node[T], weight int64) *edge[T] {
+	return newEdge[T](next, weight)
+}
+
+func newEdge[T comparable](next *Node[T], weight int64) *edge[T] {
 	return &edge[T]{
 		next:   next,
 		weight: weight,

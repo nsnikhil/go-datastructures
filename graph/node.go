@@ -1,86 +1,196 @@
-package main
+package graph
 
-import "math"
+import (
+	"github.com/nsnikhil/go-datastructures/functions/iterator"
+	"github.com/nsnikhil/go-datastructures/queue"
+	"github.com/nsnikhil/go-datastructures/set"
+	"github.com/nsnikhil/go-datastructures/stack"
+)
 
-type node[T comparable] struct {
+type Node[T comparable] struct {
 	data  T
-	edges map[*edge[T]]bool
+	edges set.Set[*edge[T]]
 
 	// SHORTEST PATH
-	costToReach int64
-	predecessor *node[T]
+	//costToReach int64
+	//predecessor *Node[T]
 }
 
-func (n *node[T]) getData() T {
-	return n.data
-}
-
-func (n *node[T]) getEdges() map[*edge[T]]bool {
-	return n.edges
-}
-
-func (n *node[T]) clearEdges() {
-	n.edges = make(map[*edge[T]]bool)
-}
-
-func (n *node[T]) removeEdge(e *edge[T]) {
-	if !n.hasEdge(e) {
+func (n *Node[T]) addEdge(e *edge[T]) {
+	if n.edges.Contains(e) {
 		return
 	}
 
-	delete(n.edges, e)
+	n.edges.Add(e)
 }
 
-func (n *node[T]) addEdge(e *edge[T]) {
-	if n.hasEdge(e) {
-		return
+func (n *Node[T]) removeEdge(e *edge[T]) error {
+	if !n.edges.Contains(e) {
+		return edgeNotFoundError(n.data, e.next.data, "Node.removeEdge")
 	}
 
-	n.edges[e] = true
-}
-
-func (n *node[T]) hasEdge(e *edge[T]) bool {
-	return n.edges[e]
-}
-
-func (n *node[T]) addEdges(edges ...*edge[T]) {
-	for _, e := range edges {
-		n.addEdge(e)
+	if err := n.edges.Remove(e); err != nil {
+		return edgeNotFoundError(n.data, e.next.data, "Node.removeEdge")
 	}
+
+	return nil
 }
 
-func (n *node[T]) areConnected(o *node[T]) bool {
-	for k := range n.edges {
-		if k.getNext() == o {
-			return true
+func (n *Node[T]) clearEdges() {
+	n.edges.Clear()
+}
+
+func (n *Node[T]) findEdge(o *Node[T]) (*edge[T], error) {
+	it := n.edges.Iterator()
+
+	for it.HasNext() {
+		e, _ := it.Next()
+		if e.next == o {
+			return e, nil
 		}
 	}
 
-	return false
+	return nil, edgeNotFoundError(n.data, o.data, "Node.findEdge")
 }
 
-func (n *node[T]) copy() *node[T] {
-	copyEdges := func(edges map[*edge[T]]bool) map[*edge[T]]bool {
-		res := make(map[*edge[T]]bool)
+func (n *Node[T]) copy() *Node[T] {
+	copyEdges := func(edges set.Set[*edge[T]]) set.Set[*edge[T]] {
+		res := set.NewHashSet[*edge[T]]()
 
-		for e, ok := range edges {
-			res[e.copy()] = ok
+		it := edges.Iterator()
+		for it.HasNext() {
+			e, _ := it.Next()
+			res.Add(e.copy())
 		}
 
 		return res
 	}
 
-	return &node[T]{
-		data:        n.data,
-		costToReach: math.MaxInt64,
-		edges:       copyEdges(n.edges),
+	return &Node[T]{
+		data:  n.data,
+		edges: copyEdges(n.edges),
 	}
 }
 
-func newNode[T comparable](data T) *node[T] {
-	return &node[T]{
-		data:        data,
-		costToReach: math.MaxInt64,
-		edges:       make(map[*edge[T]]bool),
+func (n *Node[T]) bfsIterator() iterator.Iterator[*Node[T]] {
+	return newNodeBfsIterator[T](n)
+}
+
+func (n *Node[T]) dfsIterator() iterator.Iterator[*Node[T]] {
+	return newNodeDfsIterator[T](n)
+}
+
+type nodeBfsIterator[T comparable] struct {
+	qu queue.Queue[*Node[T]]
+	vs set.Set[*Node[T]]
+}
+
+func (nbi *nodeBfsIterator[T]) HasNext() bool {
+	return !nbi.qu.Empty()
+}
+
+func (nbi *nodeBfsIterator[T]) Next() (*Node[T], error) {
+	v, err := nbi.qu.Remove()
+	if err != nil {
+		return nil, emptyIteratorError("nodeBfsIterator.Next")
+	}
+
+	it := v.edges.Iterator()
+	for it.HasNext() {
+		ed, _ := it.Next()
+		if !nbi.vs.Contains(ed.next) {
+			nbi.qu.Add(ed.next)
+			nbi.vs.Add(ed.next)
+		}
+	}
+
+	return v, nil
+}
+
+//TODO: REFACTOR REMOVE ADDING ALL EDGES AT ONCE
+func newNodeBfsIterator[T comparable](n *Node[T]) iterator.Iterator[*Node[T]] {
+	qu := queue.NewLinkedQueue[*Node[T]]()
+	qu.Add(n)
+
+	vs := set.NewHashSet[*Node[T]]()
+	vs.Add(n)
+
+	return &nodeBfsIterator[T]{
+		qu: qu,
+		vs: vs,
+	}
+}
+
+//TODO: RENAME
+func newNodeBfsIteratorWithVisited[T comparable](n *Node[T], vs set.Set[*Node[T]]) iterator.Iterator[*Node[T]] {
+	qu := queue.NewLinkedQueue[*Node[T]]()
+	qu.Add(n)
+
+	vs.Add(n)
+
+	return &nodeBfsIterator[T]{
+		qu: qu,
+		vs: vs,
+	}
+}
+
+type nodeDfsIterator[T comparable] struct {
+	st *stack.Stack[*Node[T]]
+	vs set.Set[*Node[T]]
+}
+
+func (nbi *nodeDfsIterator[T]) HasNext() bool {
+	return !nbi.st.Empty()
+}
+
+//TODO: REFACTOR REMOVE ADDING ALL EDGES AT ONCE
+func (nbi *nodeDfsIterator[T]) Next() (*Node[T], error) {
+	v, err := nbi.st.Pop()
+	if err != nil {
+		return nil, emptyIteratorError("nodeDfsIterator.Next")
+	}
+
+	it := v.edges.Iterator()
+	for it.HasNext() {
+		ed, _ := it.Next()
+		if !nbi.vs.Contains(ed.next) {
+			nbi.st.Push(ed.next)
+			nbi.vs.Add(ed.next)
+		}
+	}
+
+	return v, nil
+}
+
+func newNodeDfsIterator[T comparable](n *Node[T]) iterator.Iterator[*Node[T]] {
+	st := stack.NewStack[*Node[T]]()
+	st.Push(n)
+
+	vs := set.NewHashSet[*Node[T]]()
+	vs.Add(n)
+
+	return &nodeDfsIterator[T]{
+		st: st,
+		vs: vs,
+	}
+}
+
+//TODO: RENAME
+func newNodeDfsIteratorWithVisited[T comparable](n *Node[T], vs set.Set[*Node[T]]) iterator.Iterator[*Node[T]] {
+	st := stack.NewStack[*Node[T]]()
+	st.Push(n)
+
+	vs.Add(n)
+
+	return &nodeDfsIterator[T]{
+		st: st,
+		vs: vs,
+	}
+}
+
+func NewNode[T comparable](data T) *Node[T] {
+	return &Node[T]{
+		data:  data,
+		edges: set.NewHashSet[*edge[T]](),
 	}
 }

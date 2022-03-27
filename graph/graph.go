@@ -1,36 +1,42 @@
-package main
+package graph
 
-type graph[T comparable] interface {
-	addNode(n *node[T])
+import "github.com/nsnikhil/go-datastructures/functions/iterator"
 
-	createDiEdges(curr *node[T], nodes ...*node[T])
-	createWeightedDiEdge(curr, next *node[T], weight int64)
-	createBiEdges(curr *node[T], next ...*node[T])
-	createWeightedBiEdge(curr, nodes *node[T], weight int64)
+type Graph[T comparable] interface {
+	AddNode(n *Node[T])
 
-	deleteNode(n *node[T])
-	deleteEdge(start, end *node[T])
+	CreateDiEdge(curr *Node[T], next *Node[T]) error
 
-	print()
-	dfs()
-	bfs()
+	CreateWeightedDiEdge(curr, next *Node[T], weight int64) error
 
-	//hasLoop() bool
-	hasCycle() bool
-	//areAdjacent(a, b *node[T) bool
-	//degreeOfNode(a *node[T) int
-	//hasBridge() bool
+	CreateBiEdge(curr *Node[T], next *Node[T]) error
 
-	reverse()
-	clone() graph[T]
+	CreateWeightedBiEdge(curr, nodes *Node[T], weight int64) error
 
-	hasRoute(source, target *node[T]) bool
+	DeleteNode(n *Node[T]) error
 
-	//isDirected() bool
+	DeleteEdge(start, end *Node[T]) error
 
-	//isConnected() bool
+	//print()
+	DFSIterator() iterator.Iterator[*Node[T]]
+	BFSIterator() iterator.Iterator[*Node[T]]
 
-	getConnectedComponents() [][]*node[T]
+	HasLoop() bool
+	HasCycle() bool
+	AreAdjacent(a, b *Node[T]) bool
+	DegreeOfNode(a *Node[T]) int
+	HasBridge() bool
 
-	shortestPath()
+	Reverse()
+	Clone() Graph[T]
+
+	HasRoute(source, target *Node[T]) bool
+
+	IsDirected() bool
+
+	IsConnected() bool
+
+	GetConnectedComponents() [][]*Node[T]
+
+	ShortestPath(source, target *Node[T]) []*Node[T]
 }

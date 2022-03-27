@@ -1,6 +1,8 @@
 package internal
 
 import (
+	"fmt"
+	"github.com/nsnikhil/go-datastructures/functions/comparator"
 	"github.com/stretchr/testify/assert"
 	"math/rand"
 	"testing"
@@ -13,6 +15,51 @@ func AssertErrorEquals(t *testing.T, expected, actual error) {
 	}
 
 	assert.Equal(t, expected.Error(), actual.Error())
+}
+
+//TODO: REFACTOR
+func AssertSliceEquals[T comparable](t *testing.T, a, b []T) {
+	if len(a) != len(b) {
+		assert.Fail(t, fmt.Sprintf("len of a : %b, is not equals to len of b: %v", len(a), len(b)))
+	}
+
+	keys := func(sl []T) map[T]bool {
+		res := make(map[T]bool)
+
+		for _, e := range sl {
+			res[e] = true
+		}
+
+		return res
+	}
+
+	ak := keys(a)
+	bk := keys(b)
+
+	for v := range ak {
+		if !bk[v] {
+			assert.Fail(t, fmt.Sprintf("slice %v, and %v are not equals", a, b))
+		}
+	}
+}
+
+func AreMapsSame[K comparable, V any](a, b map[K]V, vc comparator.Comparator[V]) bool {
+	if len(a) != len(b) {
+		return false
+	}
+
+	for k, v := range a {
+		bv, ok := b[k]
+		if !ok {
+			return false
+		}
+
+		if vc.Compare(v, bv) != 0 {
+			return false
+		}
+	}
+
+	return true
 }
 
 type SliceGenerator struct {

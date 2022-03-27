@@ -1,6 +1,7 @@
 package set
 
 import (
+	"fmt"
 	"github.com/nsnikhil/erx"
 	"github.com/nsnikhil/go-datastructures/functions/iterator"
 	"github.com/nsnikhil/go-datastructures/internal"
@@ -199,7 +200,7 @@ func (hs *HashSet[T]) remove(ignore bool, e ...T) error {
 				}
 			}
 
-			return err
+			return erx.WithArgs(erx.Kind("HashSet.remove"), fmt.Errorf("element %v not found in the set: %w", e[i], err))
 		}
 	}
 
