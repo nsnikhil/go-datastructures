@@ -322,9 +322,9 @@ func (lg *listGraph[T]) OutDegreeOfNode(a *Node[T]) (int64, error) {
 	return a.edges.Size(), nil
 }
 
-func (lg *listGraph[T]) HasBridge() bool {
-	return false
-}
+//func (lg *listGraph[T]) HasBridge() bool {
+//	return false
+//}
 
 func (lg *listGraph[T]) Clone() Graph[T] {
 
@@ -421,13 +421,13 @@ func (lg *listGraph[T]) HasRoute(source, target *Node[T]) (bool, error) {
 	return visit(source, target, visited), nil
 }
 
-func (lg *listGraph[T]) IsDirected() bool {
-	return false
-}
-
-func (lg *listGraph[T]) IsConnected() bool {
-	return false
-}
+//func (lg *listGraph[T]) IsDirected() bool {
+//	return false
+//}
+//
+//func (lg *listGraph[T]) IsConnected() bool {
+//	return false
+//}
 
 func (lg *listGraph[T]) GetConnectedComponents() []list.List[*Node[T]] {
 	return koasraju(lg)
@@ -501,17 +501,17 @@ func koasraju[T comparable](lg *listGraph[T]) []list.List[*Node[T]] {
 	return res
 }
 
-func (lg *listGraph[T]) ShortestPath(source, target *Node[T]) []*Node[T] {
-	return nil
-	// unweighted Graph
-	// dag
-	// no negative weights -> dijkstra
-	// dijkstra modifications
+//func (lg *listGraph[T]) ShortestPath(source, target *Node[T]) []*Node[T] {
+//	return nil
+// unweighted Graph
+// dag
+// no negative weights -> dijkstra
+// dijkstra modifications
 
-	// general case -> bellmen ford
+// general case -> bellmen ford
 
-	// all pair shortest path -> floyd(DP)
-}
+// all pair shortest path -> floyd(DP)
+//}
 
 func nonWeightedShortestPath[T comparable](source, target *Node[T], lg *listGraph[T]) {
 	//visited := make(map[*Node[T]]bool)

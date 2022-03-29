@@ -28,7 +28,7 @@ type Graph[T comparable] interface {
 
 	HasLoop() bool
 	HasCycle() bool
-	HasBridge() bool
+	//HasBridge() bool
 
 	AreAdjacent(a, b *Node[T]) (bool, error)
 
@@ -40,11 +40,11 @@ type Graph[T comparable] interface {
 
 	HasRoute(source, target *Node[T]) (bool, error)
 
-	IsDirected() bool
+	//IsDirected() bool
 
-	IsConnected() bool
+	//IsConnected() bool
 
 	GetConnectedComponents() []list.List[*Node[T]]
 
-	ShortestPath(source, target *Node[T]) []*Node[T]
+	//ShortestPath(source, target *Node[T]) []*Node[T]
 }
