@@ -819,6 +819,20 @@ func getGraphs[T comparable](properties ...property) []Graph[int] {
 	return filter(gs, properties...)
 }
 
+func getAllGraphs() []Graph[int] {
+	f := func(g Graph[int], ps propertySet) Graph[int] { return g }
+
+	return []Graph[int]{
+		f(graphOne()), f(graphOneReverse()), f(graphTwo()), f(graphThree()), f(graphFour()),
+		f(graphFive()), f(graphSix()), f(graphSeven()), f(graphEight()),
+		f(graphNine()), f(graphTen()), f(graphEleven()), f(graphTwelve()),
+		f(graphThirteen()), f(graphFourteen()), f(graphFifteen()), f(graphSixteen()),
+		f(graphSeventeen()), f(graphEighteen()), f(graphNineTeen()), f(graphTwenty()),
+		f(graphTwentyOne()), f(graphTwentyTwo()), f(graphTwentyThree()), f(graphTwentyFour()),
+		f(graphTwentyFive()), f(graphTwentyFiveReverse()),
+	}
+}
+
 func createEdge(g Graph[int], isBidirected bool, source *Node[int], targets ...*Node[int]) {
 	for _, target := range targets {
 		createWeightedEdge(g, isBidirected, source, target, 0)

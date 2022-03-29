@@ -732,7 +732,7 @@ func TestListGraphInDegreeOfNode(t *testing.T) {
 			actualResult: func() (int64, error) {
 				g, _ := graphTwentyFour()
 
-				n := getNodeWithVal(g.(*listGraph[int]), 2)
+				n := getNodeWithVal(g, 2)
 
 				return g.InDegreeOfNode(n)
 			},
@@ -742,7 +742,7 @@ func TestListGraphInDegreeOfNode(t *testing.T) {
 			actualResult: func() (int64, error) {
 				g, _ := graphTwentyFive()
 
-				n := getNodeWithVal(g.(*listGraph[int]), 2)
+				n := getNodeWithVal(g, 2)
 
 				return g.InDegreeOfNode(n)
 			},
@@ -817,7 +817,7 @@ func TestListGraphOutDegreeOfNode(t *testing.T) {
 			actualResult: func() (int64, error) {
 				g, _ := graphTwentyFour()
 
-				n := getNodeWithVal(g.(*listGraph[int]), 2)
+				n := getNodeWithVal(g, 2)
 
 				return g.InDegreeOfNode(n)
 			},
@@ -827,7 +827,7 @@ func TestListGraphOutDegreeOfNode(t *testing.T) {
 			actualResult: func() (int64, error) {
 				g, _ := graphTwentyFive()
 
-				n := getNodeWithVal(g.(*listGraph[int]), 2)
+				n := getNodeWithVal(g, 2)
 
 				return g.InDegreeOfNode(n)
 			},
@@ -858,11 +858,90 @@ func TestListGraphHasBridge(t *testing.T) {
 }
 
 func TestListGraphClone(t *testing.T) {
-
+	for _, graph := range getAllGraphs() {
+		assert.Equal(t, graph, graph.Clone())
+	}
 }
 
 func TestListGraphHasRoute(t *testing.T) {
+	testCases := map[string]struct {
+		actualResult   func() (bool, error)
+		expectedResult bool
+		expectedError  error
+	}{
+		"should return false when no route exist": {
+			actualResult: func() (bool, error) {
+				a := NewNode[int](1)
+				b := NewNode[int](2)
 
+				g := NewListGraph[int]()
+				g.AddNode(a)
+				g.AddNode(b)
+
+				return g.HasRoute(a, b)
+			},
+		},
+		"should return true when direct route exists": {
+			actualResult: func() (bool, error) {
+				a := NewNode[int](1)
+				b := NewNode[int](2)
+
+				g := NewListGraph[int]()
+				g.AddNode(a)
+				g.AddNode(b)
+
+				require.NoError(t, g.CreateDiEdge(a, b))
+
+				return g.HasRoute(a, b)
+			},
+			expectedResult: true,
+		},
+		"should return true when indirect route exists": {
+			actualResult: func() (bool, error) {
+				g, _ := graphFour()
+
+				a := getNodeWithVal(g, 0)
+				b := getNodeWithVal(g, 2)
+
+				require.NoError(t, g.CreateDiEdge(a, b))
+
+				return g.HasRoute(a, b)
+			},
+			expectedResult: true,
+		},
+		"should return error when source not does not exist in graph": {
+			actualResult: func() (bool, error) {
+				a := NewNode[int](1)
+				b := NewNode[int](2)
+
+				g := NewListGraph[int]()
+
+				return g.HasRoute(a, b)
+			},
+			expectedError: errors.New("node 1 not found in the graph"),
+		},
+		"should return error when target not does not exist in graph": {
+			actualResult: func() (bool, error) {
+				a := NewNode[int](1)
+				b := NewNode[int](2)
+
+				g := NewListGraph[int]()
+				g.AddNode(a)
+
+				return g.HasRoute(a, b)
+			},
+			expectedError: errors.New("node 2 not found in the graph"),
+		},
+	}
+
+	for name, testCase := range testCases {
+		t.Run(name, func(t *testing.T) {
+			ok, err := testCase.actualResult()
+
+			assert.Equal(t, testCase.expectedResult, ok)
+			internal.AssertErrorEquals(t, testCase.expectedError, err)
+		})
+	}
 }
 
 func TestListGraphIsDirected(t *testing.T) {

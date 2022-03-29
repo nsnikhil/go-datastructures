@@ -5,6 +5,7 @@ import (
 	"github.com/nsnikhil/erx"
 	"github.com/nsnikhil/go-datastructures/functions/iterator"
 	"github.com/nsnikhil/go-datastructures/internal"
+	gmap "github.com/nsnikhil/go-datastructures/map"
 	"github.com/nsnikhil/go-datastructures/set"
 )
 
@@ -324,83 +325,98 @@ func (lg *listGraph[T]) HasBridge() bool {
 }
 
 func (lg *listGraph[T]) Clone() Graph[T] {
-	//	var cl func(curr *Node[T], cache map[*Node[T]]*Node[T]) *Node[T]
-	//	cl = func(curr *Node[T], cache map[*Node[T]]*Node[T]) *Node[T] {
-	//		if cache[curr] != nil {
-	//			return cache[curr]
-	//		}
-	//
-	//		n := NewNode(curr.data)
-	//		cache[curr] = n
-	//
-	//		for e := range curr.edges {
-	//			nx := e.next
-	//			var ne *edge[T]
-	//
-	//			if cache[nx] != nil {
-	//				ne = newDiEdge[T](cache[nx])
-	//			} else {
-	//				ne = newDiEdge[T](cl(nx, cache))
-	//			}
-	//
-	//			ne.weight = e.weight
-	//			n.addEdge(ne)
-	//		}
-	//
-	//		return n
-	//	}
-	//
-	//	cache := make(map[*Node[T]]*Node[T])
-	//	nodes := set.NewHashSet[*Node[T]]()
-	//
-	//	it := lg.nodes.Iterator()
-	//	for it.HasNext() {
-	//		v, _ := it.Next()
-	//		n := v
-	//		t := cache[n]
-	//		if cache[n] == nil {
-	//			nodes.Add(cl(n, cache))
-	//		} else {
-	//			nodes.Add(t)
-	//		}
-	//	}
-	//
-	//	return &listGraph[T]{
-	//		nodes: nodes,
-	//	}
-	return nil
+
+	var cl func(curr *Node[T], cache gmap.Map[*Node[T], *Node[T]]) *Node[T]
+	cl = func(curr *Node[T], cache gmap.Map[*Node[T], *Node[T]]) *Node[T] {
+		if v, err := cache.Get(curr); v != nil && err == nil {
+			return v
+		}
+
+		n := NewNode(curr.data)
+		cache.Put(curr, n)
+
+		it := curr.edges.Iterator()
+		for it.HasNext() {
+			e, _ := it.Next()
+
+			nx := e.next
+			var ne *edge[T]
+
+			if v, err := cache.Get(nx); v != nil && err == nil {
+				ne = newDiEdge[T](v)
+			} else {
+				ne = newDiEdge[T](cl(nx, cache))
+			}
+
+			ne.weight = e.weight
+			n.addEdge(ne)
+		}
+
+		return n
+	}
+
+	cache := gmap.NewHashMap[*Node[T], *Node[T]]()
+	nodes := set.NewHashSet[*Node[T]]()
+
+	it := lg.nodes.Iterator()
+	for it.HasNext() {
+		n, _ := it.Next()
+
+		t, err := cache.Get(n)
+		if err != nil {
+			nodes.Add(cl(n, cache))
+		} else {
+			nodes.Add(t)
+		}
+	}
+
+	return &listGraph[T]{
+		nodes: nodes,
+	}
 }
 
-func (lg *listGraph[T]) HasRoute(source, target *Node[T]) bool {
-	//	var visit func(curr, target *Node[T], visited map[*Node[T]]bool) bool
-	//	visit = func(curr, target *Node[T], visited map[*Node[T]]bool) bool {
-	//		visited[curr] = true
-	//
-	//		if curr == target {
-	//			return true
-	//		}
-	//
-	//		found := false
-	//		for e := range curr.edges {
-	//			nx := e.next
-	//
-	//			if nx == target {
-	//				found = true
-	//				break
-	//			}
-	//
-	//			if !visited[nx] && visit(nx, target, visited) {
-	//				found = true
-	//				break
-	//			}
-	//		}
-	//
-	//		return found
-	//	}
-	//
-	//	visited := make(map[*Node[T]]bool)
-	//	return visit(source, target, visited)
-	return false
+func (lg *listGraph[T]) HasRoute(source, target *Node[T]) (bool, error) {
+	if !lg.Contains(source) {
+		return false, nodeNotFoundError(source.data, "listGraph.HasRoute")
+	}
+
+	if !lg.Contains(target) {
+		return false, nodeNotFoundError(target.data, "listGraph.HasRoute")
+	}
+
+	var visit func(curr, target *Node[T], visited set.Set[*Node[T]]) bool
+
+	visit = func(curr, target *Node[T], visited set.Set[*Node[T]]) bool {
+		visited.Add(curr)
+
+		if curr == target {
+			return true
+		}
+
+		found := false
+
+		it := curr.edges.Iterator()
+		for it.HasNext() {
+			e, _ := it.Next()
+			nx := e.next
+
+			if nx == target {
+				found = true
+				break
+			}
+
+			if !visited.Contains(nx) && visit(nx, target, visited) {
+				found = true
+				break
+			}
+		}
+
+		return found
+	}
+
+	visited := set.NewHashSet[*Node[T]]()
+
+	return visit(source, target, visited), nil
 }
 
 func (lg *listGraph[T]) IsDirected() bool {

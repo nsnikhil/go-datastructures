@@ -35,7 +35,7 @@ type Graph[T comparable] interface {
 	Reverse()
 	Clone() Graph[T]
 
-	HasRoute(source, target *Node[T]) bool
+	HasRoute(source, target *Node[T]) (bool, error)
 
 	IsDirected() bool
 

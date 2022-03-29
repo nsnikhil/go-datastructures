@@ -114,8 +114,8 @@ func (isc intSliceComparator) Compare(a, b []int) int {
 	return 0
 }
 
-func getNodeWithVal(lg *listGraph[int], val int) *Node[int] {
-	it := lg.nodes.Iterator()
+func getNodeWithVal(g Graph[int], val int) *Node[int] {
+	it := g.(*listGraph[int]).nodes.Iterator()
 	for it.HasNext() {
 		n, _ := it.Next()
 		if n.data == val {
