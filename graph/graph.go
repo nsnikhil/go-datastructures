@@ -1,6 +1,9 @@
 package graph
 
-import "github.com/nsnikhil/go-datastructures/functions/iterator"
+import (
+	"github.com/nsnikhil/go-datastructures/functions/iterator"
+	"github.com/nsnikhil/go-datastructures/list"
+)
 
 type Graph[T comparable] interface {
 	AddNode(n *Node[T])
@@ -41,7 +44,7 @@ type Graph[T comparable] interface {
 
 	IsConnected() bool
 
-	GetConnectedComponents() [][]*Node[T]
+	GetConnectedComponents() []list.List[*Node[T]]
 
 	ShortestPath(source, target *Node[T]) []*Node[T]
 }

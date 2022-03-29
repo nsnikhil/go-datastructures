@@ -5,8 +5,10 @@ import (
 	"github.com/nsnikhil/erx"
 	"github.com/nsnikhil/go-datastructures/functions/iterator"
 	"github.com/nsnikhil/go-datastructures/internal"
+	"github.com/nsnikhil/go-datastructures/list"
 	gmap "github.com/nsnikhil/go-datastructures/map"
 	"github.com/nsnikhil/go-datastructures/set"
+	"github.com/nsnikhil/go-datastructures/stack"
 )
 
 type listGraph[T comparable] struct {
@@ -427,69 +429,76 @@ func (lg *listGraph[T]) IsConnected() bool {
 	return false
 }
 
-func (lg *listGraph[T]) GetConnectedComponents() [][]*Node[T] {
+func (lg *listGraph[T]) GetConnectedComponents() []list.List[*Node[T]] {
 	return koasraju(lg)
 }
 
-func koasraju[T comparable](lg *listGraph[T]) [][]*Node[T] {
-	return nil
-	//var pushToStack func(node *Node[T], visited map[*Node[T]]bool, st *stack.Stack[*Node[T]])
-	//pushToStack = func(node *Node[T], visited map[*Node[T]]bool, st *stack.Stack[*Node[T]]) {
-	//	visited[node] = true
-	//
-	//	for edge := range node.edges {
-	//		n := edgenext
-	//		if !visited[n] {
-	//			pushToStack(n, visited, st)
-	//		}
-	//	}
-	//
-	//	st.Push(node)
-	//}
-	//
-	//var printComponent func(node *Node[T], visited map[*Node[T]]bool, temp []*Node[T])
-	//printComponent = func(node *Node[T], visited map[*Node[T]]bool, temp []*Node[T]) {
-	//	visited[node] = true
-	//
-	//	for edge := range node.edges {
-	//		n := edgenext
-	//		if !visited[n] {
-	//			printComponent(n, visited, temp)
-	//		}
-	//	}
-	//
-	//	temp = append(temp, node)
-	//}
-	//
-	//st := stack.NewStack[*Node[T]]()
-	//visited := make(map[*Node[T]]bool)
-	//
-	//it := lg.nodes.Iterator()
-	//for it.HasNext() {
-	//	v, _ := it.Next()
-	//	node := v
-	//	if !visited[node] {
-	//		pushToStack(node, visited, st)
-	//	}
-	//}
-	//
-	//lg.Reverse()
-	//
-	//visited = make(map[*Node[T]]bool)
-	//
-	//res := make([][]*Node[T], 0)
-	//
-	//for !st.Empty() {
-	//	n, _ := st.Pop()
-	//
-	//	if !visited[n] {
-	//		temp := make([]*Node[T], 0)
-	//		printComponent(n, visited, temp)
-	//		res = append(res, temp)
-	//	}
-	//}
-	//
-	//return res
+func koasraju[T comparable](lg *listGraph[T]) []list.List[*Node[T]] {
+
+	var pushToStack func(node *Node[T], visited set.Set[*Node[T]], st *stack.Stack[*Node[T]])
+
+	pushToStack = func(node *Node[T], visited set.Set[*Node[T]], st *stack.Stack[*Node[T]]) {
+		visited.Add(node)
+
+		it := node.edges.Iterator()
+		for it.HasNext() {
+			e, _ := it.Next()
+			n := e.next
+			if !visited.Contains(n) {
+				pushToStack(n, visited, st)
+			}
+		}
+
+		st.Push(node)
+	}
+
+	var printComponent func(node *Node[T], visited set.Set[*Node[T]], temp list.List[*Node[T]])
+
+	printComponent = func(node *Node[T], visited set.Set[*Node[T]], temp list.List[*Node[T]]) {
+		visited.Add(node)
+
+		it := node.edges.Iterator()
+		for it.HasNext() {
+			e, _ := it.Next()
+			n := e.next
+			if !visited.Contains(n) {
+				printComponent(n, visited, temp)
+			}
+		}
+
+		temp.Add(node)
+	}
+
+	st := stack.NewStack[*Node[T]]()
+	visited := set.NewHashSet[*Node[T]]()
+
+	it := lg.nodes.Iterator()
+	for it.HasNext() {
+		v, _ := it.Next()
+		node := v
+		if !visited.Contains(node) {
+			pushToStack(node, visited, st)
+		}
+	}
+
+	//TODO: MUTATING THE GRAPH
+	lg.Reverse()
+
+	visited.Clear()
+
+	res := make([]list.List[*Node[T]], 0)
+
+	for !st.Empty() {
+		n, _ := st.Pop()
+
+		if !visited.Contains(n) {
+			temp := list.NewArrayList[*Node[T]]()
+			printComponent(n, visited, temp)
+			res = append(res, temp)
+		}
+	}
+
+	return res
 }
 
 func (lg *listGraph[T]) ShortestPath(source, target *Node[T]) []*Node[T] {

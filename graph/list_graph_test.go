@@ -3,6 +3,7 @@ package graph
 import (
 	"errors"
 	"github.com/nsnikhil/go-datastructures/internal"
+	"github.com/nsnikhil/go-datastructures/list"
 	"github.com/nsnikhil/go-datastructures/set"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -953,7 +954,113 @@ func TestListGraphIsConnected(t *testing.T) {
 }
 
 func TestListGraphGetConnectedComponents(t *testing.T) {
+	testCases := map[string]struct {
+		actualResult   func() []list.List[*Node[int]]
+		expectedResult func() []list.List[*Node[int]]
+	}{
+		"get empty list when graph is empty": {
+			actualResult: func() []list.List[*Node[int]] {
+				return NewListGraph[int]().GetConnectedComponents()
+			},
+			expectedResult: func() []list.List[*Node[int]] {
+				return []list.List[*Node[int]]{}
+			},
+		},
+		"get individual nodes when graph has not edges": {
+			actualResult: func() []list.List[*Node[int]] {
+				g := NewListGraph[int]()
 
+				for i := 0; i < 10; i++ {
+					g.AddNode(NewNode[int](i))
+				}
+
+				return g.GetConnectedComponents()
+			},
+			expectedResult: func() []list.List[*Node[int]] {
+				var res []list.List[*Node[int]]
+				for i := 9; i >= 0; i-- {
+					res = append(res, list.NewArrayList[*Node[int]](NewNode[int](i)))
+				}
+				return res
+			},
+		},
+		"get connected component scenario one": {
+			actualResult: func() []list.List[*Node[int]] {
+				g, _ := graphFour()
+				return g.GetConnectedComponents()
+			},
+			expectedResult: func() []list.List[*Node[int]] {
+
+				addData := func(res *[]list.List[*Node[int]], elements ...int) {
+					temp := list.NewArrayList[*Node[int]]()
+					for _, element := range elements {
+						temp.Add(NewNode[int](element))
+					}
+					*res = append(*res, temp)
+				}
+
+				var res []list.List[*Node[int]]
+				addData(&res, 0)
+				addData(&res, 5)
+				addData(&res, 3, 2, 1)
+				addData(&res, 4)
+				return res
+			},
+		},
+		"get connected component scenario two": {
+			actualResult: func() []list.List[*Node[int]] {
+				g, _ := graphTwentyTwo()
+				return g.GetConnectedComponents()
+			},
+			expectedResult: func() []list.List[*Node[int]] {
+
+				addData := func(res *[]list.List[*Node[int]], elements ...int) {
+					temp := list.NewArrayList[*Node[int]]()
+					for _, element := range elements {
+						temp.Add(NewNode[int](element))
+					}
+					*res = append(*res, temp)
+				}
+
+				var res []list.List[*Node[int]]
+				addData(&res, 0)
+				addData(&res, 3)
+				addData(&res, 4)
+				addData(&res, 5)
+				addData(&res, 1)
+				addData(&res, 2)
+				return res
+			},
+		},
+		"get connected component scenario three": {
+			actualResult: func() []list.List[*Node[int]] {
+				g, _ := graphTwentyFour()
+				return g.GetConnectedComponents()
+			},
+			expectedResult: func() []list.List[*Node[int]] {
+
+				addData := func(res *[]list.List[*Node[int]], elements ...int) {
+					temp := list.NewArrayList[*Node[int]]()
+					for _, element := range elements {
+						temp.Add(NewNode[int](element))
+					}
+					*res = append(*res, temp)
+				}
+
+				var res []list.List[*Node[int]]
+				addData(&res, 12, 14, 13, 11, 10)
+				addData(&res, 9, 8)
+				addData(&res, 3, 5, 6, 7, 4, 2, 1, 0)
+				return res
+			},
+		},
+	}
+
+	for name, testCase := range testCases {
+		t.Run(name, func(t *testing.T) {
+			assert.True(t, areComponentsEqual(testCase.expectedResult(), testCase.actualResult()))
+		})
+	}
 }
 
 func TestListGraphShortestPath(t *testing.T) {

@@ -125,3 +125,46 @@ func getNodeWithVal(g Graph[int], val int) *Node[int] {
 
 	return nil
 }
+
+//TODO: REFACTOR
+func areComponentsEqual(a, b []list.List[*Node[int]]) bool {
+	if len(a) != len(b) {
+		return false
+	}
+
+	toSlice := func(l list.List[*Node[int]]) []int {
+		res := make([]int, l.Size())
+		k := 0
+
+		it := l.Iterator()
+		for it.HasNext() {
+			v, _ := it.Next()
+			res[k] = v.data
+			k++
+		}
+
+		return res
+	}
+
+	sliceEquals := func(a, b []int) bool {
+		if len(a) != len(b) {
+			return false
+		}
+
+		for i := 0; i < len(a); i++ {
+			if a[i] != b[i] {
+				return false
+			}
+		}
+
+		return true
+	}
+
+	for i := 0; i < len(a); i++ {
+		if !sliceEquals(toSlice(a[i]), toSlice(b[i])) {
+			return false
+		}
+	}
+
+	return true
+}
