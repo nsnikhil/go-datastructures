@@ -11,6 +11,7 @@ import (
 	"github.com/nsnikhil/go-datastructures/queue"
 	"github.com/nsnikhil/go-datastructures/set"
 	"github.com/nsnikhil/go-datastructures/stack"
+	"math"
 )
 
 type listGraph[T comparable] struct {
@@ -533,6 +534,8 @@ func (lg *listGraph[T]) ShortestPath(source, target *Node[T], properties ...Prop
 
 	if ps.Contains(UnWeighted) {
 		return nonWeightedShortestPath(source, target)
+	} else if ps.Contains(directed) && ps.Contains(aCyclic) {
+		return dagShortestPath(source, target, lg)
 	}
 
 	return nil, errors.New("TODO")
@@ -623,47 +626,108 @@ func nonWeightedShortestPath[T comparable](source, target *Node[T]) (list.List[*
 	return res, nil
 }
 
-func dagShortestPath[T comparable](lg *listGraph[T]) list.List[*Node[T]] {
-	return nil
-	//var updateCost func(curr *Node[T])
-	//
-	//updateCost = func(curr *Node[T]) {
-	//	for edge := range curr.edges {
-	//		n := edgenext
-	//
-	//		if n.costToReach > curr.costToReach+edge.weight {
-	//			n.costToReach = curr.costToReach + edge.weight
-	//		}
-	//	}
-	//}
-	//
-	//first := true
-	//var firstNode *Node[T]
-	//
-	//it := lg.nodes.Iterator()
-	//for it.HasNext() {
-	//	v, _ := it.Next()
-	//	node := v
-	//	if first {
-	//		firstNode = node
-	//		node.costToReach = 0
-	//		first = false
-	//	}
-	//
-	//	updateCost(node)
-	//}
-	//
-	//if firstNode == nil {
-	//	return
-	//}
-	//
-	//it = lg.nodes.Iterator()
-	//for it.HasNext() {
-	//	v, _ := it.Next()
-	//	curr := v
-	//	fmt.Printf("%v : %d\n", currdata, curr.costToReach)
-	//}
+func dagShortestPath[T comparable](source, target *Node[T], lg *listGraph[T]) (list.List[*Node[T]], error) {
+	cm := gmap.NewHashMap[*Node[T], int64]()
+	pm := gmap.NewHashMap[*Node[T], *Node[T]]()
 
+	sortedNodes := lg.topologicalSort()
+
+	it := lg.nodes.Iterator()
+	for it.HasNext() {
+		n, _ := it.Next()
+		pm.Put(n, nil)
+
+		if n == source {
+			cm.Put(n, internal.Zero)
+		} else {
+			cm.Put(n, math.MaxInt64)
+		}
+	}
+
+	for !sortedNodes.Empty() {
+		n, _ := sortedNodes.Pop()
+
+		currCost, _ := cm.Get(n)
+		if currCost == math.MaxInt64 {
+			continue
+		}
+
+		it := n.edges.Iterator()
+
+		for it.HasNext() {
+			e, _ := it.Next()
+			nx := e.next
+
+			costToReachNext, _ := cm.Get(nx)
+
+			if costToReachNext > currCost+e.weight {
+				cm.Put(nx, currCost+e.weight)
+				pm.Put(nx, n)
+			}
+		}
+	}
+
+	curr := target
+	if !pm.ContainsKey(target) || first(cm.Get(target)) == math.MaxInt64 {
+		//TODO: REFACTOR OPERATION
+		return nil, pathNotFoundError(source.data, target.data, "nonWeightedShortestPath")
+	}
+
+	res := list.NewLinkedList[*Node[T]]()
+
+	for pm.ContainsKey(curr) {
+		res.AddFirst(curr)
+
+		if curr == source {
+			break
+		}
+
+		par, err := pm.Get(curr)
+		if err != nil {
+			//TODO: REFACTOR OPERATION
+			return nil, pathNotFoundError(source.data, target.data, "nonWeightedShortestPath")
+		}
+
+		curr = par
+	}
+
+	return res, nil
+}
+
+func (lg *listGraph[T]) topologicalSort() *stack.Stack[*Node[T]] {
+	var topologicalSortUtil func(n *Node[T], vs set.Set[*Node[T]], st *stack.Stack[*Node[T]])
+
+	topologicalSortUtil = func(n *Node[T], vs set.Set[*Node[T]], st *stack.Stack[*Node[T]]) {
+		if n == nil || vs.Contains(n) {
+			return
+		}
+
+		it := n.edges.Iterator()
+		for it.HasNext() {
+			e, _ := it.Next()
+			nx := e.next
+
+			if !vs.Contains(nx) {
+				topologicalSortUtil(nx, vs, st)
+			}
+		}
+
+		st.Push(n)
+		vs.Add(n)
+	}
+
+	st := stack.NewStack[*Node[T]]()
+	vs := set.NewHashSet[*Node[T]]()
+
+	it := lg.nodes.Iterator()
+	for it.HasNext() {
+		n, _ := it.Next()
+		if !vs.Contains(n) {
+			topologicalSortUtil(n, vs, st)
+		}
+	}
+
+	return st
 }
 
 type nodeComparator[T comparable] struct {
@@ -761,4 +825,8 @@ func bellmenFord[T comparable](start *Node[T], lg *listGraph[T]) list.List[*Node
 	//	fmt.Printf("%v %d\n", nodedata, node.costToReach)
 	//}
 
+}
+
+func first[T any, E any](first T, second E) T {
+	return first
 }
