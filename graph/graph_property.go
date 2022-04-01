@@ -12,8 +12,9 @@ const (
 	cyclic  = "cyclic"
 	ACyclic = "ACyclic"
 
-	negativeWeights = "negativeWeights"
-	negativeCycles  = "negativeCycles"
+	NonNegativeWeights = "NonNegativeWeights"
+	negativeWeights    = "negativeWeights"
+	negativeCycles     = "negativeCycles"
 
 	connected    = "connected"
 	disConnected = "disConnected"

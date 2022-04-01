@@ -1266,6 +1266,361 @@ func TestListGraphDirectedAcyclicGraphShortestPath(t *testing.T) {
 	}
 }
 
+func TestListGraphNonNegativeWeightGraphShortestPath(t *testing.T) {
+	toList := func(data ...int) list.List[*Node[int]] {
+		res := list.NewLinkedList[*Node[int]]()
+		for _, e := range data {
+			res.Add(NewNode[int](e))
+		}
+		return res
+	}
+
+	testCases := map[string]struct {
+		actualResult   func() (list.List[*Node[int]], error)
+		expectedResult list.List[*Node[int]]
+		expectedError  error
+	}{
+		"should return shortest path for non negative graph scenario one": {
+			actualResult: func() (list.List[*Node[int]], error) {
+				g, _ := graphOne()
+				a := getNodeWithVal(g, 6)
+				b := getNodeWithVal(g, 4)
+				return g.ShortestPath(a, b, NonNegativeWeights)
+			},
+			expectedResult: toList(6, 5, 4),
+		},
+		"should return shortest path for non negative graph scenario two": {
+			actualResult: func() (list.List[*Node[int]], error) {
+				g, _ := graphOne()
+				a := getNodeWithVal(g, 6)
+				b := getNodeWithVal(g, 4)
+				return g.ShortestPath(b, a, NonNegativeWeights)
+			},
+			expectedResult: toList(4, 6),
+		},
+		"should return shortest path for non negative graph scenario three": {
+			actualResult: func() (list.List[*Node[int]], error) {
+				g, _ := graphFour()
+				a := getNodeWithVal(g, 0)
+				b := getNodeWithVal(g, 2)
+				return g.ShortestPath(a, b, NonNegativeWeights)
+			},
+			expectedResult: toList(0, 1, 3, 2),
+		},
+		"should return shortest path for non negative graph scenario four": {
+			actualResult: func() (list.List[*Node[int]], error) {
+				g, _ := graphTwentyFour()
+				a := getNodeWithVal(g, 5)
+				b := getNodeWithVal(g, 6)
+				return g.ShortestPath(a, b, NonNegativeWeights)
+			},
+			expectedResult: toList(5, 1, 2, 6),
+		},
+		"should return shortest path for non negative graph scenario five": {
+			actualResult: func() (list.List[*Node[int]], error) {
+				g, _ := graphNineTeen()
+				a := getNodeWithVal(g, 4)
+				b := getNodeWithVal(g, 5)
+				return g.ShortestPath(a, b, NonNegativeWeights)
+			},
+			expectedResult: toList(4, 6, 7, 5),
+		},
+		"should return shortest path for non negative graph scenario six": {
+			actualResult: func() (list.List[*Node[int]], error) {
+				g, _ := graphNineTeen()
+				a := getNodeWithVal(g, 7)
+				b := getNodeWithVal(g, 5)
+				return g.ShortestPath(a, b, NonNegativeWeights)
+			},
+			expectedResult: toList(7, 5),
+		},
+		"should return shortest path for non negative graph scenario seven": {
+			actualResult: func() (list.List[*Node[int]], error) {
+				g, _ := graphTwentyOne()
+				a := getNodeWithVal(g, 0)
+				b := getNodeWithVal(g, 2)
+				return g.ShortestPath(a, b, NonNegativeWeights)
+			},
+			expectedResult: toList(0, 1, 3, 2),
+		},
+		"should return shortest path for non negative graph scenario eight": {
+			actualResult: func() (list.List[*Node[int]], error) {
+				g, _ := graphTwentyTwo()
+				a := getNodeWithVal(g, 0)
+				b := getNodeWithVal(g, 2)
+				return g.ShortestPath(a, b, NonNegativeWeights)
+			},
+			expectedResult: toList(0, 3, 2),
+		},
+		"should return shortest path for non negative graph scenario nine": {
+			actualResult: func() (list.List[*Node[int]], error) {
+				g, _ := graphEighteen()
+				a := getNodeWithVal(g, 5)
+				b := getNodeWithVal(g, 1)
+				return g.ShortestPath(a, b, NonNegativeWeights)
+			},
+			expectedResult: toList(5, 3, 2, 1),
+		},
+		"should return shortest path for non negative graph scenario ten": {
+			actualResult: func() (list.List[*Node[int]], error) {
+				g, _ := graphTwentyFive()
+				a := getNodeWithVal(g, 0)
+				b := getNodeWithVal(g, 4)
+				return g.ShortestPath(a, b, NonNegativeWeights)
+			},
+			expectedResult: toList(0, 1, 2, 6, 7, 4),
+		},
+		"should return error when no path exists between source and target scenario one": {
+			actualResult: func() (list.List[*Node[int]], error) {
+				g, _ := graphTwentyTwo()
+				a := getNodeWithVal(g, 5)
+				b := getNodeWithVal(g, 4)
+				return g.ShortestPath(a, b, NonNegativeWeights)
+			},
+			expectedError: errors.New("path 5 to 4 not found in the graph"),
+		},
+		"should return error when no path exists between source and target scenario two": {
+			actualResult: func() (list.List[*Node[int]], error) {
+				g, _ := graphTwentyOne()
+				a := getNodeWithVal(g, 3)
+				b := getNodeWithVal(g, 1)
+				return g.ShortestPath(a, b, NonNegativeWeights)
+			},
+			expectedError: errors.New("path 3 to 1 not found in the graph"),
+		},
+		"should return error when no path exists between source and target scenario three": {
+			actualResult: func() (list.List[*Node[int]], error) {
+				g, _ := graphTwentyFour()
+				a := getNodeWithVal(g, 7)
+				b := getNodeWithVal(g, 11)
+				return g.ShortestPath(a, b, NonNegativeWeights)
+			},
+			expectedError: errors.New("path 7 to 11 not found in the graph"),
+		},
+		"should return error when no path exists between source and target scenario four": {
+			actualResult: func() (list.List[*Node[int]], error) {
+				g, _ := graphFour()
+				a := getNodeWithVal(g, 2)
+				b := getNodeWithVal(g, 0)
+				return g.ShortestPath(a, b, NonNegativeWeights)
+			},
+			expectedError: errors.New("path 2 to 0 not found in the graph"),
+		},
+		"should return error source vertex is not present in the graph": {
+			actualResult: func() (list.List[*Node[int]], error) {
+				g := NewListGraph[int]()
+				a := NewNode[int](1)
+				b := NewNode[int](2)
+
+				return g.ShortestPath(a, b, NonNegativeWeights)
+			},
+			expectedError: errors.New("node 1 not found in the graph"),
+		},
+		"should return error target vertex is not present in the graph": {
+			actualResult: func() (list.List[*Node[int]], error) {
+				g := NewListGraph[int]()
+				a := NewNode[int](1)
+				b := NewNode[int](2)
+
+				g.AddNode(a)
+
+				return g.ShortestPath(a, b, NonNegativeWeights)
+			},
+			expectedError: errors.New("node 2 not found in the graph"),
+		},
+	}
+
+	for name, testCase := range testCases {
+		t.Run(name, func(t *testing.T) {
+			res, err := testCase.actualResult()
+			assert.True(t, isListEqual(testCase.expectedResult, res))
+			internal.AssertErrorEquals(t, testCase.expectedError, err)
+		})
+	}
+}
+
+func TestListGraphGraphShortestPath(t *testing.T) {
+	toList := func(data ...int) list.List[*Node[int]] {
+		res := list.NewLinkedList[*Node[int]]()
+		for _, e := range data {
+			res.Add(NewNode[int](e))
+		}
+		return res
+	}
+
+	testCases := map[string]struct {
+		actualResult   func() (list.List[*Node[int]], error)
+		expectedResult list.List[*Node[int]]
+		expectedError  error
+	}{
+		"should return shortest path for graph scenario one": {
+			actualResult: func() (list.List[*Node[int]], error) {
+				g, _ := graphOne()
+				a := getNodeWithVal(g, 6)
+				b := getNodeWithVal(g, 4)
+				return g.ShortestPath(a, b)
+			},
+			expectedResult: toList(6, 5, 4),
+		},
+		"should return shortest path for graph scenario two": {
+			actualResult: func() (list.List[*Node[int]], error) {
+				g, _ := graphOne()
+				a := getNodeWithVal(g, 6)
+				b := getNodeWithVal(g, 4)
+				return g.ShortestPath(b, a)
+			},
+			expectedResult: toList(4, 6),
+		},
+		"should return shortest path for graph scenario three": {
+			actualResult: func() (list.List[*Node[int]], error) {
+				g, _ := graphFour()
+				a := getNodeWithVal(g, 0)
+				b := getNodeWithVal(g, 2)
+				return g.ShortestPath(a, b)
+			},
+			expectedResult: toList(0, 1, 3, 2),
+		},
+		"should return shortest path for graph scenario four": {
+			actualResult: func() (list.List[*Node[int]], error) {
+				g, _ := graphTwentyFour()
+				a := getNodeWithVal(g, 5)
+				b := getNodeWithVal(g, 6)
+				return g.ShortestPath(a, b)
+			},
+			expectedResult: toList(5, 1, 2, 6),
+		},
+		"should return shortest path for graph scenario five": {
+			actualResult: func() (list.List[*Node[int]], error) {
+				g, _ := graphNineTeen()
+				a := getNodeWithVal(g, 4)
+				b := getNodeWithVal(g, 5)
+				return g.ShortestPath(a, b)
+			},
+			expectedResult: toList(4, 6, 7, 5),
+		},
+		"should return shortest path for graph scenario six": {
+			actualResult: func() (list.List[*Node[int]], error) {
+				g, _ := graphNineTeen()
+				a := getNodeWithVal(g, 7)
+				b := getNodeWithVal(g, 5)
+				return g.ShortestPath(a, b)
+			},
+			expectedResult: toList(7, 5),
+		},
+		"should return shortest path for graph scenario seven": {
+			actualResult: func() (list.List[*Node[int]], error) {
+				g, _ := graphTwentyOne()
+				a := getNodeWithVal(g, 0)
+				b := getNodeWithVal(g, 2)
+				return g.ShortestPath(a, b)
+			},
+			expectedResult: toList(0, 1, 3, 2),
+		},
+		"should return shortest path for graph scenario eight": {
+			actualResult: func() (list.List[*Node[int]], error) {
+				g, _ := graphTwentyTwo()
+				a := getNodeWithVal(g, 0)
+				b := getNodeWithVal(g, 2)
+				return g.ShortestPath(a, b)
+			},
+			expectedResult: toList(0, 3, 2),
+		},
+		"should return shortest path for graph scenario nine": {
+			actualResult: func() (list.List[*Node[int]], error) {
+				g, _ := graphEighteen()
+				a := getNodeWithVal(g, 5)
+				b := getNodeWithVal(g, 1)
+				return g.ShortestPath(a, b)
+			},
+			expectedResult: toList(5, 3, 2, 1),
+		},
+		"should return shortest path for graph scenario ten": {
+			actualResult: func() (list.List[*Node[int]], error) {
+				g, _ := graphTwentyFive()
+				a := getNodeWithVal(g, 0)
+				b := getNodeWithVal(g, 4)
+				return g.ShortestPath(a, b)
+			},
+			expectedResult: toList(0, 1, 2, 6, 7, 4),
+		},
+		"should return error when no path exists between source and target scenario one": {
+			actualResult: func() (list.List[*Node[int]], error) {
+				g, _ := graphTwentyTwo()
+				a := getNodeWithVal(g, 5)
+				b := getNodeWithVal(g, 4)
+				return g.ShortestPath(a, b)
+			},
+			expectedError: errors.New("path 5 to 4 not found in the graph"),
+		},
+		"should return error when no path exists between source and target scenario two": {
+			actualResult: func() (list.List[*Node[int]], error) {
+				g, _ := graphTwentyOne()
+				a := getNodeWithVal(g, 3)
+				b := getNodeWithVal(g, 1)
+				return g.ShortestPath(a, b)
+			},
+			expectedError: errors.New("path 3 to 1 not found in the graph"),
+		},
+		"should return error when no path exists between source and target scenario three": {
+			actualResult: func() (list.List[*Node[int]], error) {
+				g, _ := graphTwentyFour()
+				a := getNodeWithVal(g, 7)
+				b := getNodeWithVal(g, 11)
+				return g.ShortestPath(a, b)
+			},
+			expectedError: errors.New("path 7 to 11 not found in the graph"),
+		},
+		"should return error when no path exists between source and target scenario four": {
+			actualResult: func() (list.List[*Node[int]], error) {
+				g, _ := graphFour()
+				a := getNodeWithVal(g, 2)
+				b := getNodeWithVal(g, 0)
+				return g.ShortestPath(a, b)
+			},
+			expectedError: errors.New("path 2 to 0 not found in the graph"),
+		},
+		"should return error when graph has negative weight cycle": {
+			actualResult: func() (list.List[*Node[int]], error) {
+				g, _ := graphTwentyThree()
+				a := getNodeWithVal(g, 0)
+				b := getNodeWithVal(g, 4)
+				return g.ShortestPath(a, b)
+			},
+			expectedError: errors.New("graph has negative weight cycle"),
+		},
+		"should return error source vertex is not present in the graph": {
+			actualResult: func() (list.List[*Node[int]], error) {
+				g := NewListGraph[int]()
+				a := NewNode[int](1)
+				b := NewNode[int](2)
+
+				return g.ShortestPath(a, b)
+			},
+			expectedError: errors.New("node 1 not found in the graph"),
+		},
+		"should return error target vertex is not present in the graph": {
+			actualResult: func() (list.List[*Node[int]], error) {
+				g := NewListGraph[int]()
+				a := NewNode[int](1)
+				b := NewNode[int](2)
+
+				g.AddNode(a)
+
+				return g.ShortestPath(a, b)
+			},
+			expectedError: errors.New("node 2 not found in the graph"),
+		},
+	}
+
+	for name, testCase := range testCases {
+		t.Run(name, func(t *testing.T) {
+			res, err := testCase.actualResult()
+			assert.True(t, isListEqual(testCase.expectedResult, res))
+			internal.AssertErrorEquals(t, testCase.expectedError, err)
+		})
+	}
+}
+
 func isListEqual(a, b list.List[*Node[int]]) bool {
 	if a == nil && b == nil {
 		return true

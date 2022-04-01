@@ -523,32 +523,25 @@ func (lg *listGraph[T]) ShortestPath(source, target *Node[T], properties ...Prop
 
 	ps := toPropertySet(properties...)
 
-	// unweighted Graph
-	// dag
-	// no negative weights -> dijkstra
-	// dijkstra modifications
+	//TODO: REFACTOR ALL THE ALGORITHM CONTAINS DUPLICATE CODE TO BACKTRACK NODES
 
-	// general case -> bellmen ford
-
-	// all pair shortest path -> floyd(DP)
-
+	//UnWeighted Graph -> BFS
 	if ps.Contains(UnWeighted) {
 		return nonWeightedShortestPath(source, target)
-	} else if ps.Contains(Directed) && ps.Contains(ACyclic) {
+	}
+
+	//DAG -> TOPOLOGICAL SORT
+	if ps.Contains(Directed) && ps.Contains(ACyclic) {
 		return dagShortestPath(source, target, lg)
 	}
 
-	return nil, errors.New("TODO")
+	//NON NEGATIVE WEIGHTS -> DIJKSTRA
+	if ps.Contains(NonNegativeWeights) {
+		return dijkstra(source, target, lg)
+	}
 
-	//if ps.Contains(UnWeighted) {
-	//	return nonWeightedShortestPath(source, target)
-	//} else if ps.Contains(Directed) && ps.Contains(ACyclic) {
-	//	return dagShortestPath()
-	//} else if !ps.Contains(negativeWeights) {
-	//	return dijkstra()
-	//} else {
-	//	return bellmenFord()
-	//}
+	//GENERAL CASE -> BELLMEN FORD
+	return bellmenFord(source, target, lg)
 }
 
 func nonWeightedShortestPath[T comparable](source, target *Node[T]) (list.List[*Node[T]], error) {
@@ -670,7 +663,7 @@ func dagShortestPath[T comparable](source, target *Node[T], lg *listGraph[T]) (l
 	curr := target
 	if !pm.ContainsKey(target) || first(cm.Get(target)) == math.MaxInt64 {
 		//TODO: REFACTOR OPERATION
-		return nil, pathNotFoundError(source.data, target.data, "nonWeightedShortestPath")
+		return nil, pathNotFoundError(source.data, target.data, "dagShortestPath")
 	}
 
 	res := list.NewLinkedList[*Node[T]]()
@@ -685,7 +678,7 @@ func dagShortestPath[T comparable](source, target *Node[T], lg *listGraph[T]) (l
 		par, err := pm.Get(curr)
 		if err != nil {
 			//TODO: REFACTOR OPERATION
-			return nil, pathNotFoundError(source.data, target.data, "nonWeightedShortestPath")
+			return nil, pathNotFoundError(source.data, target.data, "dagShortestPath")
 		}
 
 		curr = par
@@ -730,100 +723,206 @@ func (lg *listGraph[T]) topologicalSort() *stack.Stack[*Node[T]] {
 	return st
 }
 
-type nodeComparator[T comparable] struct {
+type nodeWrapper[T comparable] struct {
+	curr        *Node[T]
+	predecessor *Node[T]
+	costToReach int64
 }
 
-func (nc *nodeComparator[T]) Compare(one *Node[T], two *Node[T]) int {
-	return 0
-	//return int(one.costToReach - two.costToReach)
+type nodeComparator[T comparable] struct{}
+
+func (nc *nodeComparator[T]) Compare(one *nodeWrapper[T], two *nodeWrapper[T]) int {
+	return int(one.costToReach - two.costToReach)
 }
 
-func dijkstra[T comparable](start *Node[T], lg *listGraph[T]) list.List[*Node[T]] {
-	return nil
-	//var relaxCost func(curr *Node[T], q *queue.PriorityQueue[*Node[T]])
-	//relaxCost = func(curr *Node[T], q *queue.PriorityQueue[*Node[T]]) {
-	//
-	//	for edge := range curr.edges {
-	//		n := edgenext
-	//
-	//		if n.costToReach > curr.costToReach+edge.weight {
-	//
-	//			//TODO: NEED TO VERIFY IF THIS CHANGE WORKS
-	//			cp := n.copy()
-	//			cp.costToReach = curr.costToReach + edge.weight
-	//			q.Add(cp)
-	//
-	//		}
-	//	}
-	//
-	//}
+func dijkstra[T comparable](source, target *Node[T], lg *listGraph[T]) (list.List[*Node[T]], error) {
 
-	//type nodeWrapper struct {
-	//	*Node
-	//	costToReach int
-	//	predecessor *Node
-	//}
+	var relaxCost func(
+		*nodeWrapper[T],
+		queue.Queue[*nodeWrapper[T]],
+		gmap.Map[*Node[T], int64],
+		gmap.Map[*Node[T], *Node[T]],
+		set.Set[*Node[T]],
+	)
 
-	//start.costToReach = 0
-	//
-	//q := queue.NewPriorityQueue[*Node[T]](false, &nodeComparator[T]{})
-	//it := lg.nodes.Iterator()
-	//for it.HasNext() {
-	//	v, _ := it.Next()
-	//	node := v
-	//	q.Add(node)
-	//}
-	//
-	//relaxedNodes := set.NewHashSet[*Node[T]]()
-	//
-	//for !q.Empty() {
-	//	n, _ := q.Remove()
-	//
-	//	relaxedNodes.Add(n)
-	//
-	//	relaxCost(n, q)
-	//}
+	relaxCost = func(
+		currWrapper *nodeWrapper[T],
+		q queue.Queue[*nodeWrapper[T]],
+		cm gmap.Map[*Node[T], int64],
+		pm gmap.Map[*Node[T], *Node[T]],
+		relaxedNodes set.Set[*Node[T]],
+	) {
 
+		currCost, _ := cm.Get(currWrapper.curr)
+		if currCost == math.MaxInt64 {
+			return
+		}
+
+		it := currWrapper.curr.edges.Iterator()
+		for it.HasNext() {
+			e, _ := it.Next()
+			nx := e.next
+
+			if relaxedNodes.Contains(nx) {
+				continue
+			}
+
+			costToReach, _ := cm.Get(nx)
+
+			if costToReach > currCost+e.weight {
+				newCostToReach := currCost + e.weight
+				cm.Put(nx, newCostToReach)
+				pm.Put(nx, currWrapper.curr)
+				q.Add(&nodeWrapper[T]{curr: nx, costToReach: newCostToReach})
+			}
+		}
+	}
+
+	cm := gmap.NewHashMap[*Node[T], int64]()
+	pm := gmap.NewHashMap[*Node[T], *Node[T]]()
+
+	q := queue.NewPriorityQueue[*nodeWrapper[T]](false, &nodeComparator[T]{})
+
+	it := lg.nodes.Iterator()
+	for it.HasNext() {
+		n, _ := it.Next()
+		pm.Put(n, nil)
+
+		if n == source {
+			cm.Put(n, 0)
+			q.Add(&nodeWrapper[T]{curr: n, costToReach: 0})
+		} else {
+			cm.Put(n, math.MaxInt64)
+			q.Add(&nodeWrapper[T]{curr: n, costToReach: math.MaxInt64})
+		}
+	}
+
+	relaxedNodes := set.NewHashSet[*Node[T]]()
+
+	for !q.Empty() {
+		n, _ := q.Remove()
+
+		relaxCost(n, q, cm, pm, relaxedNodes)
+
+		relaxedNodes.Add(n.curr)
+	}
+
+	curr := target
+	if !pm.ContainsKey(target) || first(cm.Get(target)) == math.MaxInt64 {
+		//TODO: REFACTOR OPERATION
+		return nil, pathNotFoundError(source.data, target.data, "dijkstra")
+	}
+
+	res := list.NewLinkedList[*Node[T]]()
+
+	for pm.ContainsKey(curr) {
+		res.AddFirst(curr)
+
+		if curr == source {
+			break
+		}
+
+		par, err := pm.Get(curr)
+		if err != nil {
+			//TODO: REFACTOR OPERATION
+			return nil, pathNotFoundError(source.data, target.data, "dijkstra")
+		}
+
+		curr = par
+	}
+
+	return res, nil
 }
 
-func bellmenFord[T comparable](start *Node[T], lg *listGraph[T]) list.List[*Node[T]] {
-	return nil
-	//start.costToReach = 0
-	//
-	//edges := make(map[*edge[T]]*Node[T])
-	//
-	////INEFFICIENT
-	//it := lg.nodes.Iterator()
-	//for it.HasNext() {
-	//	v, _ := it.Next()
-	//	curr := v
-	//	for edge := range curr.edges {
-	//		edges[edge] = curr
-	//	}
-	//}
-	//
-	//it = lg.nodes.Iterator()
-	//for it.HasNext() {
-	//	for edge, source := range edges {
-	//		if edge.next.costToReach > source.costToReach+edge.weight {
-	//			edge.next.costToReach = source.costToReach + edge.weight
-	//		}
-	//	}
-	//}
-	//
-	//for edge, source := range edges {
-	//	if edge.next.costToReach > source.costToReach+edge.weight {
-	//		fmt.Println("negative cycle")
-	//		return
-	//	}
-	//}
-	//
-	//it = lg.nodes.Iterator()
-	//for it.HasNext() {
-	//	v, _ := it.Next()
-	//	node := v
-	//	fmt.Printf("%v %d\n", nodedata, node.costToReach)
-	//}
+func bellmenFord[T comparable](source, target *Node[T], lg *listGraph[T]) (list.List[*Node[T]], error) {
+	cm := gmap.NewHashMap[*Node[T], int64]()
+	pm := gmap.NewHashMap[*Node[T], *Node[T]]()
+
+	edges := gmap.NewHashMap[*edge[T], *Node[T]]()
+
+	//INEFFICIENT
+	nIt := lg.nodes.Iterator()
+	for nIt.HasNext() {
+		n, _ := nIt.Next()
+		pm.Put(n, nil)
+
+		if n == source {
+			cm.Put(n, 0)
+		} else {
+			cm.Put(n, math.MaxInt64)
+		}
+
+		eIt := n.edges.Iterator()
+		for eIt.HasNext() {
+			e, _ := eIt.Next()
+			edges.Put(e, n)
+		}
+	}
+
+	nIt = lg.nodes.Iterator()
+	for nIt.HasNext() {
+		_, _ = nIt.Next()
+
+		eIt := edges.Iterator()
+		for eIt.HasNext() {
+			p, _ := eIt.Next()
+			edge := p.First()
+			source := p.Second()
+
+			if first(cm.Get(source)) == math.MaxInt64 {
+				continue
+			}
+
+			if first(cm.Get(edge.next)) > first(cm.Get(source))+edge.weight {
+				cm.Put(edge.next, first(cm.Get(source))+edge.weight)
+				pm.Put(edge.next, source)
+			}
+
+		}
+	}
+
+	eIt := edges.Iterator()
+	for eIt.HasNext() {
+		p, _ := eIt.Next()
+		edge := p.First()
+		source := p.Second()
+
+		if first(cm.Get(source)) == math.MaxInt64 {
+			continue
+		}
+
+		if first(cm.Get(edge.next)) > first(cm.Get(source))+edge.weight {
+			return nil, erx.WithArgs(erx.Operation("bellmenFord"), errors.New("graph has negative weight cycle"))
+		}
+
+	}
+
+	curr := target
+	if !pm.ContainsKey(target) || first(cm.Get(target)) == math.MaxInt64 {
+		//TODO: REFACTOR OPERATION
+		return nil, pathNotFoundError(source.data, target.data, "bellmenFord")
+	}
+
+	res := list.NewLinkedList[*Node[T]]()
+
+	for pm.ContainsKey(curr) {
+
+		res.AddFirst(curr)
+
+		if curr == source {
+			break
+		}
+
+		par, err := pm.Get(curr)
+		if err != nil {
+			//TODO: REFACTOR OPERATION
+			return nil, pathNotFoundError(source.data, target.data, "bellmenFord")
+		}
+
+		curr = par
+	}
+
+	return res, nil
 
 }
 
