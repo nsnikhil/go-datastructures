@@ -1,12 +1,14 @@
 package graph
 
 import (
+	"errors"
 	"fmt"
 	"github.com/nsnikhil/erx"
 	"github.com/nsnikhil/go-datastructures/functions/iterator"
 	"github.com/nsnikhil/go-datastructures/internal"
 	"github.com/nsnikhil/go-datastructures/list"
 	gmap "github.com/nsnikhil/go-datastructures/map"
+	"github.com/nsnikhil/go-datastructures/queue"
 	"github.com/nsnikhil/go-datastructures/set"
 	"github.com/nsnikhil/go-datastructures/stack"
 )
@@ -501,75 +503,120 @@ func koasraju[T comparable](lg *listGraph[T]) []list.List[*Node[T]] {
 	return res
 }
 
-//func (lg *listGraph[T]) ShortestPath(source, target *Node[T]) []*Node[T] {
-//	return nil
-// unweighted Graph
-// dag
-// no negative weights -> dijkstra
-// dijkstra modifications
+func (lg *listGraph[T]) ShortestPath(source, target *Node[T], properties ...Property) (list.List[*Node[T]], error) {
+	toPropertySet := func(properties ...Property) set.Set[Property] {
+		res := set.NewHashSet[Property]()
+		for _, property := range properties {
+			res.Add(property)
+		}
+		return res
+	}
 
-// general case -> bellmen ford
+	ps := toPropertySet(properties...)
 
-// all pair shortest path -> floyd(DP)
-//}
+	// unweighted Graph
+	// dag
+	// no negative weights -> dijkstra
+	// dijkstra modifications
 
-func nonWeightedShortestPath[T comparable](source, target *Node[T], lg *listGraph[T]) {
-	//visited := make(map[*Node[T]]bool)
-	//q := queue.NewLinkedQueue[*Node[T]]()
-	//
-	//q.Add(source)
-	//
-	//for !q.Empty() {
-	//	sz := q.Size()
-	//
-	//	found := false
-	//	for i := int64(0); i < sz; i++ {
-	//		e, _ := q.Remove()
-	//
-	//		for edge := range e.edges {
-	//			n := edgenext
-	//
-	//			if n == source {
-	//				continue
-	//			}
-	//
-	//			if !visited[n] {
-	//				if n.predecessor == nil {
-	//					n.predecessor = e
-	//				}
-	//
-	//				if n == target {
-	//					found = true
-	//					break
-	//				}
-	//
-	//				visited[n] = true
-	//				q.Add(n)
-	//			}
-	//		}
-	//
-	//		if found {
-	//			break
-	//		}
-	//
-	//	}
-	//
-	//	if found {
-	//		break
-	//	}
+	// general case -> bellmen ford
+
+	// all pair shortest path -> floyd(DP)
+
+	if ps.Contains(UnWeighted) {
+		return nonWeightedShortestPath(source, target)
+	}
+
+	return nil, errors.New("TODO")
+
+	//if ps.Contains(UnWeighted) {
+	//	return nonWeightedShortestPath(source, target)
+	//} else if ps.Contains(directed) && ps.Contains(aCyclic) {
+	//	return dagShortestPath()
+	//} else if !ps.Contains(negativeWeights) {
+	//	return dijkstra()
+	//} else {
+	//	return bellmenFord()
 	//}
-	//
-	//curr := target
-	//
-	//for curr != nil {
-	//	fmt.Printf("%v ", currdata)
-	//
-	//	curr = curr.predecessor
-	//}
-
 }
 
-func dagShortestPath[T comparable](lg *listGraph[T]) {
+func nonWeightedShortestPath[T comparable](source, target *Node[T]) (list.List[*Node[T]], error) {
+	vs := set.NewHashSet[*Node[T]]()
+	q := queue.NewLinkedQueue[*Node[T]]()
+
+	pm := gmap.NewHashMap[*Node[T], *Node[T]]()
+
+	q.Add(source)
+	vs.Add(source)
+	pm.Put(source, nil)
+
+	for !q.Empty() {
+		sz := q.Size()
+
+		found := false
+		for i := int64(0); i < sz; i++ {
+			n, _ := q.Remove()
+
+			it := n.edges.Iterator()
+			for it.HasNext() {
+				e, _ := it.Next()
+				nx := e.next
+
+				if !vs.Contains(nx) {
+					if !pm.ContainsKey(nx) {
+						pm.Put(nx, n)
+					}
+
+					if nx == target {
+						found = true
+						break
+					}
+
+					vs.Add(nx)
+					q.Add(nx)
+				}
+			}
+
+			if found {
+				break
+			}
+
+		}
+
+		if found {
+			break
+		}
+	}
+
+	curr := target
+	if !pm.ContainsKey(target) {
+		//TODO: REFACTOR OPERATION
+		return nil, pathNotFoundError(source.data, target.data, "nonWeightedShortestPath")
+	}
+
+	res := list.NewLinkedList[*Node[T]]()
+
+	for pm.ContainsKey(curr) {
+		res.AddFirst(curr)
+
+		if curr == source {
+			break
+		}
+
+		par, err := pm.Get(curr)
+		if err != nil {
+			//TODO: REFACTOR OPERATION
+			return nil, pathNotFoundError(source.data, target.data, "nonWeightedShortestPath")
+		}
+
+		curr = par
+	}
+
+	return res, nil
+}
+
+func dagShortestPath[T comparable](lg *listGraph[T]) list.List[*Node[T]] {
+	return nil
 	//var updateCost func(curr *Node[T])
 	//
 	//updateCost = func(curr *Node[T]) {
@@ -619,7 +666,8 @@ func (nc *nodeComparator[T]) Compare(one *Node[T], two *Node[T]) int {
 	//return int(one.costToReach - two.costToReach)
 }
 
-func dijkstra[T comparable](start *Node[T], lg *listGraph[T]) {
+func dijkstra[T comparable](start *Node[T], lg *listGraph[T]) list.List[*Node[T]] {
+	return nil
 	//var relaxCost func(curr *Node[T], q *queue.PriorityQueue[*Node[T]])
 	//relaxCost = func(curr *Node[T], q *queue.PriorityQueue[*Node[T]]) {
 	//
@@ -666,7 +714,8 @@ func dijkstra[T comparable](start *Node[T], lg *listGraph[T]) {
 
 }
 
-func bellmenFord[T comparable](start *Node[T], lg *listGraph[T]) {
+func bellmenFord[T comparable](start *Node[T], lg *listGraph[T]) list.List[*Node[T]] {
+	return nil
 	//start.costToReach = 0
 	//
 	//edges := make(map[*edge[T]]*Node[T])

@@ -46,5 +46,5 @@ type Graph[T comparable] interface {
 
 	GetConnectedComponents() []list.List[*Node[T]]
 
-	//ShortestPath(source, target *Node[T]) []*Node[T]
+	ShortestPath(source, target *Node[T], properties ...Property) (list.List[*Node[T]], error)
 }

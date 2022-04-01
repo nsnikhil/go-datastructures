@@ -29,3 +29,11 @@ var emptyIteratorError = func(operation erx.Operation) *erx.Erx {
 		errors.New("iterator is empty"),
 	)
 }
+
+var pathNotFoundError = func(from, to interface{}, operation erx.Operation) *erx.Erx {
+	return erx.WithArgs(
+		erx.Kind("pathNotFoundError"),
+		operation,
+		fmt.Errorf("path %v to %v not found in the graph", from, to),
+	)
+}

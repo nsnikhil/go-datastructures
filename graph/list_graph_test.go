@@ -2,6 +2,7 @@ package graph
 
 import (
 	"errors"
+	"fmt"
 	"github.com/nsnikhil/go-datastructures/internal"
 	"github.com/nsnikhil/go-datastructures/list"
 	"github.com/nsnikhil/go-datastructures/set"
@@ -1063,6 +1064,121 @@ func TestListGraphGetConnectedComponents(t *testing.T) {
 	}
 }
 
-func TestListGraphShortestPath(t *testing.T) {
+func TestListGraphUnWeightedGraphShortestPath(t *testing.T) {
+	toList := func(data ...int) list.List[*Node[int]] {
+		res := list.NewLinkedList[*Node[int]]()
+		for _, e := range data {
+			res.Add(NewNode[int](e))
+		}
+		return res
+	}
 
+	testCases := map[string]struct {
+		actualResult   func() (list.List[*Node[int]], error)
+		expectedResult list.List[*Node[int]]
+		expectedError  error
+	}{
+		"should return shortest path for unweighted graph scenario one": {
+			actualResult: func() (list.List[*Node[int]], error) {
+				g, _ := graphOne()
+				a := getNodeWithVal(g, 6)
+				b := getNodeWithVal(g, 4)
+				return g.ShortestPath(a, b, UnWeighted)
+			},
+			expectedResult: toList(6, 5, 4),
+		},
+		"should return shortest path for unweighted graph scenario two": {
+			actualResult: func() (list.List[*Node[int]], error) {
+				g, _ := graphOne()
+				a := getNodeWithVal(g, 6)
+				b := getNodeWithVal(g, 4)
+				return g.ShortestPath(b, a, UnWeighted)
+			},
+			expectedResult: toList(4, 6),
+		},
+		"should return shortest path for unweighted graph scenario three": {
+			actualResult: func() (list.List[*Node[int]], error) {
+				g, _ := graphFour()
+				a := getNodeWithVal(g, 0)
+				b := getNodeWithVal(g, 2)
+				return g.ShortestPath(a, b, UnWeighted)
+			},
+			expectedResult: toList(0, 1, 3, 2),
+		},
+		"should return shortest path for unweighted graph scenario four": {
+			actualResult: func() (list.List[*Node[int]], error) {
+				g, _ := graphTwentyFour()
+				a := getNodeWithVal(g, 5)
+				b := getNodeWithVal(g, 6)
+				return g.ShortestPath(a, b, UnWeighted)
+			},
+			expectedResult: toList(5, 1, 2, 6),
+		},
+		"should return error when no path exists between source and target scenario one": {
+			actualResult: func() (list.List[*Node[int]], error) {
+				g, _ := graphTwentyFour()
+				a := getNodeWithVal(g, 7)
+				b := getNodeWithVal(g, 11)
+				return g.ShortestPath(a, b, UnWeighted)
+			},
+			expectedError: errors.New("path 7 to 11 not found in the graph"),
+		},
+		"should return error when no path exists between source and target scenario two": {
+			actualResult: func() (list.List[*Node[int]], error) {
+				g, _ := graphFour()
+				a := getNodeWithVal(g, 2)
+				b := getNodeWithVal(g, 0)
+				return g.ShortestPath(a, b, UnWeighted)
+			},
+			expectedError: errors.New("path 2 to 0 not found in the graph"),
+		},
+	}
+
+	for name, testCase := range testCases {
+		t.Run(name, func(t *testing.T) {
+			res, err := testCase.actualResult()
+			assert.True(t, isListEqual(testCase.expectedResult, res))
+			internal.AssertErrorEquals(t, testCase.expectedError, err)
+		})
+	}
+}
+
+func isListEqual(a, b list.List[*Node[int]]) bool {
+	if a == nil && b == nil {
+		return true
+	}
+
+	if a == nil || b == nil {
+		return false
+	}
+
+	if a.Size() != b.Size() {
+		printList(a)
+		printList(b)
+		return false
+	}
+
+	aIt := a.Iterator()
+	bIt := b.Iterator()
+
+	for aIt.HasNext() && bIt.HasNext() {
+		av, _ := aIt.Next()
+		bv, _ := bIt.Next()
+		if av.data != bv.data {
+			printList(a)
+			printList(b)
+			return false
+		}
+	}
+
+	return true
+}
+
+func printList(l list.List[*Node[int]]) {
+	it := l.Iterator()
+	for it.HasNext() {
+		v, _ := it.Next()
+		fmt.Printf("%v ", v)
+	}
+	fmt.Println()
 }
