@@ -1132,6 +1132,28 @@ func TestListGraphUnWeightedGraphShortestPath(t *testing.T) {
 			},
 			expectedError: errors.New("path 2 to 0 not found in the graph"),
 		},
+		"should return error source vertex is not present in the graph": {
+			actualResult: func() (list.List[*Node[int]], error) {
+				g := NewListGraph[int]()
+				a := NewNode[int](1)
+				b := NewNode[int](2)
+
+				return g.ShortestPath(a, b, UnWeighted)
+			},
+			expectedError: errors.New("node 1 not found in the graph"),
+		},
+		"should return error target vertex is not present in the graph": {
+			actualResult: func() (list.List[*Node[int]], error) {
+				g := NewListGraph[int]()
+				a := NewNode[int](1)
+				b := NewNode[int](2)
+
+				g.AddNode(a)
+
+				return g.ShortestPath(a, b, UnWeighted)
+			},
+			expectedError: errors.New("node 2 not found in the graph"),
+		},
 	}
 
 	for name, testCase := range testCases {

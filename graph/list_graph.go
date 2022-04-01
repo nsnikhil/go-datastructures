@@ -504,6 +504,14 @@ func koasraju[T comparable](lg *listGraph[T]) []list.List[*Node[T]] {
 }
 
 func (lg *listGraph[T]) ShortestPath(source, target *Node[T], properties ...Property) (list.List[*Node[T]], error) {
+	if !lg.Contains(source) {
+		return nil, nodeNotFoundError(source.data, "listGraph.ShortestPath")
+	}
+
+	if !lg.Contains(target) {
+		return nil, nodeNotFoundError(target.data, "listGraph.ShortestPath")
+	}
+
 	toPropertySet := func(properties ...Property) set.Set[Property] {
 		res := set.NewHashSet[Property]()
 		for _, property := range properties {
