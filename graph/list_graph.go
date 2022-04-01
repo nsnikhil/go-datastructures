@@ -534,7 +534,7 @@ func (lg *listGraph[T]) ShortestPath(source, target *Node[T], properties ...Prop
 
 	if ps.Contains(UnWeighted) {
 		return nonWeightedShortestPath(source, target)
-	} else if ps.Contains(directed) && ps.Contains(aCyclic) {
+	} else if ps.Contains(Directed) && ps.Contains(ACyclic) {
 		return dagShortestPath(source, target, lg)
 	}
 
@@ -542,7 +542,7 @@ func (lg *listGraph[T]) ShortestPath(source, target *Node[T], properties ...Prop
 
 	//if ps.Contains(UnWeighted) {
 	//	return nonWeightedShortestPath(source, target)
-	//} else if ps.Contains(directed) && ps.Contains(aCyclic) {
+	//} else if ps.Contains(Directed) && ps.Contains(ACyclic) {
 	//	return dagShortestPath()
 	//} else if !ps.Contains(negativeWeights) {
 	//	return dijkstra()

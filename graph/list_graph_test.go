@@ -521,7 +521,7 @@ func TestListGraphHasCycle(t *testing.T) {
 		assert.True(t, cyclicGraph.HasCycle())
 	}
 
-	aCyclicGraphs := getGraphs[int](aCyclic)
+	aCyclicGraphs := getGraphs[int](ACyclic)
 
 	for _, aCyclicGraph := range aCyclicGraphs {
 		assert.False(t, aCyclicGraph.HasCycle())
@@ -1184,7 +1184,7 @@ func TestListGraphDirectedAcyclicGraphShortestPath(t *testing.T) {
 				g, _ := graphNineTeen()
 				a := getNodeWithVal(g, 4)
 				b := getNodeWithVal(g, 5)
-				return g.ShortestPath(a, b, directed, aCyclic)
+				return g.ShortestPath(a, b, Directed, ACyclic)
 			},
 			expectedResult: toList(4, 6, 7, 5),
 		},
@@ -1193,7 +1193,7 @@ func TestListGraphDirectedAcyclicGraphShortestPath(t *testing.T) {
 				g, _ := graphNineTeen()
 				a := getNodeWithVal(g, 7)
 				b := getNodeWithVal(g, 5)
-				return g.ShortestPath(a, b, directed, aCyclic)
+				return g.ShortestPath(a, b, Directed, ACyclic)
 			},
 			expectedResult: toList(7, 5),
 		},
@@ -1202,7 +1202,7 @@ func TestListGraphDirectedAcyclicGraphShortestPath(t *testing.T) {
 				g, _ := graphTwentyOne()
 				a := getNodeWithVal(g, 0)
 				b := getNodeWithVal(g, 2)
-				return g.ShortestPath(a, b, directed, aCyclic)
+				return g.ShortestPath(a, b, Directed, ACyclic)
 			},
 			expectedResult: toList(0, 1, 3, 2),
 		},
@@ -1211,7 +1211,7 @@ func TestListGraphDirectedAcyclicGraphShortestPath(t *testing.T) {
 				g, _ := graphTwentyTwo()
 				a := getNodeWithVal(g, 0)
 				b := getNodeWithVal(g, 2)
-				return g.ShortestPath(a, b, directed, aCyclic)
+				return g.ShortestPath(a, b, Directed, ACyclic)
 			},
 			expectedResult: toList(0, 3, 2),
 		},
@@ -1220,7 +1220,7 @@ func TestListGraphDirectedAcyclicGraphShortestPath(t *testing.T) {
 				g, _ := graphTwentyTwo()
 				a := getNodeWithVal(g, 5)
 				b := getNodeWithVal(g, 4)
-				return g.ShortestPath(a, b, directed, aCyclic)
+				return g.ShortestPath(a, b, Directed, ACyclic)
 			},
 			expectedError: errors.New("path 5 to 4 not found in the graph"),
 		},
@@ -1229,7 +1229,7 @@ func TestListGraphDirectedAcyclicGraphShortestPath(t *testing.T) {
 				g, _ := graphTwentyOne()
 				a := getNodeWithVal(g, 3)
 				b := getNodeWithVal(g, 1)
-				return g.ShortestPath(a, b, directed, aCyclic)
+				return g.ShortestPath(a, b, Directed, ACyclic)
 			},
 			expectedError: errors.New("path 3 to 1 not found in the graph"),
 		},
@@ -1239,7 +1239,7 @@ func TestListGraphDirectedAcyclicGraphShortestPath(t *testing.T) {
 				a := NewNode[int](1)
 				b := NewNode[int](2)
 
-				return g.ShortestPath(a, b, directed, aCyclic)
+				return g.ShortestPath(a, b, Directed, ACyclic)
 			},
 			expectedError: errors.New("node 1 not found in the graph"),
 		},
@@ -1251,7 +1251,7 @@ func TestListGraphDirectedAcyclicGraphShortestPath(t *testing.T) {
 
 				g.AddNode(a)
 
-				return g.ShortestPath(a, b, directed, aCyclic)
+				return g.ShortestPath(a, b, Directed, ACyclic)
 			},
 			expectedError: errors.New("node 2 not found in the graph"),
 		},

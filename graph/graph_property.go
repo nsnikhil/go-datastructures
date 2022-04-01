@@ -6,11 +6,11 @@ const (
 	weighted   Property = "weighted"
 	UnWeighted          = "UnWeighted"
 
-	directed   = "directed"
+	Directed   = "Directed"
 	unDirected = "unDirected"
 
 	cyclic  = "cyclic"
-	aCyclic = "aCyclic"
+	ACyclic = "ACyclic"
 
 	negativeWeights = "negativeWeights"
 	negativeCycles  = "negativeCycles"

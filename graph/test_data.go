@@ -39,7 +39,7 @@ func graphOne() (Graph[int], propertySet) {
 	createEdge(g, false, six, five)
 	createEdge(g, false, five, four)
 
-	return g, newPropertySet(directed, UnWeighted, cyclic, connected, stronglyConnected)
+	return g, newPropertySet(Directed, UnWeighted, cyclic, connected, stronglyConnected)
 }
 
 func graphOneReverse() (Graph[int], propertySet) {
@@ -61,7 +61,7 @@ func graphOneReverse() (Graph[int], propertySet) {
 	createEdge(g, false, five, six)
 	createEdge(g, false, four, five)
 
-	return g, newPropertySet(directed, UnWeighted, cyclic, connected, stronglyConnected)
+	return g, newPropertySet(Directed, UnWeighted, cyclic, connected, stronglyConnected)
 }
 
 func graphTwo() (Graph[int], propertySet) {
@@ -83,7 +83,7 @@ func graphTwo() (Graph[int], propertySet) {
 	createEdge(g, false, one, two)
 	createEdge(g, false, two, zero)
 	createEdge(g, true, two, three)
-	return g, newPropertySet(directed, UnWeighted, cyclic, connected, stronglyConnected)
+	return g, newPropertySet(Directed, UnWeighted, cyclic, connected, stronglyConnected)
 }
 
 func graphThree() (Graph[int], propertySet) {
@@ -105,7 +105,7 @@ func graphThree() (Graph[int], propertySet) {
 	createEdge(g, false, one, two)
 	createEdge(g, false, two, zero)
 	createEdge(g, false, three, two)
-	return g, newPropertySet(directed, UnWeighted, cyclic, connected, weaklyConnected)
+	return g, newPropertySet(Directed, UnWeighted, cyclic, connected, weaklyConnected)
 }
 
 func graphFour() (Graph[int], propertySet) {
@@ -129,7 +129,7 @@ func graphFour() (Graph[int], propertySet) {
 	createEdge(g, false, one, three, four)
 	createEdge(g, false, two, one)
 	createEdge(g, false, three, two, four)
-	return g, newPropertySet(directed, UnWeighted, cyclic, connected, weaklyConnected)
+	return g, newPropertySet(Directed, UnWeighted, cyclic, connected, weaklyConnected)
 }
 
 func graphFive() (Graph[int], propertySet) {
@@ -158,7 +158,7 @@ func graphFive() (Graph[int], propertySet) {
 	createEdge(g, false, three, two, four)
 	createEdge(g, false, four, five)
 	createEdge(g, false, five, three)
-	return g, newPropertySet(directed, UnWeighted, cyclic, connected, weaklyConnected)
+	return g, newPropertySet(Directed, UnWeighted, cyclic, connected, weaklyConnected)
 }
 
 func graphSix() (Graph[int], propertySet) {
@@ -268,7 +268,7 @@ func graphTen() (Graph[int], propertySet) {
 	createWeightedEdge(g, false, four, six, 2)
 	createWeightedEdge(g, false, six, five, 3)
 	createWeightedEdge(g, false, five, four, 4)
-	return g, newPropertySet(directed, weighted, cyclic, connected, stronglyConnected)
+	return g, newPropertySet(Directed, weighted, cyclic, connected, stronglyConnected)
 }
 
 func graphEleven() (Graph[int], propertySet) {
@@ -292,7 +292,7 @@ func graphEleven() (Graph[int], propertySet) {
 	createWeightedEdge(g, false, one, two, 4)
 	createWeightedEdge(g, false, two, zero, 5)
 	createWeightedEdge(g, true, two, three, 3)
-	return g, newPropertySet(directed, weighted, cyclic, connected, stronglyConnected)
+	return g, newPropertySet(Directed, weighted, cyclic, connected, stronglyConnected)
 }
 
 func graphTwelve() (Graph[int], propertySet) {
@@ -316,7 +316,7 @@ func graphTwelve() (Graph[int], propertySet) {
 	createWeightedEdge(g, false, one, two, 4)
 	createWeightedEdge(g, false, two, zero, 5)
 	createWeightedEdge(g, false, three, two, 3)
-	return g, newPropertySet(directed, weighted, cyclic, connected, weaklyConnected)
+	return g, newPropertySet(Directed, weighted, cyclic, connected, weaklyConnected)
 }
 
 func graphThirteen() (Graph[int], propertySet) {
@@ -345,7 +345,7 @@ func graphThirteen() (Graph[int], propertySet) {
 	createWeightedEdge(g, false, two, one, 3)
 	createWeightedEdge(g, false, three, two, 1)
 	createWeightedEdge(g, false, three, four, 4)
-	return g, newPropertySet(directed, weighted, cyclic, connected, weaklyConnected)
+	return g, newPropertySet(Directed, weighted, cyclic, connected, weaklyConnected)
 }
 
 func graphFourteen() (Graph[int], propertySet) {
@@ -375,7 +375,7 @@ func graphFourteen() (Graph[int], propertySet) {
 	createWeightedEdge(g, false, three, four, 4)
 	createWeightedEdge(g, false, four, five, 5)
 	createWeightedEdge(g, false, five, three, 6)
-	return g, newPropertySet(directed, weighted, cyclic, connected, weaklyConnected)
+	return g, newPropertySet(Directed, weighted, cyclic, connected, weaklyConnected)
 }
 
 func graphFifteen() (Graph[int], propertySet) {
@@ -503,7 +503,7 @@ func graphNineTeen() (Graph[int], propertySet) {
 	createWeightedEdge(g, false, six, five, 3)
 	createWeightedEdge(g, false, six, seven, 1)
 	createWeightedEdge(g, false, seven, five, 1)
-	return g, newPropertySet(directed, weighted, aCyclic, connected, weaklyConnected)
+	return g, newPropertySet(Directed, weighted, ACyclic, connected, weaklyConnected)
 }
 
 func graphTwenty() (Graph[int], propertySet) {
@@ -527,7 +527,7 @@ func graphTwenty() (Graph[int], propertySet) {
 	createWeightedEdge(g, false, one, two, 4)
 	createWeightedEdge(g, false, one, three, 8)
 	createWeightedEdge(g, false, two, three, 3)
-	return g, newPropertySet(directed, weighted, aCyclic, connected, weaklyConnected)
+	return g, newPropertySet(Directed, weighted, ACyclic, connected, weaklyConnected)
 }
 
 func graphTwentyOne() (Graph[int], propertySet) {
@@ -556,7 +556,7 @@ func graphTwentyOne() (Graph[int], propertySet) {
 	createWeightedEdge(g, false, one, four, 2)
 	createWeightedEdge(g, false, three, two, 1)
 	createWeightedEdge(g, false, three, four, 4)
-	return g, newPropertySet(directed, weighted, aCyclic, connected, weaklyConnected)
+	return g, newPropertySet(Directed, weighted, ACyclic, connected, weaklyConnected)
 }
 
 func graphTwentyTwo() (Graph[int], propertySet) {
@@ -585,7 +585,7 @@ func graphTwentyTwo() (Graph[int], propertySet) {
 	createWeightedEdge(g, false, three, two, 6)
 	createWeightedEdge(g, false, three, four, 4)
 	createWeightedEdge(g, false, four, five, 5)
-	return g, newPropertySet(directed, weighted, aCyclic, connected, weaklyConnected)
+	return g, newPropertySet(Directed, weighted, ACyclic, connected, weaklyConnected)
 }
 
 func graphTwentyThree() (Graph[int], propertySet) {
@@ -610,7 +610,7 @@ func graphTwentyThree() (Graph[int], propertySet) {
 	createWeightedEdge(g, false, two, three, 3)
 	createWeightedEdge(g, false, three, one, -6)
 	createWeightedEdge(g, false, three, four, 4)
-	return g, newPropertySet(directed, weighted, cyclic, connected, weaklyConnected, negativeWeights, negativeCycles)
+	return g, newPropertySet(Directed, weighted, cyclic, connected, weaklyConnected, negativeWeights, negativeCycles)
 }
 
 func graphTwentyFour() (Graph[int], propertySet) {
@@ -698,7 +698,7 @@ func graphTwentyFive() (Graph[int], propertySet) {
 	createEdge(g, false, nodes[13], nodes[14])
 	createEdge(g, false, nodes[14], nodes[12])
 
-	return g, newPropertySet(directed, UnWeighted, cyclic, disConnected)
+	return g, newPropertySet(Directed, UnWeighted, cyclic, disConnected)
 }
 
 func graphTwentyFiveReverse() (Graph[int], propertySet) {
@@ -742,7 +742,7 @@ func graphTwentyFiveReverse() (Graph[int], propertySet) {
 	createEdge(g, false, nodes[14], nodes[13])
 	createEdge(g, false, nodes[12], nodes[14])
 
-	return g, newPropertySet(directed, UnWeighted, cyclic, disConnected)
+	return g, newPropertySet(Directed, UnWeighted, cyclic, disConnected)
 }
 
 type graphSet[T comparable] struct {
