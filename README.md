@@ -35,8 +35,8 @@ This Project aims to port/build well known and commonly used data structures to 
 - [x] Priority Queue
 
 #### Tree
-- [ ] Binary Tree
-- [ ] Binary Search Tree
+- [x] Binary Tree
+- [x] Binary Search Tree
 - [ ] AVL Tree
 - [ ] Red Black Tree
 - [ ] N-Ary Tree
@@ -51,10 +51,8 @@ This Project aims to port/build well known and commonly used data structures to 
 
 #### Graph
 - [ ] Graphs
-- [ ] Adjacency List
+- [x] Adjacency List
 - [ ] Adjacency Matrix
-- [ ] Directed Graph
-- [ ] Directed Acyclic Graph
 
 #### Hash Based
 - [ ] Hash List
@@ -88,9 +86,8 @@ This Project aims to port/build well known and commonly used data structures to 
 
 ### Known Issues
 
-1. Multiple implementation of sorting algorithm.
-2. Concurrent search dose not provide enough performance benefits and also the benchmark test for the same sometimes gets into infinite loop.
-3. In heap one can add two elements even though the comparator type and element type is not same.  
+1Concurrent search dose not provide enough performance benefits and also the benchmark test for the same sometimes gets into infinite loop.
+2In heap one can add two elements even though the comparator type and element type is not same.  
 
 ---
 
