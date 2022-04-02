@@ -1,5 +1,5 @@
 package internal
 
-func ZeroValueOf[T comparable]() T {
+func ZeroValueOf[T any]() T {
 	return *new(T)
 }

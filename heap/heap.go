@@ -2,7 +2,7 @@ package heap
 
 import "github.com/nsnikhil/go-datastructures/functions/iterator"
 
-type Heap[T comparable] interface {
+type Heap[T any] interface {
 	/*
 
 	 */

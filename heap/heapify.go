@@ -5,11 +5,11 @@ import (
 	"github.com/nsnikhil/go-datastructures/internal"
 )
 
-func heapify[T comparable](curr int, c comparator.Comparator[T], maxHeapify bool, data []T) {
+func heapify[T any](curr int, c comparator.Comparator[T], maxHeapify bool, data []T) {
 	heapUtil(curr, c, maxHeapify, data)
 }
 
-func heapUtil[T comparable](curr int, c comparator.Comparator[T], maxHeapify bool, data []T) {
+func heapUtil[T any](curr int, c comparator.Comparator[T], maxHeapify bool, data []T) {
 	if curr == len(data)-1 {
 		shiftUp(curr, c, maxHeapify, data)
 	} else {
@@ -17,7 +17,7 @@ func heapUtil[T comparable](curr int, c comparator.Comparator[T], maxHeapify boo
 	}
 }
 
-func shiftUp[T comparable](curr int, c comparator.Comparator[T], maxHeapify bool, data []T) {
+func shiftUp[T any](curr int, c comparator.Comparator[T], maxHeapify bool, data []T) {
 	if curr == 0 {
 		return
 	}
@@ -38,7 +38,7 @@ func shiftUp[T comparable](curr int, c comparator.Comparator[T], maxHeapify bool
 
 }
 
-func shiftDown[T comparable](curr int, c comparator.Comparator[T], maxHeapify bool, data []T) {
+func shiftDown[T any](curr int, c comparator.Comparator[T], maxHeapify bool, data []T) {
 	if curr >= len(data)/2 {
 		return
 	}
@@ -58,7 +58,7 @@ func shiftDown[T comparable](curr int, c comparator.Comparator[T], maxHeapify bo
 	}
 }
 
-func shouldSwapWithParent[T comparable](curr int, c comparator.Comparator[T], maxHeapify bool, data []T) (bool, int) {
+func shouldSwapWithParent[T any](curr int, c comparator.Comparator[T], maxHeapify bool, data []T) (bool, int) {
 	if curr == 0 {
 		return false, internal.InvalidIndex
 	}
@@ -74,7 +74,7 @@ func shouldSwapWithParent[T comparable](curr int, c comparator.Comparator[T], ma
 	return diff > 0, parent
 }
 
-func shouldSwapWithChild[T comparable](curr int, c comparator.Comparator[T], maxHeapify bool, data []T) (bool, int) {
+func shouldSwapWithChild[T any](curr int, c comparator.Comparator[T], maxHeapify bool, data []T) (bool, int) {
 	lcIndex := leftChildIndex(curr)
 	leftDiff := c.Compare(data[curr], data[lcIndex])
 

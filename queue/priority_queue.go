@@ -7,11 +7,11 @@ import (
 	"github.com/nsnikhil/go-datastructures/internal"
 )
 
-type PriorityQueue[T comparable] struct {
+type PriorityQueue[T any] struct {
 	h heap.Heap[T]
 }
 
-func NewPriorityQueue[T comparable](isMax bool, c comparator.Comparator[T]) *PriorityQueue[T] {
+func NewPriorityQueue[T any](isMax bool, c comparator.Comparator[T]) *PriorityQueue[T] {
 	var h heap.Heap[T]
 
 	if isMax {

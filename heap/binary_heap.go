@@ -7,29 +7,29 @@ import (
 	"github.com/nsnikhil/go-datastructures/internal"
 )
 
-type binaryHeap[T comparable] struct {
+type binaryHeap[T any] struct {
 	c         comparator.Comparator[T]
 	isMaxHeap bool
 	data      []T
 }
 
-type MaxHeap[T comparable] struct {
+type MaxHeap[T any] struct {
 	*binaryHeap[T]
 }
 
-func NewMaxHeap[T comparable](c comparator.Comparator[T], data ...T) *MaxHeap[T] {
+func NewMaxHeap[T any](c comparator.Comparator[T], data ...T) *MaxHeap[T] {
 	return &MaxHeap[T]{binaryHeap: newBinaryHeap(c, true, data...)}
 }
 
-type MinHeap[T comparable] struct {
+type MinHeap[T any] struct {
 	*binaryHeap[T]
 }
 
-func NewMinHeap[T comparable](c comparator.Comparator[T], data ...T) *MinHeap[T] {
+func NewMinHeap[T any](c comparator.Comparator[T], data ...T) *MinHeap[T] {
 	return &MinHeap[T]{binaryHeap: newBinaryHeap(c, false, data...)}
 }
 
-func newBinaryHeap[T comparable](c comparator.Comparator[T], isMaxHeap bool, data ...T) *binaryHeap[T] {
+func newBinaryHeap[T any](c comparator.Comparator[T], isMaxHeap bool, data ...T) *binaryHeap[T] {
 	hp := &binaryHeap[T]{
 		c:         c,
 		isMaxHeap: isMaxHeap,
@@ -89,12 +89,12 @@ func (bh *binaryHeap[T]) Iterator() iterator.Iterator[T] {
 	return newBinaryHeapIterator[T](bh)
 }
 
-type binaryHeapIterator[T comparable] struct {
+type binaryHeapIterator[T any] struct {
 	currentIndex int64
 	h            *binaryHeap[T]
 }
 
-func newBinaryHeapIterator[T comparable](bh *binaryHeap[T]) *binaryHeapIterator[T] {
+func newBinaryHeapIterator[T any](bh *binaryHeap[T]) *binaryHeapIterator[T] {
 	return &binaryHeapIterator[T]{
 		currentIndex: 0,
 		h:            bh,
