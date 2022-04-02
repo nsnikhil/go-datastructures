@@ -4,7 +4,7 @@ import (
 	"github.com/nsnikhil/go-datastructures/internal"
 )
 
-type edge[T comparable] struct {
+type edge[T any] struct {
 	next   *Node[T]
 	weight int64
 }
@@ -24,15 +24,15 @@ func (e *edge[T]) copy() *edge[T] {
 	}
 }
 
-func newDiEdge[T comparable](next *Node[T]) *edge[T] {
+func newDiEdge[T any](next *Node[T]) *edge[T] {
 	return newEdge[T](next, internal.Zero)
 }
 
-func newWeightedDiEdge[T comparable](next *Node[T], weight int64) *edge[T] {
+func newWeightedDiEdge[T any](next *Node[T], weight int64) *edge[T] {
 	return newEdge[T](next, weight)
 }
 
-func newEdge[T comparable](next *Node[T], weight int64) *edge[T] {
+func newEdge[T any](next *Node[T], weight int64) *edge[T] {
 	return &edge[T]{
 		next:   next,
 		weight: weight,

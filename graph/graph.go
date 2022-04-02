@@ -5,7 +5,7 @@ import (
 	"github.com/nsnikhil/go-datastructures/list"
 )
 
-type Graph[T comparable] interface {
+type Graph[T any] interface {
 	AddNode(n *Node[T])
 
 	CreateDiEdge(curr *Node[T], next *Node[T]) error

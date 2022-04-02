@@ -7,7 +7,7 @@ import (
 	"github.com/nsnikhil/go-datastructures/stack"
 )
 
-type Node[T comparable] struct {
+type Node[T any] struct {
 	data  T
 	edges set.Set[*edge[T]]
 
@@ -80,7 +80,7 @@ func (n *Node[T]) dfsIterator() iterator.Iterator[*Node[T]] {
 	return newNodeDfsIterator[T](n)
 }
 
-type nodeBfsIterator[T comparable] struct {
+type nodeBfsIterator[T any] struct {
 	qu queue.Queue[*Node[T]]
 	vs set.Set[*Node[T]]
 }
@@ -108,7 +108,7 @@ func (nbi *nodeBfsIterator[T]) Next() (*Node[T], error) {
 }
 
 //TODO: REFACTOR REMOVE ADDING ALL EDGES AT ONCE
-func newNodeBfsIterator[T comparable](n *Node[T]) iterator.Iterator[*Node[T]] {
+func newNodeBfsIterator[T any](n *Node[T]) iterator.Iterator[*Node[T]] {
 	qu := queue.NewLinkedQueue[*Node[T]]()
 	qu.Add(n)
 
@@ -122,7 +122,7 @@ func newNodeBfsIterator[T comparable](n *Node[T]) iterator.Iterator[*Node[T]] {
 }
 
 //TODO: RENAME
-func newNodeBfsIteratorWithVisited[T comparable](n *Node[T], vs set.Set[*Node[T]]) iterator.Iterator[*Node[T]] {
+func newNodeBfsIteratorWithVisited[T any](n *Node[T], vs set.Set[*Node[T]]) iterator.Iterator[*Node[T]] {
 	qu := queue.NewLinkedQueue[*Node[T]]()
 	qu.Add(n)
 
@@ -134,7 +134,7 @@ func newNodeBfsIteratorWithVisited[T comparable](n *Node[T], vs set.Set[*Node[T]
 	}
 }
 
-type nodeDfsIterator[T comparable] struct {
+type nodeDfsIterator[T any] struct {
 	st *stack.Stack[*Node[T]]
 	vs set.Set[*Node[T]]
 }
@@ -162,7 +162,7 @@ func (nbi *nodeDfsIterator[T]) Next() (*Node[T], error) {
 	return v, nil
 }
 
-func newNodeDfsIterator[T comparable](n *Node[T]) iterator.Iterator[*Node[T]] {
+func newNodeDfsIterator[T any](n *Node[T]) iterator.Iterator[*Node[T]] {
 	st := stack.NewStack[*Node[T]]()
 	st.Push(n)
 
@@ -176,7 +176,7 @@ func newNodeDfsIterator[T comparable](n *Node[T]) iterator.Iterator[*Node[T]] {
 }
 
 //TODO: RENAME
-func newNodeDfsIteratorWithVisited[T comparable](n *Node[T], vs set.Set[*Node[T]]) iterator.Iterator[*Node[T]] {
+func newNodeDfsIteratorWithVisited[T any](n *Node[T], vs set.Set[*Node[T]]) iterator.Iterator[*Node[T]] {
 	st := stack.NewStack[*Node[T]]()
 	st.Push(n)
 
@@ -188,7 +188,7 @@ func newNodeDfsIteratorWithVisited[T comparable](n *Node[T], vs set.Set[*Node[T]
 	}
 }
 
-func NewNode[T comparable](data T) *Node[T] {
+func NewNode[T any](data T) *Node[T] {
 	return &Node[T]{
 		data:  data,
 		edges: set.NewHashSet[*edge[T]](),

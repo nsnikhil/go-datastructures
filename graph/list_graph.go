@@ -14,11 +14,11 @@ import (
 	"math"
 )
 
-type listGraph[T comparable] struct {
+type listGraph[T any] struct {
 	nodes set.Set[*Node[T]]
 }
 
-func NewListGraph[T comparable]() Graph[T] {
+func NewListGraph[T any]() Graph[T] {
 	return &listGraph[T]{
 		nodes: set.NewHashSet[*Node[T]](),
 	}
@@ -127,7 +127,7 @@ func (lg *listGraph[T]) BFSIterator() iterator.Iterator[*Node[T]] {
 	return newListGraphIterator(true, lg)
 }
 
-type listGraphIterator[T comparable] struct {
+type listGraphIterator[T any] struct {
 	isBfs             bool
 	vs                set.Set[*Node[T]]
 	nodesIterator     iterator.Iterator[*Node[T]]
@@ -168,7 +168,7 @@ func (lgi *listGraphIterator[T]) Next() (*Node[T], error) {
 	return v, nil
 }
 
-func newListGraphIterator[T comparable](isBfs bool, graph *listGraph[T]) iterator.Iterator[*Node[T]] {
+func newListGraphIterator[T any](isBfs bool, graph *listGraph[T]) iterator.Iterator[*Node[T]] {
 	return &listGraphIterator[T]{
 		isBfs:         isBfs,
 		vs:            set.NewHashSet[*Node[T]](),
@@ -436,7 +436,7 @@ func (lg *listGraph[T]) GetConnectedComponents() []list.List[*Node[T]] {
 	return koasraju(lg)
 }
 
-func koasraju[T comparable](lg *listGraph[T]) []list.List[*Node[T]] {
+func koasraju[T any](lg *listGraph[T]) []list.List[*Node[T]] {
 
 	var pushToStack func(node *Node[T], visited set.Set[*Node[T]], st *stack.Stack[*Node[T]])
 
@@ -544,7 +544,7 @@ func (lg *listGraph[T]) ShortestPath(source, target *Node[T], properties ...Prop
 	return bellmenFord(source, target, lg)
 }
 
-func nonWeightedShortestPath[T comparable](source, target *Node[T]) (list.List[*Node[T]], error) {
+func nonWeightedShortestPath[T any](source, target *Node[T]) (list.List[*Node[T]], error) {
 	vs := set.NewHashSet[*Node[T]]()
 	q := queue.NewLinkedQueue[*Node[T]]()
 
@@ -619,7 +619,7 @@ func nonWeightedShortestPath[T comparable](source, target *Node[T]) (list.List[*
 	return res, nil
 }
 
-func dagShortestPath[T comparable](source, target *Node[T], lg *listGraph[T]) (list.List[*Node[T]], error) {
+func dagShortestPath[T any](source, target *Node[T], lg *listGraph[T]) (list.List[*Node[T]], error) {
 	cm := gmap.NewHashMap[*Node[T], int64]()
 	pm := gmap.NewHashMap[*Node[T], *Node[T]]()
 
@@ -723,19 +723,19 @@ func (lg *listGraph[T]) topologicalSort() *stack.Stack[*Node[T]] {
 	return st
 }
 
-type nodeWrapper[T comparable] struct {
+type nodeWrapper[T any] struct {
 	curr        *Node[T]
 	predecessor *Node[T]
 	costToReach int64
 }
 
-type nodeComparator[T comparable] struct{}
+type nodeComparator[T any] struct{}
 
 func (nc *nodeComparator[T]) Compare(one *nodeWrapper[T], two *nodeWrapper[T]) int {
 	return int(one.costToReach - two.costToReach)
 }
 
-func dijkstra[T comparable](source, target *Node[T], lg *listGraph[T]) (list.List[*Node[T]], error) {
+func dijkstra[T any](source, target *Node[T], lg *listGraph[T]) (list.List[*Node[T]], error) {
 
 	var relaxCost func(
 		*nodeWrapper[T],
@@ -834,7 +834,7 @@ func dijkstra[T comparable](source, target *Node[T], lg *listGraph[T]) (list.Lis
 	return res, nil
 }
 
-func bellmenFord[T comparable](source, target *Node[T], lg *listGraph[T]) (list.List[*Node[T]], error) {
+func bellmenFord[T any](source, target *Node[T], lg *listGraph[T]) (list.List[*Node[T]], error) {
 	cm := gmap.NewHashMap[*Node[T], int64]()
 	pm := gmap.NewHashMap[*Node[T], *Node[T]]()
 
